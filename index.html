@@ -1,81 +1,79 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>エオルゼア冒険記録庫 Ver.0.3</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>エオルゼア冒険記録庫 Ver.0.4</title>
 <style>
-:root{--bg:#101722;--p:#1c2736;--p2:#263448;--t:#f4f6f8;--m:#aeb8c7;--a:#d8b75f;--b:#3a4b61;--d:#e07a7a}
-*{box-sizing:border-box}body{margin:0;font-family:"Segoe UI","Yu Gothic UI",sans-serif;background:var(--bg);color:var(--t)}
-header,main{max-width:1120px;margin:auto;padding:20px}h1{margin:0}.sub,.meta,.hint{color:var(--m)}
-main{display:grid;gap:20px}@media(min-width:900px){main{grid-template-columns:420px 1fr;align-items:start}}
+:root{--bg:#0f1720;--p:#1b2735;--p2:#263549;--t:#f4f6f8;--m:#aeb8c7;--a:#d9b85e;--a2:#f4dfa1;--b:#3c4d63;--d:#e17d7d}
+*{box-sizing:border-box}body{margin:0;font-family:"Segoe UI","Yu Gothic UI",sans-serif;background:linear-gradient(#101822,#0c131b);color:var(--t)}
+header,main{max-width:1180px;margin:auto;padding:20px}h1{margin-bottom:6px}.sub,.meta,.hint{color:var(--m)}
+main{display:grid;gap:20px}@media(min-width:960px){main{grid-template-columns:420px 1fr}}
 .panel,.card{background:var(--p);border:1px solid var(--b);border-radius:14px;padding:18px}.card{background:var(--p2);margin-top:10px}
-label{display:block;margin:12px 0 6px;color:var(--m)}input,select,textarea,button{width:100%;padding:11px;border-radius:9px;font:inherit}
-input,select,textarea{background:var(--p2);color:var(--t);border:1px solid var(--b)}textarea{min-height:90px;resize:vertical}
-button{border:0;font-weight:700;cursor:pointer}.primary{background:var(--a);color:#221d10}.danger{width:auto;background:transparent;color:#ffb5b5;border:1px solid var(--d);padding:7px 10px}
-.row{display:flex;justify-content:space-between;gap:12px;align-items:center}.link{width:auto;padding:0;background:transparent;color:#f3dda0;text-align:left}
-.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.stat{background:var(--p2);border:1px solid var(--b);border-radius:10px;padding:12px}.stat b{display:block;font-size:1.4rem;color:var(--a)}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:9px;margin-top:10px}.grid img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:9px;cursor:zoom-in}
-.empty{padding:20px;text-align:center;color:var(--m);border:1px dashed var(--b);border-radius:10px}
-dialog{width:min(820px,calc(100vw - 24px));max-height:90vh;background:var(--p);color:var(--t);border:1px solid var(--b);border-radius:14px;padding:18px}
-dialog::backdrop{background:#050a14cc}.dlg{overflow:auto;max-height:84vh}.close{width:auto;background:#3a4659;color:var(--t);padding:8px 12px}
-.notice{display:none;background:#244532;border:1px solid #5f9c70;padding:10px;border-radius:9px;margin-bottom:10px}.show{display:block}
+label{display:block;margin:12px 0 6px;color:var(--m)}input,select,textarea{width:100%;padding:11px;border-radius:9px;border:1px solid var(--b);background:var(--p2);color:var(--t)}
+textarea{min-height:90px}button{padding:10px 14px;border:0;border-radius:9px;font-weight:700;cursor:pointer}.primary{width:100%;margin-top:14px;background:var(--a)}.secondary{background:#3a4659;color:var(--t)}.danger{background:transparent;border:1px solid var(--d);color:#ffb2b2}
+.row{display:flex;justify-content:space-between;gap:10px;align-items:center}.link{background:none;padding:0;color:var(--a2);text-align:left}.count{color:var(--a);font-weight:800}
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}@media(min-width:700px){.stats{grid-template-columns:repeat(4,1fr)}}.stat{background:var(--p2);padding:12px;border-radius:10px;border:1px solid var(--b)}.stat strong{display:block;color:var(--a);font-size:1.4rem}
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.tag{padding:4px 8px;border-radius:999px;background:rgba(217,184,94,.14);border:1px solid rgba(217,184,94,.35)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;margin-top:10px}.grid img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:8px;cursor:zoom-in;border:1px solid var(--b)}
+.notice,.error{display:none;padding:10px;border-radius:8px;margin-bottom:10px}.notice.show,.error.show{display:block}.notice{background:#183d2b}.error{background:#472326}
+.empty{padding:20px;text-align:center;border:1px dashed var(--b);border-radius:10px;color:var(--m)}
+dialog{width:min(850px,calc(100vw - 24px));max-height:90vh;background:var(--p);color:var(--t);border:1px solid var(--b);border-radius:14px}dialog::backdrop{background:#000b}.inside{padding:18px;max-height:86vh;overflow:auto}
 </style>
 </head>
 <body>
-<header><h1>エオルゼア冒険記録庫</h1><div class="sub">ゲームデータと思い出を、ひとつの場所へ。 Ver.0.3</div></header>
+<header><h1>エオルゼア冒険記録庫</h1><div class="sub">ゲームデータと思い出を、ひとつの場所へ。 Ver.0.4</div></header>
 <main>
 <section class="panel">
-<h2>今日の冒険を登録</h2><div id="notice" class="notice"></div>
+<h2>今日の冒険を登録</h2><div id="notice" class="notice"></div><div id="error" class="error"></div>
 <form id="form">
 <label>日付</label><input id="date" type="date" required>
-<label>コンテンツ名</label><input id="content" required placeholder="例：クルティウス">
+<label>コンテンツ名</label><input id="content" placeholder="例：クルティウス" required>
 <label>ルーレット</label><select id="roulette"><option value="">なし</option><option>エキスパート</option><option>ハイレベリング</option><option>レベリング</option><option>討伐・討滅戦</option><option>メインクエスト</option><option>アライアンスレイド</option><option>ノーマルレイド</option><option>フロントライン</option></select>
-<label>ドロップ・入手品</label><input id="drop" placeholder="例：カード、ミニオン、なし">
-<label>思い出メモ</label><textarea id="memo" placeholder="その日の出来事を書きます"></textarea>
-<label>SS（複数選択可）</label><input id="shots" type="file" accept="image/png,image/jpeg,image/webp" multiple>
-<div class="hint">画像はこのブラウザ内のIndexedDBへ保存されます。</div><div id="preview" class="grid"></div>
-<p><button class="primary">記録する</button></p>
+<label>入手アイテム（複数可）</label><input id="items" placeholder="カード, ミニオン, 譜面"><div class="hint">カンマ「,」「、」または改行で区切れます。</div>
+<label>思い出メモ</label><textarea id="memo"></textarea>
+<label>SS（複数可）</label><input id="shots" type="file" accept="image/png,image/jpeg,image/webp" multiple><div id="preview" class="grid"></div>
+<button id="save" class="primary">記録する</button>
 </form>
-<button id="clear" class="danger">全記録を削除</button>
+<div style="display:flex;gap:8px;margin-top:12px"><button id="sample" class="secondary">サンプル入力</button><button id="clear" class="danger">全削除</button></div>
 </section>
 <section class="panel">
 <h2>冒険ダッシュボード</h2>
-<div class="stats"><div class="stat">総記録数<b id="nLogs">0</b></div><div class="stat">コンテンツ数<b id="nContents">0</b></div><div class="stat">SS枚数<b id="nShots">0</b></div></div>
-<h3>コンテンツ別 挑戦回数</h3><div id="counts"></div>
+<div class="stats"><div class="stat">総記録数<strong id="nLogs">0</strong></div><div class="stat">コンテンツ数<strong id="nContents">0</strong></div><div class="stat">入手アイテム数<strong id="nItems">0</strong></div><div class="stat">SS枚数<strong id="nShots">0</strong></div></div>
+<h3>コンテンツ別 挑戦回数</h3><div id="contents"></div>
+<h3>入手アイテム図鑑</h3><div id="itemsList"></div>
 <h3>最近の思い出</h3><div id="logs"></div>
 </section>
 </main>
-
-<dialog id="detail"><div class="dlg"><div class="row"><h2 id="dt"></h2><button id="dc" class="close">閉じる</button></div><div id="ds"></div><h3>関連SS</h3><div id="dg" class="grid"></div><h3>過去の挑戦と思い出</h3><div id="dl"></div></div></dialog>
-<dialog id="zoom"><div class="row"><span></span><button id="zc" class="close">閉じる</button></div><img id="zi" style="width:100%;max-height:82vh;object-fit:contain"></dialog>
-
+<dialog id="detail"><div class="inside"><div class="row"><div><div class="meta" id="detailType"></div><h2 id="detailTitle"></h2></div><button id="closeDetail" class="secondary">閉じる</button></div><div id="detailBody"></div></div></dialog>
+<dialog id="image"><div class="inside"><div class="row"><span></span><button id="closeImage" class="secondary">閉じる</button></div><img id="big" style="width:100%;max-height:80vh;object-fit:contain"></div></dialog>
 <script>
-const DB="EorzeaArchiveDB",STORE="adventureLogs",OLD="eorzeaAdventureLogs_v1",FLAG="eorzeaAdventureLogs_migrated_to_idb_v1";
-const $=id=>document.getElementById(id), urls=new Set();
+const DB="EorzeaArchiveDB",STORE="adventureLogs";const $=x=>document.getElementById(x);let urls=[];
 $("date").value=new Date().toISOString().slice(0,10);
-function id(){return crypto.randomUUID?crypto.randomUUID():String(Date.now()+Math.random())}
-function openDB(){return new Promise((ok,no)=>{const r=indexedDB.open(DB,1);r.onupgradeneeded=()=>{const d=r.result;if(!d.objectStoreNames.contains(STORE)){const s=d.createObjectStore(STORE,{keyPath:"id"});s.createIndex("content","content");s.createIndex("date","date")}};r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error)})}
-async function tx(mode,fn){const d=await openDB();return new Promise((ok,no)=>{const t=d.transaction(STORE,mode),s=t.objectStore(STORE);fn(s);t.oncomplete=ok;t.onerror=()=>no(t.error)})}
-async function put(x){return tx("readwrite",s=>s.put(x))}
-async function all(){const d=await openDB();return new Promise((ok,no)=>{const r=d.transaction(STORE).objectStore(STORE).getAll();r.onsuccess=()=>ok(r.result||[]);r.onerror=()=>no(r.error)})}
-async function del(k){return tx("readwrite",s=>s.delete(k))} async function clearAll(){return tx("readwrite",s=>s.clear())}
+function openDB(){return new Promise((ok,no)=>{let r=indexedDB.open(DB,1);r.onupgradeneeded=()=>{let d=r.result;if(!d.objectStoreNames.contains(STORE))d.createObjectStore(STORE,{keyPath:"id"})};r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error)})}
+async function all(){let d=await openDB();return new Promise((ok,no)=>{let r=d.transaction(STORE).objectStore(STORE).getAll();r.onsuccess=()=>ok(r.result||[]);r.onerror=()=>no(r.error)})}
+async function put(v){let d=await openDB();return new Promise((ok,no)=>{let t=d.transaction(STORE,"readwrite");t.objectStore(STORE).put(v);t.oncomplete=ok;t.onerror=()=>no(t.error)})}
+async function del(id){let d=await openDB();return new Promise((ok,no)=>{let t=d.transaction(STORE,"readwrite");t.objectStore(STORE).delete(id);t.oncomplete=ok;t.onerror=()=>no(t.error)})}
+async function wipe(){let d=await openDB();return new Promise((ok,no)=>{let t=d.transaction(STORE,"readwrite");t.objectStore(STORE).clear();t.oncomplete=ok;t.onerror=()=>no(t.error)})}
 function esc(s){return String(s??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;")}
-function fmt(d){return d?d.replaceAll("-","/"):"-"} function sort(a){return [...a].sort((x,y)=>String(y.date).localeCompare(String(x.date))||(y.createdAt||0)-(x.createdAt||0))}
-function url(blob){const u=URL.createObjectURL(blob);urls.add(u);return u} function revoke(){urls.forEach(URL.revokeObjectURL);urls.clear()}
-function imgs(shots=[]){return shots.map((s,i)=>{const f=s.file||s.image;if(!f)return"";const u=url(f);return `<img src="${u}" alt="${esc(s.fileName||"SS")}" data-u="${u}">`}).join("")}
-function zoomBind(){document.querySelectorAll("[data-u]").forEach(x=>x.onclick=()=>{$("zi").src=x.dataset.u;$("zoom").showModal()})}
-async function migrate(){if(localStorage.getItem(FLAG)==="done")return;try{const x=JSON.parse(localStorage.getItem(OLD)||"[]");for(const a of x)await put({...a,id:a.id||id(),screenshots:[]});if(x.length)note(`${x.length}件の旧記録を引き継ぎました。`);localStorage.setItem(FLAG,"done")}catch(e){console.error(e)}}
-function note(s){$("notice").textContent=s;$("notice").classList.add("show");setTimeout(()=>$("notice").classList.remove("show"),3500)}
-async function render(){revoke();const a=sort(await all()),c={};let ns=0;a.forEach(x=>{c[x.content]=(c[x.content]||0)+1;ns+=(x.screenshots||[]).length});$("nLogs").textContent=a.length;$("nContents").textContent=Object.keys(c).length;$("nShots").textContent=ns;
-$("counts").innerHTML=Object.keys(c).length?Object.entries(c).sort((x,y)=>y[1]-x[1]).map(([n,v])=>`<div class="card row"><button class="link" data-name="${esc(n)}">${esc(n)}</button><b>${v}回</b></div>`).join(""):`<div class="empty">まだ記録がありません。</div>`;
-$("logs").innerHTML=a.length?a.map(x=>`<article class="card"><div class="row"><button class="link" data-name="${esc(x.content)}">${esc(x.content)}</button><button class="danger" data-del="${x.id}">削除</button></div><div class="meta">${fmt(x.date)}${x.roulette?" ・ "+esc(x.roulette):""}</div>${x.drop?`<div><b>入手：</b>${esc(x.drop)}</div>`:""}${x.memo?`<p><b>思い出：</b>${esc(x.memo)}</p>`:""}${(x.screenshots||[]).length?`<div class="grid">${imgs(x.screenshots)}</div>`:""}</article>`).join(""):`<div class="empty">最初の思い出を登録しましょう。</div>`;
-document.querySelectorAll("[data-name]").forEach(b=>b.onclick=()=>openDetail(b.dataset.name));document.querySelectorAll("[data-del]").forEach(b=>b.onclick=async()=>{if(confirm("この記録を削除しますか？")){await del(b.dataset.del);render()}});zoomBind()}
-async function openDetail(name){const a=sort((await all()).filter(x=>x.content===name));revoke();$("dt").textContent=name;$("ds").innerHTML=`<div class="stats"><div class="stat">挑戦回数<b>${a.length}回</b></div><div class="stat">初回<b>${fmt(a[a.length-1].date)}</b></div><div class="stat">最終<b>${fmt(a[0].date)}</b></div></div>`;
-const ss=a.flatMap(x=>x.screenshots||[]);$("dg").innerHTML=ss.length?imgs(ss):`<div class="empty">関連SSはありません。</div>`;
-$("dl").innerHTML=a.map(x=>`<div class="card"><b>${fmt(x.date)}</b><div class="meta">${esc(x.roulette||"ルーレット指定なし")}</div>${x.drop?`<div>入手：${esc(x.drop)}</div>`:""}${x.memo?`<p>${esc(x.memo)}</p>`:""}${(x.screenshots||[]).length?`<div class="grid">${imgs(x.screenshots)}</div>`:""}</div>`).join("");zoomBind();$("detail").showModal()}
-$("shots").onchange=()=>{revoke();$("preview").innerHTML=[...$("shots").files].map(f=>`<img src="${url(f)}" data-u="${[...urls].at(-1)}" alt="${esc(f.name)}">`).join("");zoomBind()}
-$("form").onsubmit=async e=>{e.preventDefault();const content=$("content").value.trim();if(!content)return;const screenshots=[...$("shots").files].map(f=>({id:id(),fileName:f.name,fileType:f.type,fileSize:f.size,file:f}));await put({id:id(),date:$("date").value,content,roulette:$("roulette").value,drop:$("drop").value.trim(),memo:$("memo").value.trim(),screenshots,createdAt:Date.now()});$("content").value=$("drop").value=$("memo").value=$("shots").value="";$("roulette").value="";$("preview").innerHTML="";note("冒険と思い出を記録しました。");render()}
-$("clear").onclick=async()=>{if(confirm("すべての記録とSSを削除しますか？")){await clearAll();render()}};$("dc").onclick=()=>$("detail").close();$("zc").onclick=()=>$("zoom").close();
-(async()=>{await openDB();await migrate();await render()})().catch(e=>alert("IndexedDBを利用できません。ChromeまたはEdgeで開いてください。"));
+function parse(s){return [...new Set(String(s||"").split(/[,、\n]/).map(x=>x.trim()).filter(Boolean))]}
+function its(l){if(Array.isArray(l.items))return l.items;if(l.drop)return parse(l.drop).filter(x=>x!=="なし");return[]}
+function sh(l){return Array.isArray(l.screenshots)?l.screenshots:[]}
+function fmt(d){return d?d.replaceAll("-","/"):"-"}function sort(a){return [...a].sort((x,y)=>String(y.date).localeCompare(String(x.date))||(y.createdAt||0)-(x.createdAt||0))}
+function clearUrls(){urls.forEach(URL.revokeObjectURL);urls=[]}
+function grid(shots){if(!shots.length)return"";return `<div class="grid">${shots.map(s=>{let f=s.file||s.image;if(!f)return"";let u=URL.createObjectURL(f);urls.push(u);return `<img src="${u}" data-url="${u}" alt="${esc(s.fileName||"SS")}">`}).join("")}</div>`}
+function tags(a){return a.length?`<div class="tags">${a.map(x=>`<span class="tag">${esc(x)}</span>`).join("")}</div>`:""}
+function bind(){document.querySelectorAll("[data-url]").forEach(i=>i.onclick=()=>{$("big").src=i.dataset.url;$("image").showModal()});document.querySelectorAll("[data-content]").forEach(b=>b.onclick=()=>openContent(b.dataset.content));document.querySelectorAll("[data-item]").forEach(b=>b.onclick=()=>openItem(b.dataset.item))}
+async function render(){clearUrls();let logs=sort(await all()),cc={},ic={},ns=0;logs.forEach(l=>{cc[l.content]=(cc[l.content]||0)+1;its(l).forEach(i=>ic[i]=(ic[i]||0)+1);ns+=sh(l).length});$("nLogs").textContent=logs.length;$("nContents").textContent=Object.keys(cc).length;$("nItems").textContent=Object.keys(ic).length;$("nShots").textContent=ns;
+$("contents").innerHTML=Object.keys(cc).length?Object.entries(cc).sort((a,b)=>b[1]-a[1]).map(([n,c])=>`<div class="card row"><button class="link" data-content="${esc(n)}">${esc(n)}</button><span class="count">${c}回</span></div>`).join(""):'<div class="empty">まだ記録がありません。</div>';
+$("itemsList").innerHTML=Object.keys(ic).length?Object.entries(ic).sort((a,b)=>b[1]-a[1]).map(([n,c])=>`<div class="card row"><button class="link" data-item="${esc(n)}">${esc(n)}</button><span class="count">${c}回入手</span></div>`).join(""):'<div class="empty">まだ入手アイテムがありません。</div>';
+$("logs").innerHTML=logs.length?logs.map(l=>`<div class="card"><div class="row"><button class="link" data-content="${esc(l.content)}">${esc(l.content)}</button><button class="danger" data-del="${l.id}">削除</button></div><div class="meta">${fmt(l.date)}${l.roulette?" ・ "+esc(l.roulette):""}</div>${tags(its(l))}${l.memo?`<div style="margin-top:8px"><b>思い出：</b>${esc(l.memo)}</div>`:""}${grid(sh(l))}</div>`).join(""):'<div class="empty">最初の冒険を登録しましょう。</div>';
+document.querySelectorAll("[data-del]").forEach(b=>b.onclick=async()=>{if(confirm("削除しますか？")){await del(b.dataset.del);render()}});bind()}
+async function openContent(name){clearUrls();let ls=sort((await all()).filter(l=>l.content===name));$("detailType").textContent="コンテンツ詳細";$("detailTitle").textContent=name;let items=[...new Set(ls.flatMap(its))],shots=ls.flatMap(sh);$("detailBody").innerHTML=`<div class="stats"><div class="stat">挑戦回数<strong>${ls.length}回</strong></div><div class="stat">初回<strong>${fmt(ls.at(-1)?.date)}</strong></div><div class="stat">最終<strong>${fmt(ls[0]?.date)}</strong></div></div><h3>入手アイテム</h3>${items.length?`<div class="tags">${items.map(i=>`<button class="link" data-item="${esc(i)}">${esc(i)}</button>`).join("")}</div>`:'<div class="empty">なし</div>'}<h3>関連SS</h3>${shots.length?grid(shots):'<div class="empty">なし</div>'}<h3>履歴</h3>${ls.map(l=>`<div class="card"><b>${fmt(l.date)}</b>${tags(its(l))}${l.memo?`<div>${esc(l.memo)}</div>`:""}${grid(sh(l))}</div>`).join("")}`;bind();$("detail").showModal()}
+async function openItem(name){clearUrls();let ls=sort((await all()).filter(l=>its(l).includes(name))),shots=ls.flatMap(sh),contents=[...new Set(ls.map(l=>l.content))];$("detailType").textContent="入手アイテム詳細";$("detailTitle").textContent=name;$("detailBody").innerHTML=`<div class="stats"><div class="stat">入手回数<strong>${ls.length}回</strong></div><div class="stat">初回<strong>${fmt(ls.at(-1)?.date)}</strong></div><div class="stat">最終<strong>${fmt(ls[0]?.date)}</strong></div></div><h3>関連コンテンツ</h3><div class="tags">${contents.map(c=>`<button class="link" data-content="${esc(c)}">${esc(c)}</button>`).join("")}</div><h3>関連SS</h3>${shots.length?grid(shots):'<div class="empty">なし</div>'}<h3>入手履歴</h3>${ls.map(l=>`<div class="card"><b>${fmt(l.date)} ${esc(l.content)}</b>${l.memo?`<div>${esc(l.memo)}</div>`:""}${grid(sh(l))}</div>`).join("")}`;bind();$("detail").showModal()}
+$("shots").onchange=()=>{clearUrls();$("preview").innerHTML=grid([...$("shots").files].map(file=>({file,fileName:file.name})));bind()}
+$("form").onsubmit=async e=>{e.preventDefault();let c=$("content").value.trim();if(!c)return;let shots=[...$("shots").files].map(file=>({id:crypto.randomUUID(),fileName:file.name,file}));await put({id:crypto.randomUUID(),date:$("date").value,content:c,roulette:$("roulette").value,items:parse($("items").value),memo:$("memo").value.trim(),screenshots:shots,createdAt:Date.now()});$("content").value=$("items").value=$("memo").value="";$("roulette").value="";$("shots").value="";$("preview").innerHTML="";$("notice").textContent="記録しました。";$("notice").classList.add("show");setTimeout(()=>$("notice").classList.remove("show"),2500);render()}
+$("sample").onclick=()=>{$("content").value="クルティウス";$("roulette").value="レベリング";$("items").value="カード, ミニオン";$("memo").value="アイテム名をクリックすると図鑑が開きます。"}
+$("clear").onclick=async()=>{if(confirm("すべて削除しますか？")){await wipe();render()}};$("closeDetail").onclick=()=>$("detail").close();$("closeImage").onclick=()=>$("image").close();render();
 </script>
 </body></html>
