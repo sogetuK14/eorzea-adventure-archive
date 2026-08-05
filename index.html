@@ -3,19 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>エオルゼア冒険記録庫 Ver.0.6</title>
+<title>エオルゼア冒険記録庫 Ver.0.7</title>
 <style>
 :root{
-  --bg:#0e151e;--panel:#1a2634;--panel2:#253448;--panel3:#30435b;
+  --bg:#0d141c;--panel:#192533;--panel2:#243448;--panel3:#2f4259;
   --text:#f4f6f8;--muted:#aeb8c7;--accent:#d9b85e;--accent2:#f4dfa1;
-  --border:#3c4d63;--danger:#e17d7d;--success:#83c796;--blue:#8bbcff
+  --border:#3b4c62;--danger:#e17d7d;--success:#86c99a
 }
 *{box-sizing:border-box}
 body{
   margin:0;font-family:"Segoe UI","Yu Gothic UI",sans-serif;color:var(--text);
   background:
     radial-gradient(circle at top right,rgba(217,184,94,.14),transparent 28%),
-    linear-gradient(180deg,#101822 0%,#0b1219 100%);
+    linear-gradient(180deg,#101822 0%,#0b1118 100%);
   min-height:100vh
 }
 header{max-width:1240px;margin:auto;padding:28px 20px 14px}
@@ -29,7 +29,7 @@ main{max-width:1240px;margin:auto;padding:10px 20px 46px}
 .layout{display:grid;gap:20px}
 @media(min-width:1000px){.layout{grid-template-columns:430px minmax(0,1fr);align-items:start}}
 .panel,.card{
-  background:rgba(26,38,52,.97);border:1px solid var(--border);
+  background:rgba(25,37,51,.97);border:1px solid var(--border);
   border-radius:16px;padding:18px;box-shadow:0 18px 44px rgba(0,0,0,.22)
 }
 .card{background:var(--panel2);margin-top:10px;box-shadow:none}
@@ -48,14 +48,14 @@ button:disabled{opacity:.6;cursor:wait}
 .link{background:none;padding:0;color:var(--accent2);text-align:left}
 .link:hover{text-decoration:underline}
 .row{display:flex;justify-content:space-between;gap:10px;align-items:center}
-.meta,.hint{color:var(--muted);font-size:.9rem}
+.meta,.hint,.small{color:var(--muted);font-size:.9rem}
 .notice,.error{display:none;padding:10px;border-radius:8px;margin-bottom:10px}
 .notice.show,.error.show{display:block}.notice{background:#183d2b}.error{background:#472326}
 .stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
 @media(min-width:760px){.stats{grid-template-columns:repeat(4,1fr)}}
 .stat{background:var(--panel2);padding:13px;border-radius:10px;border:1px solid var(--border)}
 .stat strong{display:block;color:var(--accent);font-size:1.45rem;margin-top:4px}
-.hero{padding:22px;border-radius:18px;border:1px solid var(--border);background:linear-gradient(135deg,rgba(217,184,94,.17),rgba(48,67,91,.88))}
+.hero{padding:22px;border-radius:18px;border:1px solid var(--border);background:linear-gradient(135deg,rgba(217,184,94,.17),rgba(47,66,89,.88))}
 .hero h2{font-size:1.6rem}.hero p{color:var(--muted);margin-bottom:0}
 .progress-wrap{margin-top:14px}
 .progress-label{display:flex;justify-content:space-between;color:var(--muted);font-size:.9rem}
@@ -71,14 +71,10 @@ button:disabled{opacity:.6;cursor:wait}
 @media(min-width:780px){.collection-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .collection-card{background:var(--panel2);border:1px solid var(--border);border-radius:14px;padding:16px}
 .collection-card h3{margin:0 0 8px;color:var(--accent2)}
-.badge{display:inline-block;padding:4px 8px;border-radius:999px;background:#20344f;color:#c8dcff;font-size:.8rem}
-.favorite{font-size:1.25rem;background:none;padding:2px 6px;color:#707b89}.favorite.on{color:#ffd86b}
-.master-item{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center}
-.master-item input[type=checkbox]{width:20px;height:20px;accent-color:var(--accent)}
-.master-item.done{border-color:rgba(131,199,150,.5);background:rgba(42,82,58,.36)}
-.master-item .item-name{font-weight:700}
-.small{font-size:.82rem;color:var(--muted)}
-.pill{padding:4px 8px;border-radius:999px;background:#1f3043;color:#bcd6ff;font-size:.8rem}
+.item-check{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:center;background:var(--panel2);border:1px solid var(--border);border-radius:12px;padding:12px;margin-top:8px}
+.item-check input{width:20px;height:20px;accent-color:var(--accent)}
+.item-check.done{border-color:rgba(134,201,154,.55);background:rgba(40,83,58,.34)}
+.master-row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center}
 dialog{width:min(900px,calc(100vw - 24px));max-height:90vh;background:var(--panel);color:var(--text);border:1px solid var(--border);border-radius:14px}
 dialog::backdrop{background:#000b}.inside{padding:18px;max-height:86vh;overflow:auto}
 </style>
@@ -86,7 +82,7 @@ dialog::backdrop{background:#000b}.inside{padding:18px;max-height:86vh;overflow:
 <body>
 <header>
   <h1>エオルゼア冒険記録庫</h1>
-  <div class="sub">FF14を遊ぶと、図鑑が育つ。 Ver.0.6 “Collection Core”</div>
+  <div class="sub">FF14を遊ぶと、図鑑が育つ。 Ver.0.7 “Foundation”</div>
 </header>
 
 <nav>
@@ -99,7 +95,7 @@ dialog::backdrop{background:#000b}.inside{padding:18px;max-height:86vh;overflow:
 <main>
 <section id="home" class="view active">
   <div class="hero">
-    <h2>おかえりなさい、はいびす。</h2>
+    <h2>おかえりなさい。</h2>
     <p>今日は、どの図鑑を育てましょうか。</p>
     <div class="progress-wrap">
       <div class="progress-label"><span>総合収集率</span><span id="growthText">0%</span></div>
@@ -113,12 +109,8 @@ dialog::backdrop{background:#000b}.inside{padding:18px;max-height:86vh;overflow:
     <div class="stat">未取得<strong id="homeMissing">0</strong></div>
   </div>
   <div class="collection-grid" style="margin-top:18px">
-    <div class="collection-card">
-      <span class="badge">今日の成果</span><h3>今日育った図鑑</h3><div id="todayGrowth"></div>
-    </div>
-    <div class="collection-card">
-      <span class="badge">あと少し</span><h3>未取得アイテム</h3><div id="missingPreview"></div>
-    </div>
+    <div class="collection-card"><h3>今日育った図鑑</h3><div id="todayGrowth"></div></div>
+    <div class="collection-card"><h3>未取得アイテム</h3><div id="missingPreview"></div></div>
   </div>
   <div class="panel" style="margin-top:18px"><h2>最近の思い出</h2><div id="recentMemories"></div></div>
 </section>
@@ -130,15 +122,16 @@ dialog::backdrop{background:#000b}.inside{padding:18px;max-height:86vh;overflow:
     <div id="notice" class="notice"></div><div id="error" class="error"></div>
     <form id="form">
       <label>日付</label><input id="date" type="date" required>
-      <label>コンテンツ名</label><input id="content" placeholder="例：クルティウス" required>
+      <label>コンテンツ</label>
+      <select id="contentSelect" required><option value="">図鑑マスターから選択</option></select>
+      <div class="hint">未登録のコンテンツは、先に「図鑑マスター」へ追加してください。</div>
       <label>ルーレット</label>
       <select id="roulette">
         <option value="">なし</option><option>エキスパート</option><option>ハイレベリング</option><option>レベリング</option>
         <option>討伐・討滅戦</option><option>メインクエスト</option><option>アライアンスレイド</option><option>ノーマルレイド</option><option>フロントライン</option>
       </select>
       <label>今回入手したアイテム</label>
-      <input id="items" placeholder="実際のカード名、ミニオン名など">
-      <div class="hint">カンマ「,」「、」または改行で複数登録できます。</div>
+      <div id="dropChoices"></div>
       <label>思い出メモ</label><textarea id="memo"></textarea>
       <label>SS（複数可）</label><input id="shots" type="file" accept="image/png,image/jpeg,image/webp" multiple>
       <div id="preview" class="grid"></div>
@@ -147,25 +140,22 @@ dialog::backdrop{background:#000b}.inside{padding:18px;max-height:86vh;overflow:
   </section>
 
   <section class="panel">
-    <h2>冒険ダッシュボード</h2>
+    <h2>最近の冒険</h2>
     <div class="stats">
       <div class="stat">総記録数<strong id="nLogs">0</strong></div>
       <div class="stat">コンテンツ数<strong id="nContents">0</strong></div>
       <div class="stat">取得アイテム種<strong id="nItems">0</strong></div>
       <div class="stat">SS枚数<strong id="nShots">0</strong></div>
     </div>
-    <h3>最近の思い出</h3><div id="logs"></div>
+    <div id="logs"></div>
   </section>
 </div>
 </section>
 
 <section id="collection" class="view">
   <div class="panel">
-    <h2>育っている図鑑</h2>
-    <div class="collection-grid">
-      <div class="collection-card"><h3>コンテンツ図鑑</h3><div id="collectionContents"></div></div>
-      <div class="collection-card"><h3>取得アイテム図鑑</h3><div id="collectionItems"></div></div>
-    </div>
+    <h2>図鑑</h2>
+    <div id="collectionContents"></div>
   </div>
 </section>
 
@@ -196,7 +186,7 @@ dialog::backdrop{background:#000b}.inside{padding:18px;max-height:86vh;overflow:
 <dialog id="detail">
   <div class="inside">
     <div class="row">
-      <div><div class="meta" id="detailType"></div><h2 id="detailTitle"></h2></div>
+      <div><div class="meta">コンテンツ図鑑</div><h2 id="detailTitle"></h2></div>
       <button id="closeDetail" class="secondary">閉じる</button>
     </div>
     <div id="detailBody"></div>
@@ -225,66 +215,79 @@ function setJSON(k,v){localStorage.setItem(k,JSON.stringify(v))}
 function master(){return getJSON(MASTER)}
 function owned(){return getJSON(OWNED)}
 function esc(s){return String(s??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;")}
-function parse(s){return [...new Set(String(s||"").split(/[,、\\n]/).map(x=>x.trim()).filter(Boolean))]}
-function its(l){if(Array.isArray(l.items))return l.items;if(l.drop)return parse(l.drop).filter(x=>x!=="なし");return[]}
+function its(l){return Array.isArray(l.items)?l.items:[]}
 function sh(l){return Array.isArray(l.screenshots)?l.screenshots:[]}
 function fmt(d){return d?d.replaceAll("-","/"):"-"}
 function sort(a){return [...a].sort((x,y)=>String(y.date).localeCompare(String(x.date))||(y.createdAt||0)-(x.createdAt||0))}
 function clearUrls(){urls.forEach(URL.revokeObjectURL);urls=[]}
 function grid(shots){if(!shots.length)return"";return `<div class="grid">${shots.map(s=>{let f=s.file||s.image;if(!f)return"";let u=URL.createObjectURL(f);urls.push(u);return `<img src="${u}" data-url="${u}" alt="${esc(s.fileName||"SS")}">`}).join("")}</div>`}
 function tags(a){return a.length?`<div class="tags">${a.map(x=>`<span class="tag">${esc(x)}</span>`).join("")}</div>`:""}
-function itemKey(content,item){return content+"|||"+item}
-function isOwned(content,item){return owned().some(x=>x.key===itemKey(content,item))}
-function ownedInfo(content,item){return owned().find(x=>x.key===itemKey(content,item))}
-function toggleOwned(content,item){
-  let o=owned(),key=itemKey(content,item);
-  if(o.some(x=>x.key===key))o=o.filter(x=>x.key!==key);
-  else o.push({key,content,item,date:new Date().toISOString().slice(0,10)});
+function key(c,i){return c+"|||"+i}
+function isOwned(c,i){return owned().some(x=>x.key===key(c,i))}
+function info(c,i){return owned().find(x=>x.key===key(c,i))}
+function setOwned(c,i,date){
+  let o=owned(),k=key(c,i);
+  if(!o.some(x=>x.key===k))o.push({key:k,content:c,item:i,date});
+  setJSON(OWNED,o)
+}
+function toggleOwned(c,i){
+  let o=owned(),k=key(c,i);
+  if(o.some(x=>x.key===k))o=o.filter(x=>x.key!==k);
+  else o.push({key:k,content:c,item:i,date:new Date().toISOString().slice(0,10)});
   setJSON(OWNED,o);render()
 }
 function bind(){
   document.querySelectorAll("[data-url]").forEach(i=>i.onclick=()=>{$("big").src=i.dataset.url;$("image").showModal()});
   document.querySelectorAll("[data-content]").forEach(b=>b.onclick=()=>openContent(b.dataset.content));
-  document.querySelectorAll("[data-item]").forEach(b=>b.onclick=()=>openItem(b.dataset.item));
   document.querySelectorAll("[data-own-content]").forEach(b=>b.onchange=()=>toggleOwned(b.dataset.ownContent,b.dataset.ownItem));
+}
+function refreshContentSelect(){
+  const contents=[...new Set(master().map(x=>x.content))].sort((a,b)=>a.localeCompare(b,"ja"));
+  const current=$("contentSelect").value;
+  $("contentSelect").innerHTML='<option value="">図鑑マスターから選択</option>'+contents.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join("");
+  if(contents.includes(current))$("contentSelect").value=current;
+  renderDropChoices()
+}
+function renderDropChoices(){
+  const c=$("contentSelect").value;
+  const items=master().filter(x=>x.content===c);
+  $("dropChoices").innerHTML=items.length?items.map(x=>`<label class="item-check ${isOwned(c,x.item)?"done":""}">
+    <input type="checkbox" name="dropItem" value="${esc(x.item)}">
+    <span><b>${esc(x.item)}</b><br><span class="small">${esc(x.type)}${isOwned(c,x.item)?" ・ 取得済み":""}</span></span>
+  </label>`).join(""):'<div class="empty">コンテンツを選ぶと、取得可能アイテムが表示されます。</div>'
 }
 async function render(){
   clearUrls();
-  const logs=sort(await all()),m=master(),o=owned(),cc={},ic={};let ns=0;
-  logs.forEach(l=>{cc[l.content]=(cc[l.content]||0)+1;its(l).forEach(i=>ic[i]=(ic[i]||0)+1);ns+=sh(l).length});
-  const total=m.length,got=o.filter(x=>m.some(y=>itemKey(y.content,y.item)===x.key)).length,missing=Math.max(0,total-got),rate=total?Math.round(got/total*100):0;
+  refreshContentSelect();
+  const logs=sort(await all()),m=master(),o=owned(),contents=[...new Set(m.map(x=>x.content))];
+  const total=m.length,got=m.filter(x=>isOwned(x.content,x.item)).length,missing=Math.max(0,total-got),rate=total?Math.round(got/total*100):0;
+  const acquiredNames=[...new Set(logs.flatMap(its))];
+  let ns=0;logs.forEach(l=>ns+=sh(l).length);
 
   $("growthText").textContent=rate+"%";$("growthBar").style.width=rate+"%";
-  $("homeLogs").textContent=logs.length;$("homeContents").textContent=new Set(m.map(x=>x.content)).size;
-  $("homeOwned").textContent=got;$("homeMissing").textContent=missing;
-  $("nLogs").textContent=logs.length;$("nContents").textContent=Object.keys(cc).length;$("nItems").textContent=Object.keys(ic).length;$("nShots").textContent=ns;
+  $("homeLogs").textContent=logs.length;$("homeContents").textContent=contents.length;$("homeOwned").textContent=got;$("homeMissing").textContent=missing;
+  $("nLogs").textContent=logs.length;$("nContents").textContent=new Set(logs.map(x=>x.content)).size;$("nItems").textContent=acquiredNames.length;$("nShots").textContent=ns;
 
   const today=new Date().toISOString().slice(0,10),todayLogs=logs.filter(l=>l.date===today);
   $("todayGrowth").innerHTML=todayLogs.length?todayLogs.map(l=>`<div class="card"><b>${esc(l.content)}</b>${tags(its(l))}<div class="meta">SS ${sh(l).length}枚</div></div>`).join(""):'<div class="empty">今日はまだ図鑑が育っていません。</div>';
 
-  const miss=m.filter(x=>!isOwned(x.content,x.item)).slice(0,6);
+  const miss=m.filter(x=>!isOwned(x.content,x.item)).slice(0,8);
   $("missingPreview").innerHTML=miss.length?miss.map(x=>`<div class="card"><b>${esc(x.item)}</b><div class="meta">${esc(x.content)} ・ ${esc(x.type)}</div></div>`).join(""):'<div class="empty">未取得アイテムはありません。</div>';
 
   $("recentMemories").innerHTML=logs.length?logs.slice(0,3).map(l=>`<div class="card"><b>${esc(l.content)}</b><div class="meta">${fmt(l.date)}</div>${l.memo?`<div>${esc(l.memo)}</div>`:""}${grid(sh(l))}</div>`).join(""):'<div class="empty">思い出はまだありません。</div>';
 
-  const ce=Object.entries(cc).sort((a,b)=>b[1]-a[1]);
-  $("collectionContents").innerHTML=ce.length?ce.map(([n,c])=>`<div class="card row"><button class="link" data-content="${esc(n)}">${esc(n)}</button><span class="count">${c}回</span></div>`).join(""):'<div class="empty">まだ記録がありません。</div>';
-
-  const ie=Object.entries(ic).sort((a,b)=>b[1]-a[1]);
-  $("collectionItems").innerHTML=ie.length?ie.map(([n,c])=>`<div class="card row"><button class="link" data-item="${esc(n)}">${esc(n)}</button><span class="count">${c}回入手</span></div>`).join(""):'<div class="empty">まだ取得アイテムがありません。</div>';
-
   $("logs").innerHTML=logs.length?logs.map(l=>`<div class="card"><div class="row"><button class="link" data-content="${esc(l.content)}">${esc(l.content)}</button><button class="danger" data-del="${l.id}">削除</button></div><div class="meta">${fmt(l.date)}${l.roulette?" ・ "+esc(l.roulette):""}</div>${tags(its(l))}${l.memo?`<div style="margin-top:8px"><b>思い出：</b>${esc(l.memo)}</div>`:""}${grid(sh(l))}</div>`).join(""):'<div class="empty">最初の冒険を登録しましょう。</div>';
 
+  $("collectionContents").innerHTML=contents.length?contents.map(c=>{
+    const items=m.filter(x=>x.content===c),g=items.filter(x=>isOwned(c,x.item)).length,r=items.length?Math.round(g/items.length*100):0;
+    return `<div class="card"><div class="row"><button class="link" data-content="${esc(c)}">${esc(c)}</button><span class="count">${g}/${items.length}</span></div><div class="progress" style="margin-top:10px"><span style="width:${r}%"></span></div></div>`
+  }).join(""):'<div class="empty">図鑑マスターを登録してください。</div>';
+
   const grouped={};m.forEach(x=>(grouped[x.content]??=[]).push(x));
-  $("masterList").innerHTML=Object.keys(grouped).length?Object.entries(grouped).sort().map(([content,items])=>{
-    const gotCount=items.filter(x=>isOwned(content,x.item)).length;
-    return `<div class="card"><div class="row"><button class="link" data-content="${esc(content)}">${esc(content)}</button><span class="count">${gotCount}/${items.length}</span></div>
-    ${items.map(x=>`<div class="card master-item ${isOwned(content,x.item)?"done":""}">
-      <input type="checkbox" ${isOwned(content,x.item)?"checked":""} data-own-content="${esc(content)}" data-own-item="${esc(x.item)}">
-      <div><div class="item-name">${esc(x.item)}</div><div class="small">${esc(x.type)}${ownedInfo(content,x.item)?` ・ 取得 ${fmt(ownedInfo(content,x.item).date)}`:""}</div></div>
-      <button class="danger" data-master-del="${x.id}">削除</button>
-    </div>`).join("")}</div>`;
-  }).join(""):'<div class="empty">図鑑マスターはまだありません。</div>';
+  $("masterList").innerHTML=Object.keys(grouped).length?Object.entries(grouped).sort((a,b)=>a[0].localeCompare(b[0],"ja")).map(([c,items])=>`<div class="card">
+    <div class="row"><button class="link" data-content="${esc(c)}">${esc(c)}</button><span class="count">${items.filter(x=>isOwned(c,x.item)).length}/${items.length}</span></div>
+    ${items.map(x=>`<div class="card master-row"><div><b>${esc(x.item)}</b><div class="small">${esc(x.type)}${info(c,x.item)?` ・ 取得 ${fmt(info(c,x.item).date)}`:""}</div></div><button class="danger" data-master-del="${x.id}">削除</button></div>`).join("")}
+  </div>`).join(""):'<div class="empty">まだ登録がありません。</div>';
 
   document.querySelectorAll("[data-del]").forEach(b=>b.onclick=async()=>{if(confirm("この冒険記録を削除しますか？")){await del(b.dataset.del);render()}});
   document.querySelectorAll("[data-master-del]").forEach(b=>b.onclick=()=>{if(confirm("この図鑑項目を削除しますか？")){setJSON(MASTER,master().filter(x=>x.id!==b.dataset.masterDel));render()}});
@@ -293,28 +296,17 @@ async function render(){
 
 async function openContent(name){
   clearUrls();
-  const logs=sort((await all()).filter(l=>l.content===name)),m=master().filter(x=>x.content===name),shots=logs.flatMap(sh);
-  const got=m.filter(x=>isOwned(name,x.item)).length,rate=m.length?Math.round(got/m.length*100):0;
-  $("detailType").textContent="コンテンツ図鑑";$("detailTitle").textContent=name;
-  $("detailBody").innerHTML=`<div class="stats"><div class="stat">挑戦回数<strong>${logs.length}回</strong></div><div class="stat">収集率<strong>${rate}%</strong></div><div class="stat">取得済み<strong>${got}/${m.length}</strong></div><div class="stat">SS<strong>${shots.length}枚</strong></div></div>
+  const logs=sort((await all()).filter(l=>l.content===name)),items=master().filter(x=>x.content===name),shots=logs.flatMap(sh);
+  const got=items.filter(x=>isOwned(name,x.item)).length,rate=items.length?Math.round(got/items.length*100):0;
+  $("detailTitle").textContent=name;
+  $("detailBody").innerHTML=`<div class="stats"><div class="stat">挑戦回数<strong>${logs.length}回</strong></div><div class="stat">収集率<strong>${rate}%</strong></div><div class="stat">取得済み<strong>${got}/${items.length}</strong></div><div class="stat">SS<strong>${shots.length}枚</strong></div></div>
   <h3>取得可能アイテム</h3>
-  ${m.length?m.map(x=>`<div class="card master-item ${isOwned(name,x.item)?"done":""}">
+  ${items.length?items.map(x=>`<label class="item-check ${isOwned(name,x.item)?"done":""}">
     <input type="checkbox" ${isOwned(name,x.item)?"checked":""} data-own-content="${esc(name)}" data-own-item="${esc(x.item)}">
-    <div><div class="item-name">${esc(x.item)}</div><div class="small">${esc(x.type)}${ownedInfo(name,x.item)?` ・ 取得 ${fmt(ownedInfo(name,x.item).date)}`:""}</div></div>
-    <span class="pill">${isOwned(name,x.item)?"取得済み":"未取得"}</span>
-  </div>`).join(""):'<div class="empty">図鑑マスターにアイテムを追加してください。</div>'}
+    <span><b>${esc(x.item)}</b><br><span class="small">${esc(x.type)}${info(name,x.item)?` ・ 取得 ${fmt(info(name,x.item).date)}`:" ・ 未取得"}</span></span>
+  </label>`).join(""):'<div class="empty">図鑑マスターにアイテムを追加してください。</div>'}
   <h3>関連SS</h3>${shots.length?grid(shots):'<div class="empty">なし</div>'}
   <h3>冒険履歴</h3>${logs.length?logs.map(l=>`<div class="card"><b>${fmt(l.date)}</b>${tags(its(l))}${l.memo?`<div>${esc(l.memo)}</div>`:""}${grid(sh(l))}</div>`).join(""):'<div class="empty">履歴なし</div>'}`;
-  bind();$("detail").showModal()
-}
-async function openItem(name){
-  clearUrls();
-  const logs=sort((await all()).filter(l=>its(l).includes(name))),shots=logs.flatMap(sh),contents=[...new Set(logs.map(l=>l.content))];
-  $("detailType").textContent="取得アイテム図鑑";$("detailTitle").textContent=name;
-  $("detailBody").innerHTML=`<div class="stats"><div class="stat">入手回数<strong>${logs.length}回</strong></div><div class="stat">初回<strong>${fmt(logs.at(-1)?.date)}</strong></div><div class="stat">最終<strong>${fmt(logs[0]?.date)}</strong></div><div class="stat">関連SS<strong>${shots.length}枚</strong></div></div>
-  <h3>関連コンテンツ</h3><div class="tags">${contents.map(c=>`<button class="link" data-content="${esc(c)}">${esc(c)}</button>`).join("")}</div>
-  <h3>関連SS</h3>${shots.length?grid(shots):'<div class="empty">なし</div>'}
-  <h3>入手履歴</h3>${logs.map(l=>`<div class="card"><b>${fmt(l.date)} ${esc(l.content)}</b>${l.memo?`<div>${esc(l.memo)}</div>`:""}${grid(sh(l))}</div>`).join("")}`;
   bind();$("detail").showModal()
 }
 
@@ -323,22 +315,16 @@ document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{
   document.querySelectorAll(".view").forEach(x=>x.classList.remove("active"));
   t.classList.add("active");$(t.dataset.view).classList.add("active")
 });
+$("contentSelect").onchange=renderDropChoices;
 $("shots").onchange=()=>{clearUrls();$("preview").innerHTML=grid([...$("shots").files].map(file=>({file,fileName:file.name})));bind()};
 $("form").onsubmit=async e=>{
   e.preventDefault();
-  const c=$("content").value.trim();if(!c)return;
+  const content=$("contentSelect").value;if(!content)return;
+  const selected=[...document.querySelectorAll('input[name="dropItem"]:checked')].map(x=>x.value);
   const shots=[...$("shots").files].map(file=>({id:crypto.randomUUID(),fileName:file.name,file}));
-  const items=parse($("items").value);
-  await put({id:crypto.randomUUID(),date:$("date").value,content:c,roulette:$("roulette").value,items,memo:$("memo").value.trim(),screenshots:shots,createdAt:Date.now()});
-  if(items.length){
-    let o=owned();
-    items.forEach(item=>{
-      const key=itemKey(c,item);
-      if(!o.some(x=>x.key===key))o.push({key,content:c,item,date:$("date").value})
-    });
-    setJSON(OWNED,o)
-  }
-  $("content").value=$("items").value=$("memo").value="";$("roulette").value="";$("shots").value="";$("preview").innerHTML="";
+  await put({id:crypto.randomUUID(),date:$("date").value,content,roulette:$("roulette").value,items:selected,memo:$("memo").value.trim(),screenshots:shots,createdAt:Date.now()});
+  selected.forEach(item=>setOwned(content,item,$("date").value));
+  $("contentSelect").value="";$("roulette").value="";$("memo").value="";$("shots").value="";$("preview").innerHTML="";
   $("notice").textContent="図鑑と冒険の記録を保存しました。";$("notice").classList.add("show");setTimeout(()=>$("notice").classList.remove("show"),2600);
   render()
 };
@@ -348,8 +334,7 @@ $("masterForm").onsubmit=e=>{
   if(!content||!item)return;
   let m=master();
   if(!m.some(x=>x.content===content&&x.item===item))m.push({id:crypto.randomUUID(),content,item,type});
-  setJSON(MASTER,m);
-  $("masterItem").value="";
+  setJSON(MASTER,m);$("masterItem").value="";
   $("masterNotice").textContent="図鑑マスターに追加しました。";$("masterNotice").classList.add("show");setTimeout(()=>$("masterNotice").classList.remove("show"),2200);
   render()
 };
