@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>エオルゼア冒険記録庫 Ver.0.8</title>
+<title>エオルゼア冒険記録庫 v0.8.1</title>
 <style>
 :root{
   --bg:#0c131b;--panel:#182431;--panel2:#223247;--panel3:#2e425a;
@@ -11,65 +11,94 @@
   --border:#3a4d64;--danger:#df7a7a;--success:#88c99a;--blue:#89b9ff
 }
 *{box-sizing:border-box}
-body{margin:0;font-family:"Segoe UI","Yu Gothic UI",sans-serif;color:var(--text);
-background:radial-gradient(circle at top right,rgba(217,184,94,.13),transparent 28%),linear-gradient(180deg,#101822,#0b1118);min-height:100vh}
-header{max-width:1260px;margin:auto;padding:28px 20px 14px}
-h1{margin:0;font-size:clamp(1.65rem,4vw,2.65rem)}.sub{color:var(--muted);margin-top:8px}
-nav{max-width:1260px;margin:auto;padding:0 20px 14px;display:flex;gap:8px;flex-wrap:wrap}
+body{
+  margin:0;font-family:"Segoe UI","Yu Gothic UI",sans-serif;color:var(--text);
+  background:
+    radial-gradient(circle at top right,rgba(217,184,94,.13),transparent 28%),
+    linear-gradient(180deg,#101822,#0b1118);
+  min-height:100vh
+}
+header{max-width:1280px;margin:auto;padding:28px 20px 14px}
+h1{margin:0;font-size:clamp(1.65rem,4vw,2.65rem)}
+.sub{color:var(--muted);margin-top:8px}
+nav{max-width:1280px;margin:auto;padding:0 20px 14px;display:flex;gap:8px;flex-wrap:wrap}
 .tab{background:#223044;color:var(--text);border:1px solid var(--border);padding:10px 14px;border-radius:999px}
 .tab.active{background:var(--accent);color:#241f13}
-main{max-width:1260px;margin:auto;padding:10px 20px 46px}.view{display:none}.view.active{display:block}
-.layout{display:grid;gap:20px}@media(min-width:1020px){.layout{grid-template-columns:430px minmax(0,1fr);align-items:start}}
-.panel,.card{background:rgba(24,36,49,.97);border:1px solid var(--border);border-radius:16px;padding:18px;box-shadow:0 18px 44px rgba(0,0,0,.22)}
+main{max-width:1280px;margin:auto;padding:10px 20px 46px}
+.view{display:none}.view.active{display:block}
+.layout{display:grid;gap:20px}
+@media(min-width:1040px){.layout{grid-template-columns:430px minmax(0,1fr);align-items:start}}
+.panel,.card{
+  background:rgba(24,36,49,.97);border:1px solid var(--border);
+  border-radius:16px;padding:18px;box-shadow:0 18px 44px rgba(0,0,0,.22)
+}
 .card{background:var(--panel2);margin-top:10px;box-shadow:none}
-h2{margin:0 0 14px}h3{margin:22px 0 8px;color:#f6e3a4}
+h2{margin:0 0 14px}
+h3{margin:22px 0 8px;color:#f6e3a4}
 label{display:block;margin:12px 0 6px;color:var(--muted)}
-input,select,textarea{width:100%;padding:11px;border-radius:9px;border:1px solid var(--border);background:var(--panel2);color:var(--text);font:inherit}
+input,select,textarea{
+  width:100%;padding:11px;border-radius:9px;border:1px solid var(--border);
+  background:var(--panel2);color:var(--text);font:inherit
+}
 textarea{min-height:92px;resize:vertical}
 button{padding:10px 14px;border:0;border-radius:9px;font-weight:700;cursor:pointer}
-.primary{width:100%;margin-top:14px;background:var(--accent);color:#241f13}.secondary{background:#3a4659;color:var(--text)}
-.danger{background:transparent;border:1px solid var(--danger);color:#ffb2b2}.link{background:none;padding:0;color:var(--accent2);text-align:left}
-.row{display:flex;justify-content:space-between;gap:10px;align-items:center}.meta,.hint,.small{color:var(--muted);font-size:.9rem}
-.notice,.error{display:none;padding:10px;border-radius:8px;margin-bottom:10px}.notice.show,.error.show{display:block}.notice{background:#183d2b}.error{background:#472326}
-.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}@media(min-width:780px){.stats{grid-template-columns:repeat(4,1fr)}}
-.stat{background:var(--panel2);padding:13px;border-radius:10px;border:1px solid var(--border)}.stat strong{display:block;color:var(--accent);font-size:1.45rem;margin-top:4px}
+.primary{width:100%;margin-top:14px;background:var(--accent);color:#241f13}
+.secondary{background:#3a4659;color:var(--text)}
+.danger{background:transparent;border:1px solid var(--danger);color:#ffb2b2}
+.link{background:none;padding:0;color:var(--accent2);text-align:left}
+.row{display:flex;justify-content:space-between;gap:10px;align-items:center}
+.meta,.hint,.small{color:var(--muted);font-size:.9rem}
+.notice{display:none;padding:10px;border-radius:8px;margin-bottom:10px;background:#183d2b}
+.notice.show{display:block}
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+@media(min-width:800px){.stats{grid-template-columns:repeat(4,1fr)}}
+.stat{background:var(--panel2);padding:13px;border-radius:10px;border:1px solid var(--border)}
+.stat strong{display:block;color:var(--accent);font-size:1.45rem;margin-top:4px}
 .hero{padding:22px;border-radius:18px;border:1px solid var(--border);background:linear-gradient(135deg,rgba(217,184,94,.17),rgba(46,66,90,.88))}
 .hero h2{font-size:1.6rem}.hero p{color:var(--muted);margin-bottom:0}
-.progress{height:14px;background:#15202e;border-radius:999px;overflow:hidden;border:1px solid var(--border)}.progress>span{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));width:0}
-.progress-label{display:flex;justify-content:space-between;color:var(--muted);font-size:.9rem;margin-top:12px}
-.tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.tag{padding:4px 8px;border-radius:999px;background:rgba(217,184,94,.14);border:1px solid rgba(217,184,94,.35)}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;margin-top:10px}.grid img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:8px;cursor:zoom-in;border:1px solid var(--border)}
+.progress{height:14px;background:#15202e;border-radius:999px;overflow:hidden;border:1px solid var(--border)}
+.progress>span{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));width:0}
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.tag{padding:4px 8px;border-radius:999px;background:rgba(217,184,94,.14);border:1px solid rgba(217,184,94,.35)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;margin-top:10px}
+.grid img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:8px;cursor:zoom-in;border:1px solid var(--border)}
 .empty{padding:20px;text-align:center;border:1px dashed var(--border);border-radius:10px;color:var(--muted)}
-.rule{border-left:4px solid var(--blue)}.achievement{border-left:4px solid var(--success)}
+.rule{border-left:4px solid var(--blue)}
+.achievement{border-left:4px solid var(--success)}
 .pill{display:inline-block;padding:4px 8px;border-radius:999px;background:#1e3043;color:#c7dcff;font-size:.8rem}
-.count{color:var(--accent);font-weight:800}
+.master-grid{display:grid;grid-template-columns:1fr;gap:10px}
+@media(min-width:760px){.master-grid{grid-template-columns:repeat(2,1fr)}}
+.search-row{display:grid;grid-template-columns:1fr 180px;gap:10px}
+@media(max-width:700px){.search-row{grid-template-columns:1fr}}
+.category-title{margin:18px 0 6px;color:var(--accent2);font-size:1rem}
 dialog{width:min(920px,calc(100vw - 24px));max-height:90vh;background:var(--panel);color:var(--text);border:1px solid var(--border);border-radius:14px}
-dialog::backdrop{background:#000b}.inside{padding:18px;max-height:86vh;overflow:auto}
+dialog::backdrop{background:#000b}
+.inside{padding:18px;max-height:86vh;overflow:auto}
 </style>
 </head>
 <body>
 <header>
-<h1>エオルゼア冒険記録庫</h1>
-<div class="sub">1つのログで、すべてが育つ。 Ver.0.8 “One Log”</div>
+  <h1>エオルゼア冒険記録庫</h1>
+  <div class="sub">遊んだ時間そのものが資産になる。 v0.8.1 “Master Setup”</div>
 </header>
 
 <nav>
-<button class="tab active" data-view="home">ホーム</button>
-<button class="tab" data-view="log">行動ログ</button>
-<button class="tab" data-view="achievements">アチーブ</button>
-<button class="tab" data-view="masters">マスター</button>
+  <button class="tab active" data-view="home">ホーム</button>
+  <button class="tab" data-view="log">行動ログ</button>
+  <button class="tab" data-view="achievements">アチーブ</button>
+  <button class="tab" data-view="masters">マスター</button>
 </nav>
 
 <main>
 <section id="home" class="view active">
   <div class="hero">
     <h2>おかえりなさい。</h2>
-    <p>行動を1件記録すると、関連する図鑑とアチーブがまとめて育ちます。</p>
+    <p>1つのログから、ジョブ・ロール・コンテンツ・アチーブがまとめて育ちます。</p>
   </div>
   <div class="stats" style="margin-top:18px">
     <div class="stat">行動ログ<strong id="homeLogs">0</strong></div>
-    <div class="stat">コンテンツ<strong id="homeContents">0</strong></div>
-    <div class="stat">使用ジョブ<strong id="homeJobs">0</strong></div>
+    <div class="stat">登録コンテンツ<strong id="homeContents">0</strong></div>
+    <div class="stat">登録ジョブ<strong id="homeJobs">0</strong></div>
     <div class="stat">達成アチーブ<strong id="homeCompleted">0</strong></div>
   </div>
   <div class="panel" style="margin-top:18px">
@@ -89,6 +118,7 @@ dialog::backdrop{background:#000b}.inside{padding:18px;max-height:86vh;overflow:
     <div id="notice" class="notice"></div>
     <form id="logForm">
       <label>日付</label><input id="date" type="date" required>
+
       <label>行動種別</label>
       <select id="actionType">
         <option value="content">コンテンツ参加</option>
@@ -96,19 +126,41 @@ dialog::backdrop{background:#000b}.inside{padding:18px;max-height:86vh;overflow:
       </select>
 
       <div id="contentFields">
-        <label>コンテンツ</label><select id="contentSelect"><option value="">選択してください</option></select>
-        <label>参加ジョブ</label><select id="jobSelect"><option value="">選択してください</option></select>
-        <label>結果</label><select id="result"><option>参加</option><option>クリア</option><option>未クリア</option></select>
+        <label>大分類</label>
+        <select id="logCategoryFilter"></select>
+
+        <label>小分類</label>
+        <select id="logSubcategoryFilter"></select>
+
+        <label>コンテンツ</label>
+        <select id="contentSelect"><option value="">選択してください</option></select>
+
+        <label>参加ジョブ</label>
+        <select id="jobSelect"><option value="">選択してください</option></select>
+
+        <label>結果</label>
+        <select id="result">
+          <option>参加</option>
+          <option>クリア</option>
+          <option>未クリア</option>
+        </select>
       </div>
 
       <div id="collectableFields" style="display:none">
-        <label>クラス</label><select id="collectableJob"><option value="">選択してください</option></select>
-        <label>納品数</label><input id="collectableCount" type="number" min="1" value="1">
+        <label>クラス</label>
+        <select id="collectableJob"><option value="">選択してください</option></select>
+
+        <label>納品数</label>
+        <input id="collectableCount" type="number" min="1" value="1">
       </div>
 
-      <label>思い出メモ</label><textarea id="memo"></textarea>
-      <label>SS（複数可）</label><input id="shots" type="file" accept="image/png,image/jpeg,image/webp" multiple>
+      <label>思い出メモ</label>
+      <textarea id="memo"></textarea>
+
+      <label>SS（複数可）</label>
+      <input id="shots" type="file" accept="image/png,image/jpeg,image/webp" multiple>
       <div id="preview" class="grid"></div>
+
       <button class="primary">保存する</button>
     </form>
   </section>
@@ -128,193 +180,538 @@ dialog::backdrop{background:#000b}.inside{padding:18px;max-height:86vh;overflow:
 </section>
 
 <section id="masters" class="view">
-<div class="layout">
-  <section class="panel">
-    <h2>ジョブマスター</h2>
-    <form id="jobForm">
-      <label>ジョブ名</label><input id="jobName" required>
-      <label>ロール</label>
-      <select id="jobRole"><option>タンク</option><option>ヒーラー</option><option>DPS</option><option>クラフター</option><option>ギャザラー</option></select>
-      <button class="primary">ジョブ追加</button>
-    </form>
-    <div id="jobList"></div>
-  </section>
-
-  <section class="panel">
-    <h2>コンテンツマスター</h2>
-    <form id="contentForm">
-      <label>コンテンツ名</label><input id="contentName" required>
-      <label>大分類</label><select id="contentCategory"><option>バトル</option><option>手帳</option><option>達成</option><option>その他</option></select>
-      <label>小分類</label><select id="contentSubcategory"><option>ID</option><option>討滅戦</option><option>ノーマルレイド</option><option>アライアンスレイド</option><option>零式</option><option>絶</option><option>その他</option></select>
-      <label><input id="highDifficulty" type="checkbox" style="width:auto"> 高難易度として扱う</label>
-      <button class="primary">コンテンツ追加</button>
-    </form>
-    <div id="contentList"></div>
-  </section>
-
-  <section class="panel">
-    <h2>アチーブマスター</h2>
-    <form id="achievementForm">
-      <label>アチーブ名</label><input id="achievementName" required>
-      <label>目標値</label><input id="achievementTarget" type="number" min="1" value="10">
-      <label>集計ルール</label>
-      <select id="achievementRule">
-        <option value="all_content">コンテンツ参加回数</option>
-        <option value="id_content">ID参加回数</option>
-        <option value="high_difficulty">高難易度参加回数</option>
-        <option value="tank_high_difficulty">タンクで高難易度参加回数</option>
-        <option value="collectable_delivery">収集品納品数</option>
+  <div class="panel">
+    <h2>マスター管理</h2>
+    <div class="search-row">
+      <input id="masterSearch" placeholder="ジョブ・コンテンツ・アチーブを検索">
+      <select id="masterFilter">
+        <option value="all">すべて</option>
+        <option value="job">ジョブ</option>
+        <option value="content">コンテンツ</option>
+        <option value="achievement">アチーブ</option>
       </select>
-      <button class="primary">アチーブ追加</button>
-    </form>
-    <div id="achievementMasterList"></div>
-  </section>
-</div>
+    </div>
+  </div>
+
+  <div class="layout" style="margin-top:20px">
+    <section class="panel">
+      <h2>ジョブマスター</h2>
+      <form id="jobForm">
+        <label>ジョブ名</label><input id="jobName" required>
+        <label>ロール</label>
+        <select id="jobRole">
+          <option>タンク</option>
+          <option>ヒーラー</option>
+          <option>近接DPS</option>
+          <option>遠隔物理DPS</option>
+          <option>遠隔魔法DPS</option>
+          <option>クラフター</option>
+          <option>ギャザラー</option>
+        </select>
+        <button class="primary">ジョブ追加</button>
+      </form>
+      <div id="jobList"></div>
+    </section>
+
+    <section class="panel">
+      <h2>コンテンツマスター</h2>
+      <form id="contentForm">
+        <label>コンテンツ名</label><input id="contentName" required>
+
+        <label>大分類</label>
+        <select id="contentCategory"></select>
+
+        <label>小分類</label>
+        <select id="contentSubcategory"></select>
+
+        <label><input id="highDifficulty" type="checkbox" style="width:auto"> 高難易度として扱う</label>
+
+        <button class="primary">コンテンツ追加</button>
+      </form>
+      <div id="contentList"></div>
+    </section>
+
+    <section class="panel">
+      <h2>アチーブマスター</h2>
+      <form id="achievementForm">
+        <label>アチーブ名</label><input id="achievementName" required>
+
+        <label>目標値</label><input id="achievementTarget" type="number" min="1" value="10">
+
+        <label>集計ルール</label>
+        <select id="achievementRule">
+          <option value="all_content">コンテンツ参加回数</option>
+          <option value="id_content">ID参加回数</option>
+          <option value="raid_content">レイド参加回数</option>
+          <option value="high_difficulty">高難易度参加回数</option>
+          <option value="tank_high_difficulty">タンクで高難易度参加回数</option>
+          <option value="heal_high_difficulty">ヒーラーで高難易度参加回数</option>
+          <option value="dps_high_difficulty">DPSで高難易度参加回数</option>
+          <option value="collectable_delivery">収集品納品数</option>
+        </select>
+
+        <button class="primary">アチーブ追加</button>
+      </form>
+      <div id="achievementMasterList"></div>
+    </section>
+  </div>
 </section>
 </main>
 
 <dialog id="imageDialog">
-<div class="inside">
-<div class="row"><span></span><button id="closeImage" class="secondary">閉じる</button></div>
-<img id="big" style="width:100%;max-height:80vh;object-fit:contain" alt="拡大表示">
-</div>
+  <div class="inside">
+    <div class="row"><span></span><button id="closeImage" class="secondary">閉じる</button></div>
+    <img id="big" style="width:100%;max-height:80vh;object-fit:contain" alt="拡大表示">
+  </div>
 </dialog>
 
 <script>
 const DB="EorzeaArchiveDB_v08",STORE="actionLogs";
-const JOBS="eorzeaJobs_v08",CONTENTS="eorzeaContents_v08",ACHIEVEMENTS="eorzeaAchievements_v08";
-const $=x=>document.getElementById(x);let urls=[];
+const JOBS="eorzeaJobs_v081",CONTENTS="eorzeaContents_v081",ACHIEVEMENTS="eorzeaAchievements_v081";
+const $=id=>document.getElementById(id);
+let urls=[];
+
+const CATEGORY_MAP={
+  "バトル":["ID","討伐・討滅戦","ノーマルレイド","アライアンスレイド","零式","絶","PvP","ディープダンジョン","ヴァリアント","異聞","その他"],
+  "ギャザクラ":["採集","制作","収集品","リーヴ","お得意様","その他"],
+  "手帳":["釣り手帳","探検手帳","制作手帳","攻略手帳","青魔道士ログ","その他"],
+  "コレクション":["カード","ミニオン","マウント","オーケストリオン譜","エモート","ファッションアクセサリー","その他"],
+  "達成":["アチーブメント","クエスト","FATE","友好部族","その他"],
+  "その他":["その他"]
+};
+
 $("date").value=new Date().toISOString().slice(0,10);
 
-function getJSON(k){try{return JSON.parse(localStorage.getItem(k))||[]}catch{return[]}}
-function setJSON(k,v){localStorage.setItem(k,JSON.stringify(v))}
-function jobs(){return getJSON(JOBS)}function contents(){return getJSON(CONTENTS)}function achievements(){return getJSON(ACHIEVEMENTS)}
-function openDB(){return new Promise((ok,no)=>{let r=indexedDB.open(DB,1);r.onupgradeneeded=()=>{let d=r.result;if(!d.objectStoreNames.contains(STORE))d.createObjectStore(STORE,{keyPath:"id"})};r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error)})}
-async function allLogs(){let d=await openDB();return new Promise((ok,no)=>{let r=d.transaction(STORE).objectStore(STORE).getAll();r.onsuccess=()=>ok(r.result||[]);r.onerror=()=>no(r.error)})}
-async function putLog(v){let d=await openDB();return new Promise((ok,no)=>{let t=d.transaction(STORE,"readwrite");t.objectStore(STORE).put(v);t.oncomplete=ok;t.onerror=()=>no(t.error)})}
-async function deleteLog(id){let d=await openDB();return new Promise((ok,no)=>{let t=d.transaction(STORE,"readwrite");t.objectStore(STORE).delete(id);t.oncomplete=ok;t.onerror=()=>no(t.error)})}
+function getJSON(key){try{return JSON.parse(localStorage.getItem(key))||[]}catch{return[]}}
+function setJSON(key,value){localStorage.setItem(key,JSON.stringify(value))}
+function jobs(){return getJSON(JOBS)}
+function contents(){return getJSON(CONTENTS)}
+function achievements(){return getJSON(ACHIEVEMENTS)}
 
-function esc(s){return String(s??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;")}
-function fmt(d){return d?d.replaceAll("-","/"):"-"}
-function sortLogs(a){return [...a].sort((x,y)=>String(y.date).localeCompare(String(x.date))||(y.createdAt||0)-(x.createdAt||0))}
+function openDB(){
+  return new Promise((resolve,reject)=>{
+    const request=indexedDB.open(DB,1);
+    request.onupgradeneeded=()=>{
+      const db=request.result;
+      if(!db.objectStoreNames.contains(STORE))db.createObjectStore(STORE,{keyPath:"id"});
+    };
+    request.onsuccess=()=>resolve(request.result);
+    request.onerror=()=>reject(request.error);
+  });
+}
+async function allLogs(){
+  const db=await openDB();
+  return new Promise((resolve,reject)=>{
+    const request=db.transaction(STORE).objectStore(STORE).getAll();
+    request.onsuccess=()=>resolve(request.result||[]);
+    request.onerror=()=>reject(request.error);
+  });
+}
+async function putLog(value){
+  const db=await openDB();
+  return new Promise((resolve,reject)=>{
+    const tx=db.transaction(STORE,"readwrite");
+    tx.objectStore(STORE).put(value);
+    tx.oncomplete=resolve;
+    tx.onerror=()=>reject(tx.error);
+  });
+}
+async function deleteLog(id){
+  const db=await openDB();
+  return new Promise((resolve,reject)=>{
+    const tx=db.transaction(STORE,"readwrite");
+    tx.objectStore(STORE).delete(id);
+    tx.oncomplete=resolve;
+    tx.onerror=()=>reject(tx.error);
+  });
+}
+
+function esc(value){
+  return String(value??"")
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;");
+}
+function fmt(date){return date?date.replaceAll("-","/"):"-"}
+function sortLogs(logs){
+  return [...logs].sort((a,b)=>String(b.date).localeCompare(String(a.date))||(b.createdAt||0)-(a.createdAt||0));
+}
 function clearUrls(){urls.forEach(URL.revokeObjectURL);urls=[]}
-function grid(shots){if(!shots?.length)return"";return `<div class="grid">${shots.map(s=>{let f=s.file||s.image;if(!f)return"";let u=URL.createObjectURL(f);urls.push(u);return `<img src="${u}" data-url="${u}" alt="${esc(s.fileName||"SS")}">`}).join("")}</div>`}
-function bindZoom(){document.querySelectorAll("[data-url]").forEach(i=>i.onclick=()=>{$("big").src=i.dataset.url;$("imageDialog").showModal()})}
+function imageGrid(shots){
+  if(!shots?.length)return"";
+  return `<div class="grid">${shots.map(shot=>{
+    const file=shot.file||shot.image;
+    if(!file)return"";
+    const url=URL.createObjectURL(file);
+    urls.push(url);
+    return `<img src="${url}" data-url="${url}" alt="${esc(shot.fileName||"SS")}">`;
+  }).join("")}</div>`;
+}
+function bindZoom(){
+  document.querySelectorAll("[data-url]").forEach(img=>{
+    img.onclick=()=>{
+      $("big").src=img.dataset.url;
+      $("imageDialog").showModal();
+    };
+  });
+}
+
+function normalizeRole(role){
+  if(role==="近接DPS"||role==="遠隔物理DPS"||role==="遠隔魔法DPS")return"DPS";
+  return role;
+}
 
 function seedDefaults(){
   if(!jobs().length){
-    setJSON(JOBS,[
-      {id:crypto.randomUUID(),name:"戦士",role:"タンク"},
-      {id:crypto.randomUUID(),name:"ナイト",role:"タンク"},
-      {id:crypto.randomUUID(),name:"暗黒騎士",role:"タンク"},
-      {id:crypto.randomUUID(),name:"ガンブレイカー",role:"タンク"},
-      {id:crypto.randomUUID(),name:"白魔道士",role:"ヒーラー"},
-      {id:crypto.randomUUID(),name:"園芸師",role:"ギャザラー"},
-      {id:crypto.randomUUID(),name:"採掘師",role:"ギャザラー"},
-      {id:crypto.randomUUID(),name:"漁師",role:"ギャザラー"}
-    ])
+    const initialJobs=[
+      ["ナイト","タンク"],["戦士","タンク"],["暗黒騎士","タンク"],["ガンブレイカー","タンク"],["バスティオン","タンク"],
+      ["白魔道士","ヒーラー"],["学者","ヒーラー"],["占星術師","ヒーラー"],["賢者","ヒーラー"],
+      ["モンク","近接DPS"],["竜騎士","近接DPS"],["忍者","近接DPS"],["侍","近接DPS"],["リーパー","近接DPS"],["ヴァイパー","近接DPS"],
+      ["吟遊詩人","遠隔物理DPS"],["機工士","遠隔物理DPS"],["踊り子","遠隔物理DPS"],
+      ["黒魔道士","遠隔魔法DPS"],["召喚士","遠隔魔法DPS"],["赤魔道士","遠隔魔法DPS"],["ピクトマンサー","遠隔魔法DPS"],["青魔道士","遠隔魔法DPS"],
+      ["木工師","クラフター"],["鍛冶師","クラフター"],["甲冑師","クラフター"],["彫金師","クラフター"],["革細工師","クラフター"],["裁縫師","クラフター"],["錬金術師","クラフター"],["調理師","クラフター"],
+      ["採掘師","ギャザラー"],["園芸師","ギャザラー"],["漁師","ギャザラー"]
+    ];
+    setJSON(JOBS,initialJobs.map(([name,role])=>({id:crypto.randomUUID(),name,role})));
   }
+
   if(!achievements().length){
     setJSON(ACHIEVEMENTS,[
       {id:crypto.randomUUID(),name:"コンテンツ参加",target:10,rule:"all_content"},
       {id:crypto.randomUUID(),name:"ID参加",target:10,rule:"id_content"},
+      {id:crypto.randomUUID(),name:"レイド参加",target:10,rule:"raid_content"},
       {id:crypto.randomUUID(),name:"高難易度参加",target:10,rule:"high_difficulty"},
       {id:crypto.randomUUID(),name:"タンクで高難易度",target:10,rule:"tank_high_difficulty"},
+      {id:crypto.randomUUID(),name:"ヒーラーで高難易度",target:10,rule:"heal_high_difficulty"},
+      {id:crypto.randomUUID(),name:"DPSで高難易度",target:10,rule:"dps_high_difficulty"},
       {id:crypto.randomUUID(),name:"収集品納品",target:100,rule:"collectable_delivery"}
-    ])
+    ]);
   }
 }
 
 function calcAchievement(rule,logs){
-  return logs.reduce((sum,l)=>{
-    if(rule==="all_content" && l.actionType==="content") return sum+1;
-    if(rule==="id_content" && l.actionType==="content" && l.contentSubcategory==="ID") return sum+1;
-    if(rule==="high_difficulty" && l.actionType==="content" && l.highDifficulty) return sum+1;
-    if(rule==="tank_high_difficulty" && l.actionType==="content" && l.highDifficulty && l.role==="タンク") return sum+1;
-    if(rule==="collectable_delivery" && l.actionType==="collectable") return sum+(Number(l.count)||0);
+  return logs.reduce((sum,log)=>{
+    const role=normalizeRole(log.role);
+    const isRaid=["ノーマルレイド","アライアンスレイド","零式","絶"].includes(log.contentSubcategory);
+
+    if(rule==="all_content"&&log.actionType==="content")return sum+1;
+    if(rule==="id_content"&&log.actionType==="content"&&log.contentSubcategory==="ID")return sum+1;
+    if(rule==="raid_content"&&log.actionType==="content"&&isRaid)return sum+1;
+    if(rule==="high_difficulty"&&log.actionType==="content"&&log.highDifficulty)return sum+1;
+    if(rule==="tank_high_difficulty"&&log.actionType==="content"&&log.highDifficulty&&role==="タンク")return sum+1;
+    if(rule==="heal_high_difficulty"&&log.actionType==="content"&&log.highDifficulty&&role==="ヒーラー")return sum+1;
+    if(rule==="dps_high_difficulty"&&log.actionType==="content"&&log.highDifficulty&&role==="DPS")return sum+1;
+    if(rule==="collectable_delivery"&&log.actionType==="collectable")return sum+(Number(log.count)||0);
+
     return sum;
-  },0)
+  },0);
 }
 
-function refreshSelects(){
-  $("jobSelect").innerHTML='<option value="">選択してください</option>'+jobs().filter(x=>["タンク","ヒーラー","DPS"].includes(x.role)).map(x=>`<option value="${x.id}">${esc(x.name)}（${esc(x.role)}）</option>`).join("");
-  $("collectableJob").innerHTML='<option value="">選択してください</option>'+jobs().filter(x=>["クラフター","ギャザラー"].includes(x.role)).map(x=>`<option value="${x.id}">${esc(x.name)}（${esc(x.role)}）</option>`).join("");
-  $("contentSelect").innerHTML='<option value="">選択してください</option>'+contents().map(x=>`<option value="${x.id}">${esc(x.name)}（${esc(x.subcategory)}）</option>`).join("")
+function fillCategorySelect(selectId){
+  $(selectId).innerHTML=Object.keys(CATEGORY_MAP).map(category=>`<option>${category}</option>`).join("");
+}
+function fillSubcategorySelect(categorySelectId,subcategorySelectId){
+  const category=$(categorySelectId).value;
+  $(subcategorySelectId).innerHTML=(CATEGORY_MAP[category]||["その他"]).map(sub=>`<option>${sub}</option>`).join("");
+}
+
+function refreshLogFilters(){
+  const categories=["すべて",...Object.keys(CATEGORY_MAP)];
+  $("logCategoryFilter").innerHTML=categories.map(c=>`<option>${c}</option>`).join("");
+  refreshLogSubcategories();
+}
+function refreshLogSubcategories(){
+  const category=$("logCategoryFilter").value;
+  const subs=category==="すべて"
+    ? ["すべて",...new Set(contents().map(c=>c.subcategory))]
+    : ["すべて",...(CATEGORY_MAP[category]||[])];
+  $("logSubcategoryFilter").innerHTML=subs.map(s=>`<option>${esc(s)}</option>`).join("");
+  refreshContentSelect();
+}
+function refreshContentSelect(){
+  const category=$("logCategoryFilter").value;
+  const subcategory=$("logSubcategoryFilter").value;
+  const filtered=contents().filter(content=>{
+    const categoryOk=category==="すべて"||content.category===category;
+    const subcategoryOk=subcategory==="すべて"||content.subcategory===subcategory;
+    return categoryOk&&subcategoryOk;
+  });
+  $("contentSelect").innerHTML='<option value="">選択してください</option>'+
+    filtered.map(content=>`<option value="${content.id}">${esc(content.name)}（${esc(content.subcategory)}）</option>`).join("");
+}
+function refreshJobSelects(){
+  $("jobSelect").innerHTML='<option value="">選択してください</option>'+
+    jobs().filter(j=>!["クラフター","ギャザラー"].includes(j.role))
+      .map(j=>`<option value="${j.id}">${esc(j.name)}（${esc(j.role)}）</option>`).join("");
+
+  $("collectableJob").innerHTML='<option value="">選択してください</option>'+
+    jobs().filter(j=>["クラフター","ギャザラー"].includes(j.role))
+      .map(j=>`<option value="${j.id}">${esc(j.name)}（${esc(j.role)}）</option>`).join("");
 }
 
 async function render(){
-  clearUrls();refreshSelects();
-  const logs=sortLogs(await allLogs()),acs=achievements(),cs=contents(),js=jobs();
-  const usedJobs=new Set(logs.map(x=>x.jobId).filter(Boolean));
-  const completed=acs.filter(a=>calcAchievement(a.rule,logs)>=a.target).length;
-  $("homeLogs").textContent=logs.length;$("homeContents").textContent=cs.length;$("homeJobs").textContent=usedJobs.size;$("homeCompleted").textContent=completed;
+  clearUrls();
+  refreshJobSelects();
+  refreshContentSelect();
 
-  $("recentGrowth").innerHTML=logs.length?logs.slice(0,5).map(l=>`<div class="card">
-    <b>${l.actionType==="content"?esc(l.contentName):"収集品納品"}</b>
-    <div class="meta">${fmt(l.date)}${l.jobName?` ・ ${esc(l.jobName)}`:""}</div>
-    ${l.actionType==="content"?`<div class="tags"><span class="tag">${esc(l.contentSubcategory)}</span>${l.highDifficulty?'<span class="tag">高難易度</span>':""}${l.role?`<span class="tag">${esc(l.role)}</span>`:""}</div>`:`<div class="tags"><span class="tag">${esc(l.jobName)}</span><span class="tag">${l.count}個納品</span></div>`}
-  </div>`).join(""):'<div class="empty">まだログがありません。</div>';
+  const logs=sortLogs(await allLogs());
+  const jobList=jobs();
+  const contentList=contents();
+  const achievementList=achievements();
 
-  const achievementHtml=acs.length?acs.map(a=>{
-    const value=calcAchievement(a.rule,logs),pct=Math.min(100,Math.round(value/a.target*100));
-    return `<div class="card achievement"><div class="row"><b>${esc(a.name)}</b><span class="count">${value}/${a.target}</span></div><div class="progress" style="margin-top:10px"><span style="width:${pct}%"></span></div></div>`
-  }).join(""):'<div class="empty">アチーブマスターを登録してください。</div>';
+  const completed=achievementList.filter(a=>calcAchievement(a.rule,logs)>=a.target).length;
+
+  $("homeLogs").textContent=logs.length;
+  $("homeContents").textContent=contentList.length;
+  $("homeJobs").textContent=jobList.length;
+  $("homeCompleted").textContent=completed;
+
+  $("recentGrowth").innerHTML=logs.length
+    ? logs.slice(0,5).map(log=>`<div class="card">
+        <b>${log.actionType==="content"?esc(log.contentName):"収集品納品"}</b>
+        <div class="meta">${fmt(log.date)}${log.jobName?` ・ ${esc(log.jobName)}`:""}</div>
+        ${log.actionType==="content"
+          ? `<div class="tags"><span class="tag">${esc(log.contentCategory)}</span><span class="tag">${esc(log.contentSubcategory)}</span>${log.highDifficulty?'<span class="tag">高難易度</span>':""}<span class="tag">${esc(normalizeRole(log.role))}</span></div>`
+          : `<div class="tags"><span class="tag">${esc(log.jobName)}</span><span class="tag">${log.count}個納品</span></div>`}
+      </div>`).join("")
+    : '<div class="empty">まだログがありません。</div>';
+
+  const achievementHtml=achievementList.length
+    ? achievementList.map(achievement=>{
+        const value=calcAchievement(achievement.rule,logs);
+        const percent=Math.min(100,Math.round(value/achievement.target*100));
+        return `<div class="card achievement">
+          <div class="row"><b>${esc(achievement.name)}</b><span class="count">${value}/${achievement.target}</span></div>
+          <div class="progress" style="margin-top:10px"><span style="width:${percent}%"></span></div>
+        </div>`;
+      }).join("")
+    : '<div class="empty">アチーブマスターを登録してください。</div>';
+
   $("homeAchievements").innerHTML=$("achievementList").innerHTML=achievementHtml;
 
-  $("logs").innerHTML=logs.length?logs.map(l=>`<div class="card">
-    <div class="row"><b>${l.actionType==="content"?esc(l.contentName):"収集品納品"}</b><button class="danger" data-del="${l.id}">削除</button></div>
-    <div class="meta">${fmt(l.date)}${l.jobName?` ・ ${esc(l.jobName)}`:""}${l.result?` ・ ${esc(l.result)}`:""}</div>
-    ${l.actionType==="content"?`<div class="tags"><span class="tag">${esc(l.contentCategory)}</span><span class="tag">${esc(l.contentSubcategory)}</span>${l.highDifficulty?'<span class="tag">高難易度</span>':""}${l.role?`<span class="tag">${esc(l.role)}</span>`:""}</div>`:`<div class="tags"><span class="tag">${l.count}個納品</span></div>`}
-    ${l.memo?`<div style="margin-top:8px">${esc(l.memo)}</div>`:""}${grid(l.screenshots)}
-  </div>`).join(""):'<div class="empty">最初の行動を記録しましょう。</div>';
+  $("logs").innerHTML=logs.length
+    ? logs.map(log=>`<div class="card">
+        <div class="row">
+          <b>${log.actionType==="content"?esc(log.contentName):"収集品納品"}</b>
+          <button class="danger" data-log-delete="${log.id}">削除</button>
+        </div>
+        <div class="meta">${fmt(log.date)}${log.jobName?` ・ ${esc(log.jobName)}`:""}${log.result?` ・ ${esc(log.result)}`:""}</div>
+        ${log.actionType==="content"
+          ? `<div class="tags"><span class="tag">${esc(log.contentCategory)}</span><span class="tag">${esc(log.contentSubcategory)}</span>${log.highDifficulty?'<span class="tag">高難易度</span>':""}<span class="tag">${esc(normalizeRole(log.role))}</span></div>`
+          : `<div class="tags"><span class="tag">${log.count}個納品</span></div>`}
+        ${log.memo?`<div style="margin-top:8px">${esc(log.memo)}</div>`:""}
+        ${imageGrid(log.screenshots)}
+      </div>`).join("")
+    : '<div class="empty">最初の行動を記録しましょう。</div>';
 
-  $("jobList").innerHTML=js.length?js.map(j=>`<div class="card row"><div><b>${esc(j.name)}</b><div class="small">${esc(j.role)}</div></div><button class="danger" data-job-del="${j.id}">削除</button></div>`).join(""):'<div class="empty">未登録</div>';
-  $("contentList").innerHTML=cs.length?cs.map(c=>`<div class="card row"><div><b>${esc(c.name)}</b><div class="small">${esc(c.category)} / ${esc(c.subcategory)}${c.highDifficulty?" / 高難易度":""}</div></div><button class="danger" data-content-del="${c.id}">削除</button></div>`).join(""):'<div class="empty">未登録</div>';
-  $("achievementMasterList").innerHTML=acs.length?acs.map(a=>`<div class="card rule row"><div><b>${esc(a.name)}</b><div class="small">${esc(a.rule)} / 目標 ${a.target}</div></div><button class="danger" data-ach-del="${a.id}">削除</button></div>`).join(""):'<div class="empty">未登録</div>';
+  const query=$("masterSearch").value.trim().toLowerCase();
+  const filter=$("masterFilter").value;
 
-  document.querySelectorAll("[data-del]").forEach(b=>b.onclick=async()=>{if(confirm("このログを削除しますか？")){await deleteLog(b.dataset.del);render()}});
-  document.querySelectorAll("[data-job-del]").forEach(b=>b.onclick=()=>{setJSON(JOBS,jobs().filter(x=>x.id!==b.dataset.jobDel));render()});
-  document.querySelectorAll("[data-content-del]").forEach(b=>b.onclick=()=>{setJSON(CONTENTS,contents().filter(x=>x.id!==b.dataset.contentDel));render()});
-  document.querySelectorAll("[data-ach-del]").forEach(b=>b.onclick=()=>{setJSON(ACHIEVEMENTS,achievements().filter(x=>x.id!==b.dataset.achDel));render()});
-  bindZoom()
+  const filteredJobs=jobList.filter(j=>(filter==="all"||filter==="job")&&j.name.toLowerCase().includes(query));
+  const filteredContents=contentList.filter(c=>(filter==="all"||filter==="content")&&(c.name+" "+c.category+" "+c.subcategory).toLowerCase().includes(query));
+  const filteredAchievements=achievementList.filter(a=>(filter==="all"||filter==="achievement")&&(a.name+" "+a.rule).toLowerCase().includes(query));
+
+  $("jobList").innerHTML=filteredJobs.length
+    ? filteredJobs.map(job=>`<div class="card row">
+        <div><b>${esc(job.name)}</b><div class="small">${esc(job.role)}</div></div>
+        <button class="danger" data-job-delete="${job.id}">削除</button>
+      </div>`).join("")
+    : '<div class="empty">該当するジョブがありません。</div>';
+
+  const groupedContents={};
+  filteredContents.forEach(content=>{
+    (groupedContents[content.category]??=[]).push(content);
+  });
+  $("contentList").innerHTML=Object.keys(groupedContents).length
+    ? Object.entries(groupedContents).map(([category,list])=>`
+        <div class="category-title">${esc(category)}</div>
+        ${list.map(content=>`<div class="card row">
+          <div><b>${esc(content.name)}</b><div class="small">${esc(content.subcategory)}${content.highDifficulty?" / 高難易度":""}</div></div>
+          <button class="danger" data-content-delete="${content.id}">削除</button>
+        </div>`).join("")}
+      `).join("")
+    : '<div class="empty">該当するコンテンツがありません。</div>';
+
+  $("achievementMasterList").innerHTML=filteredAchievements.length
+    ? filteredAchievements.map(a=>`<div class="card rule row">
+        <div><b>${esc(a.name)}</b><div class="small">${esc(a.rule)} / 目標 ${a.target}</div></div>
+        <button class="danger" data-achievement-delete="${a.id}">削除</button>
+      </div>`).join("")
+    : '<div class="empty">該当するアチーブがありません。</div>';
+
+  document.querySelectorAll("[data-log-delete]").forEach(button=>{
+    button.onclick=async()=>{
+      if(confirm("このログを削除しますか？")){
+        await deleteLog(button.dataset.logDelete);
+        render();
+      }
+    };
+  });
+  document.querySelectorAll("[data-job-delete]").forEach(button=>{
+    button.onclick=()=>{
+      setJSON(JOBS,jobs().filter(j=>j.id!==button.dataset.jobDelete));
+      render();
+    };
+  });
+  document.querySelectorAll("[data-content-delete]").forEach(button=>{
+    button.onclick=()=>{
+      setJSON(CONTENTS,contents().filter(c=>c.id!==button.dataset.contentDelete));
+      render();
+    };
+  });
+  document.querySelectorAll("[data-achievement-delete]").forEach(button=>{
+    button.onclick=()=>{
+      setJSON(ACHIEVEMENTS,achievements().filter(a=>a.id!==button.dataset.achievementDelete));
+      render();
+    };
+  });
+
+  bindZoom();
 }
 
 $("actionType").onchange=()=>{
-  const isContent=$("actionType").value==="content";
-  $("contentFields").style.display=isContent?"block":"none";
-  $("collectableFields").style.display=isContent?"none":"block"
+  const contentMode=$("actionType").value==="content";
+  $("contentFields").style.display=contentMode?"block":"none";
+  $("collectableFields").style.display=contentMode?"none":"block";
 };
-$("shots").onchange=()=>{clearUrls();$("preview").innerHTML=grid([...$("shots").files].map(file=>({file,fileName:file.name})));bindZoom()};
 
-$("logForm").onsubmit=async e=>{
-  e.preventDefault();
+$("shots").onchange=()=>{
+  clearUrls();
+  $("preview").innerHTML=imageGrid([...$("shots").files].map(file=>({file,fileName:file.name})));
+  bindZoom();
+};
+
+$("logForm").onsubmit=async event=>{
+  event.preventDefault();
+
   const actionType=$("actionType").value;
-  const screenshots=[...$("shots").files].map(file=>({id:crypto.randomUUID(),fileName:file.name,file}));
-  let log={id:crypto.randomUUID(),date:$("date").value,actionType,memo:$("memo").value.trim(),screenshots,createdAt:Date.now()};
+  const screenshots=[...$("shots").files].map(file=>({
+    id:crypto.randomUUID(),
+    fileName:file.name,
+    file
+  }));
+
+  const log={
+    id:crypto.randomUUID(),
+    date:$("date").value,
+    actionType,
+    memo:$("memo").value.trim(),
+    screenshots,
+    createdAt:Date.now()
+  };
 
   if(actionType==="content"){
-    const c=contents().find(x=>x.id===$("contentSelect").value);
-    const j=jobs().find(x=>x.id===$("jobSelect").value);
-    if(!c||!j)return;
-    Object.assign(log,{contentId:c.id,contentName:c.name,contentCategory:c.category,contentSubcategory:c.subcategory,highDifficulty:!!c.highDifficulty,jobId:j.id,jobName:j.name,role:j.role,result:$("result").value});
+    const content=contents().find(c=>c.id===$("contentSelect").value);
+    const job=jobs().find(j=>j.id===$("jobSelect").value);
+    if(!content||!job)return;
+
+    Object.assign(log,{
+      contentId:content.id,
+      contentName:content.name,
+      contentCategory:content.category,
+      contentSubcategory:content.subcategory,
+      highDifficulty:!!content.highDifficulty,
+      jobId:job.id,
+      jobName:job.name,
+      role:job.role,
+      result:$("result").value
+    });
   }else{
-    const j=jobs().find(x=>x.id===$("collectableJob").value);
-    if(!j)return;
-    Object.assign(log,{jobId:j.id,jobName:j.name,role:j.role,count:Number($("collectableCount").value)||1});
+    const job=jobs().find(j=>j.id===$("collectableJob").value);
+    if(!job)return;
+
+    Object.assign(log,{
+      jobId:job.id,
+      jobName:job.name,
+      role:job.role,
+      count:Number($("collectableCount").value)||1
+    });
   }
+
   await putLog(log);
-  $("memo").value="";$("shots").value="";$("preview").innerHTML="";
-  $("notice").textContent="行動ログを保存し、関連アチーブを再集計しました。";$("notice").classList.add("show");setTimeout(()=>$("notice").classList.remove("show"),2600);
-  render()
+
+  $("memo").value="";
+  $("shots").value="";
+  $("preview").innerHTML="";
+  $("notice").textContent="行動ログを保存し、関連アチーブを再集計しました。";
+  $("notice").classList.add("show");
+  setTimeout(()=>$("notice").classList.remove("show"),2600);
+
+  render();
 };
 
-$("jobForm").onsubmit=e=>{e.preventDefault();let list=jobs();list.push({id:crypto.randomUUID(),name:$("jobName").value.trim(),role:$("jobRole").value});setJSON(JOBS,list);$("jobName").value="";render()};
-$("contentForm").onsubmit=e=>{e.preventDefault();let list=contents();list.push({id:crypto.randomUUID(),name:$("contentName").value.trim(),category:$("contentCategory").value,subcategory:$("contentSubcategory").value,highDifficulty:$("highDifficulty").checked});setJSON(CONTENTS,list);$("contentName").value="";$("highDifficulty").checked=false;render()};
-$("achievementForm").onsubmit=e=>{e.preventDefault();let list=achievements();list.push({id:crypto.randomUUID(),name:$("achievementName").value.trim(),target:Number($("achievementTarget").value)||1,rule:$("achievementRule").value});setJSON(ACHIEVEMENTS,list);$("achievementName").value="";render()};
+$("jobForm").onsubmit=event=>{
+  event.preventDefault();
+  const name=$("jobName").value.trim();
+  if(!name)return;
 
-document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));document.querySelectorAll(".view").forEach(x=>x.classList.remove("active"));t.classList.add("active");$(t.dataset.view).classList.add("active")});
+  const list=jobs();
+  if(!list.some(j=>j.name===name)){
+    list.push({id:crypto.randomUUID(),name,role:$("jobRole").value});
+    setJSON(JOBS,list);
+  }
+  $("jobName").value="";
+  render();
+};
+
+$("contentForm").onsubmit=event=>{
+  event.preventDefault();
+  const name=$("contentName").value.trim();
+  if(!name)return;
+
+  const list=contents();
+  if(!list.some(c=>c.name===name)){
+    list.push({
+      id:crypto.randomUUID(),
+      name,
+      category:$("contentCategory").value,
+      subcategory:$("contentSubcategory").value,
+      highDifficulty:$("highDifficulty").checked
+    });
+    setJSON(CONTENTS,list);
+  }
+  $("contentName").value="";
+  $("highDifficulty").checked=false;
+  render();
+};
+
+$("achievementForm").onsubmit=event=>{
+  event.preventDefault();
+  const name=$("achievementName").value.trim();
+  if(!name)return;
+
+  const list=achievements();
+  list.push({
+    id:crypto.randomUUID(),
+    name,
+    target:Number($("achievementTarget").value)||1,
+    rule:$("achievementRule").value
+  });
+  setJSON(ACHIEVEMENTS,list);
+  $("achievementName").value="";
+  render();
+};
+
+document.querySelectorAll(".tab").forEach(tab=>{
+  tab.onclick=()=>{
+    document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
+    document.querySelectorAll(".view").forEach(x=>x.classList.remove("active"));
+    tab.classList.add("active");
+    $(tab.dataset.view).classList.add("active");
+  };
+});
+
+$("contentCategory").onchange=()=>fillSubcategorySelect("contentCategory","contentSubcategory");
+$("logCategoryFilter").onchange=refreshLogSubcategories;
+$("logSubcategoryFilter").onchange=refreshContentSelect;
+$("masterSearch").oninput=render;
+$("masterFilter").onchange=render;
 $("closeImage").onclick=()=>$("imageDialog").close();
 
+fillCategorySelect("contentCategory");
+fillSubcategorySelect("contentCategory","contentSubcategory");
+refreshLogFilters();
 seedDefaults();
 render();
 </script>
