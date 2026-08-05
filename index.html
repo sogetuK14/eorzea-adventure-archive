@@ -2,19 +2,74 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>エオルゼア冒険記録庫 v0.8.2</title>
+<title>エオルゼア冒険記録庫 v0.8.3</title>
 <style>
 :root{--p:#182431;--p2:#223247;--t:#f5f7f9;--m:#aeb8c7;--a:#d9b85e;--b:#3a4d64;--d:#df7a7a;--s:#88c99a}*{box-sizing:border-box}body{margin:0;font-family:"Segoe UI","Yu Gothic UI",sans-serif;color:var(--t);background:linear-gradient(#101822,#0b1118);min-height:100vh}header,nav,main{max-width:1280px;margin:auto;padding:20px}header{padding-bottom:10px}h1{margin:0}.sub,.meta,.small,label{color:var(--m)}nav{display:flex;gap:8px;flex-wrap:wrap;padding-top:0}.tab{background:#223044;color:var(--t);border:1px solid var(--b);padding:10px 14px;border-radius:999px}.tab.active{background:var(--a);color:#241f13}.view{display:none}.view.active{display:block}.layout{display:grid;gap:20px}@media(min-width:1040px){.layout{grid-template-columns:430px 1fr}}.panel,.card{background:var(--p);border:1px solid var(--b);border-radius:16px;padding:18px}.card{background:var(--p2);margin-top:10px}label{display:block;margin:12px 0 6px}input,select,textarea{width:100%;padding:11px;border-radius:9px;border:1px solid var(--b);background:var(--p2);color:var(--t);font:inherit}textarea{min-height:90px}button{padding:10px 14px;border:0;border-radius:9px;font-weight:700;cursor:pointer}.primary{width:100%;margin-top:14px;background:var(--a)}.danger{background:transparent;border:1px solid var(--d);color:#ffb2b2}.secondary{background:#3a4659;color:var(--t)}.row{display:flex;justify-content:space-between;gap:10px;align-items:center}.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}@media(min-width:800px){.stats{grid-template-columns:repeat(4,1fr)}}.stat{background:var(--p2);padding:13px;border-radius:10px;border:1px solid var(--b)}.stat strong{display:block;color:var(--a);font-size:1.4rem}.progress{height:14px;background:#15202e;border-radius:999px;overflow:hidden;border:1px solid var(--b)}.progress span{display:block;height:100%;background:linear-gradient(90deg,var(--a),#f4dfa1)}.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.tag{padding:4px 8px;border-radius:999px;background:#26384c}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;margin-top:10px}.grid img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:8px}.notice{display:none;background:#183d2b;padding:10px;border-radius:8px}.notice.show{display:block}.achievement{border-left:4px solid var(--s)}.count{color:var(--a);font-weight:800}.hero{padding:22px;border-radius:18px;border:1px solid var(--b);background:linear-gradient(135deg,rgba(217,184,94,.17),rgba(46,66,90,.88))}.inline{display:grid;grid-template-columns:1fr 1fr;gap:10px}@media(max-width:700px){.inline{grid-template-columns:1fr}}
+
+.project-card{border-left:4px solid var(--accent)}
+.check-item{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;background:var(--panel2);border:1px solid var(--border);border-radius:12px;padding:12px;margin-top:8px}
+.check-item.done{background:rgba(38,80,55,.35);border-color:rgba(136,201,154,.5)}
+.check-item input{width:20px;height:20px;accent-color:var(--accent)}
+.badge{display:inline-block;padding:4px 8px;border-radius:999px;background:#1e3043;color:#c7dcff;font-size:.8rem}
+.project-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
 </style></head>
 <body>
-<header><h1>エオルゼア冒険記録庫</h1><div class="sub">現在値から、遊んだ分だけ正しく育つ。 v0.8.2 “Baseline Sync”</div></header>
-<nav><button class="tab active" data-view="home">ホーム</button><button class="tab" data-view="log">行動ログ</button><button class="tab" data-view="achievements">アチーブ</button><button class="tab" data-view="leveling">レベリング</button><button class="tab" data-view="masters">マスター</button></nav>
+<header><h1>エオルゼア冒険記録庫</h1><div class="sub">記録も思い出も、目標も、すべて積み重なる。 v0.8.3 “Projects Integrated”</div></header>
+<nav><button class="tab active" data-view="home">ホーム</button><button class="tab" data-view="log">行動ログ</button><button class="tab" data-view="achievements">アチーブ</button><button class="tab" data-view="leveling">レベリング</button><button class="tab" data-view="masters">マスター</button><button class="tab" data-view="projects">プロジェクト</button><button class="tab" data-view="counters">進捗メモ</button></nav>
 <main>
 <section id="home" class="view active"><div class="hero"><h2>おかえりなさい。</h2><p>ゲーム内の現在値を起点に、追加したログ分だけ正しく育ちます。</p></div><div class="stats" style="margin-top:18px"><div class="stat">行動ログ<strong id="homeLogs">0</strong></div><div class="stat">登録コンテンツ<strong id="homeContents">0</strong></div><div class="stat">登録ジョブ<strong id="homeJobs">0</strong></div><div class="stat">達成アチーブ<strong id="homeCompleted">0</strong></div></div><div class="panel" style="margin-top:18px"><h2>最近育ったもの</h2><div id="recentGrowth"></div></div><div class="panel" style="margin-top:18px"><h2>アチーブ進捗</h2><div id="homeAchievements"></div></div></section>
 <section id="log" class="view"><div class="layout"><section class="panel"><h2>行動を記録</h2><div id="notice" class="notice"></div><form id="logForm"><label>日付</label><input id="date" type="date" required><label>行動種別</label><select id="actionType"><option value="content">コンテンツ参加</option><option value="collectable">収集品納品</option></select><div id="contentFields"><label>コンテンツ</label><select id="contentSelect"></select><label>参加ジョブ</label><select id="jobSelect"></select><label>結果</label><select id="result"><option>参加</option><option>クリア</option><option>未クリア</option><option>完了</option></select><div id="resurrectionWrap" style="display:none"><label>蘇生回数</label><input id="resurrectionCount" type="number" min="0" value="0"></div><label>今回獲得経験値</label><input id="earnedExp" type="number" min="0" value="0"></div><div id="collectableFields" style="display:none"><label>クラス</label><select id="collectableJob"></select><label>納品数</label><input id="collectableCount" type="number" min="1" value="1"><label>今回獲得経験値</label><input id="collectableExp" type="number" min="0" value="0"></div><label>思い出メモ</label><textarea id="memo"></textarea><label>SS（複数可）</label><input id="shots" type="file" accept="image/png,image/jpeg,image/webp" multiple><button class="primary">保存する</button></form></section><section class="panel"><h2>最近の行動ログ</h2><div id="logs"></div></section></div></section>
 <section id="achievements" class="view"><div class="layout"><section class="panel"><h2>アチーブ現在値</h2><form id="baselineForm"><label>アチーブ</label><select id="baselineAchievement"></select><label>ゲーム内の現在値</label><input id="baselineValue" type="number" min="0" value="0"><button class="primary">現在値を保存</button></form></section><section class="panel"><h2>アチーブ進捗</h2><div id="achievementList"></div></section></div></section>
 <section id="leveling" class="view"><div class="layout"><section class="panel"><h2>ジョブ経験値の現在値</h2><form id="levelForm"><label>ジョブ</label><select id="levelJob"></select><div class="inline"><div><label>現在レベル</label><input id="currentLevel" type="number" min="1" max="100" value="1"></div><div><label>現在経験値</label><input id="currentExp" type="number" min="0" value="0"></div></div><label>次のレベルまでの必要経験値</label><input id="neededExp" type="number" min="1" value="1000"><button class="primary">レベル情報を保存</button></form></section><section class="panel"><h2>レベリング状況</h2><div id="levelingList"></div></section></div></section>
 <section id="masters" class="view"><div class="layout"><section class="panel"><h2>ジョブマスター</h2><form id="jobForm"><label>ジョブ名</label><input id="jobName" required><label>ロール</label><select id="jobRole"><option>タンク</option><option>ヒーラー</option><option>近接DPS</option><option>遠隔物理DPS</option><option>遠隔魔法DPS</option><option>クラフター</option><option>ギャザラー</option></select><button class="primary">ジョブ追加</button></form><div id="jobList"></div></section><section class="panel"><h2>コンテンツマスター</h2><form id="contentForm"><label>コンテンツ名</label><input id="contentName" required><label>大分類</label><select id="contentCategory"><option>バトル</option><option>ギャザクラ</option><option>手帳</option><option>その他</option></select><label>小分類</label><select id="contentSubcategory"><option>ID</option><option>討伐・討滅戦</option><option>ノーマルレイド</option><option>アライアンスレイド</option><option>零式</option><option>絶</option><option>制作</option><option>採集</option><option>リーヴ</option><option>その他</option></select><label><input id="highDifficulty" type="checkbox" style="width:auto"> 高難易度として扱う</label><button class="primary">コンテンツ追加</button></form><div id="contentList"></div></section><section class="panel"><h2>アチーブマスター</h2><form id="achievementForm"><label>アチーブ名</label><input id="achievementName" required><label>目標値</label><input id="achievementTarget" type="number" min="1" value="10"><label>集計ルール</label><select id="achievementRule"><option value="all_content">コンテンツ参加回数</option><option value="id_content">ID参加回数</option><option value="raid_content">レイド参加回数</option><option value="high_difficulty">高難易度参加回数</option><option value="tank_high_difficulty">タンクで高難易度参加回数</option><option value="healer_resurrection">ヒーラー蘇生回数</option><option value="collectable_delivery">収集品納品数</option><option value="craft_complete">制作完了回数</option></select><button class="primary">アチーブ追加</button></form><div id="achievementMasterList"></div></section></div></section>
+
+<section id="projects" class="view">
+<div class="layout">
+  <section class="panel">
+    <h2>プロジェクトを追加</h2>
+    <form id="pProjectForm">
+      <label>プロジェクト名</label>
+      <input id="pProjectName" placeholder="例：黄金実装 全コンテンツ巡り" required>
+      <label>種類</label>
+      <select id="pProjectType">
+        <option>コンテンツ巡り</option><option>武器制作</option><option>手帳埋め</option>
+        <option>コレクション</option><option>その他</option>
+      </select>
+      <label>現在段階</label>
+      <input id="pProjectStage" placeholder="例：輝き（記憶）集め">
+      <label>メモ</label>
+      <textarea id="pProjectMemo" placeholder="次にやること、注意点など"></textarea>
+      <button class="primary">プロジェクト追加</button>
+    </form>
+  </section>
+  <section class="panel">
+    <h2>プロジェクト一覧</h2>
+    <div id="pProjectList"></div>
+  </section>
+</div>
+</section>
+
+<section id="counters" class="view">
+<div class="layout">
+  <section class="panel">
+    <h2>自由カウンターを追加</h2>
+    <form id="pCounterForm">
+      <label>項目名</label>
+      <input id="pCounterName" placeholder="例：敵討伐回数" required>
+      <label>現在値</label><input id="pCounterValue" type="number" min="0" value="0">
+      <label>目標値</label><input id="pCounterTarget" type="number" min="0" value="0">
+      <label>単位</label><input id="pCounterUnit" placeholder="回・体・個など">
+      <label>最終確認日</label><input id="pCounterDate" type="date">
+      <label>メモ</label><textarea id="pCounterMemo"></textarea>
+      <button class="primary">カウンター追加</button>
+    </form>
+  </section>
+  <section class="panel">
+    <h2>進捗メモ</h2>
+    <div id="pCounterList"></div>
+  </section>
+</div>
+</section>
 </main>
 <script>
 const DB="EorzeaArchiveDB_v08",STORE="actionLogs",JOBS="eorzeaJobs_v081",CONTENTS="eorzeaContents_v081",ACH="eorzeaAchievements_v082",BASE="eorzeaAchievementBaselines_v082",LEVELS="eorzeaJobLevels_v082";const $=i=>document.getElementById(i);$("date").value=new Date().toISOString().slice(0,10);
@@ -32,4 +87,131 @@ $("contentSelect").onchange=()=>{jobselect();res()};$("jobSelect").onchange=res;
 $("logForm").onsubmit=async ev=>{ev.preventDefault();let type=$("actionType").value,l={id:crypto.randomUUID(),date:$("date").value,actionType:type,memo:$("memo").value,createdAt:Date.now()};if(type==="content"){let c=contents().find(x=>x.id===$("contentSelect").value),j=jobs().find(x=>x.id===$("jobSelect").value);if(!c||!j)return;let xp=+$("earnedExp").value||0;Object.assign(l,{contentId:c.id,contentName:c.name,contentCategory:c.category,contentSubcategory:c.subcategory,highDifficulty:c.highDifficulty,jobId:j.id,jobName:j.name,role:j.role,result:$("result").value,resurrectionCount:j.role==="ヒーラー"?+$("resurrectionCount").value||0:0,earnedExp:xp});applyExp(j.id,xp)}else{let j=jobs().find(x=>x.id===$("collectableJob").value);if(!j)return;let xp=+$("collectableExp").value||0;Object.assign(l,{jobId:j.id,jobName:j.name,role:j.role,count:+$("collectableCount").value||1,earnedExp:xp});applyExp(j.id,xp)}await put(l);$("notice").textContent="保存して再集計しました。";$("notice").classList.add("show");setTimeout(()=>$("notice").classList.remove("show"),2000);render()};
 $("baselineForm").onsubmit=ev=>{ev.preventDefault();let id=$("baselineAchievement").value,a=baselines().filter(x=>x.achievementId!==id);a.push({achievementId:id,value:+$("baselineValue").value||0});sj(BASE,a);render()};$("levelForm").onsubmit=ev=>{ev.preventDefault();let id=$("levelJob").value,a=levels().filter(x=>x.jobId!==id);a.push({jobId:id,currentLevel:+$("currentLevel").value||1,currentExp:+$("currentExp").value||0,neededExp:+$("neededExp").value||1});sj(LEVELS,a);render()};
 $("jobForm").onsubmit=ev=>{ev.preventDefault();let a=jobs();a.push({id:crypto.randomUUID(),name:$("jobName").value,role:$("jobRole").value});sj(JOBS,a);render()};$("contentForm").onsubmit=ev=>{ev.preventDefault();let a=contents();a.push({id:crypto.randomUUID(),name:$("contentName").value,category:$("contentCategory").value,subcategory:$("contentSubcategory").value,highDifficulty:$("highDifficulty").checked});sj(CONTENTS,a);render()};$("achievementForm").onsubmit=ev=>{ev.preventDefault();let a=ach();a.push({id:crypto.randomUUID(),name:$("achievementName").value,target:+$("achievementTarget").value||1,rule:$("achievementRule").value});sj(ACH,a);render()};document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));t.classList.add('active');$(t.dataset.view).classList.add('active')});seed();render();jobselect();
+
+const P_PROJECTS_KEY="eorzeaProjects_v083";
+const P_COUNTERS_KEY="eorzeaCounters_v083";
+
+function pProjects(){return gj(P_PROJECTS_KEY)}
+function pCounters(){return gj(P_COUNTERS_KEY)}
+function pSaveProjects(v){sj(P_PROJECTS_KEY,v)}
+function pSaveCounters(v){sj(P_COUNTERS_KEY,v)}
+
+function pAddItem(projectId){
+  const text=prompt("追加する項目名を入力してください。");
+  if(!text||!text.trim())return;
+  const list=pProjects(),project=list.find(p=>p.id===projectId);
+  if(!project)return;
+  project.items.push({id:crypto.randomUUID(),text:text.trim(),memo:"",done:false});
+  pSaveProjects(list);pRender();
+}
+function pEditProject(projectId){
+  const list=pProjects(),project=list.find(p=>p.id===projectId);
+  if(!project)return;
+  const name=prompt("プロジェクト名",project.name);if(name===null)return;
+  const stage=prompt("現在段階",project.stage||"");if(stage===null)return;
+  const memo=prompt("メモ",project.memo||"");if(memo===null)return;
+  project.name=name.trim()||project.name;project.stage=stage.trim();project.memo=memo.trim();
+  pSaveProjects(list);pRender();
+}
+function pToggleProject(projectId){
+  const list=pProjects(),project=list.find(p=>p.id===projectId);
+  if(!project)return;project.done=!project.done;pSaveProjects(list);pRender();
+}
+function pDeleteProject(projectId){
+  if(!confirm("このプロジェクトを削除しますか？"))return;
+  pSaveProjects(pProjects().filter(p=>p.id!==projectId));pRender();
+}
+function pToggleItem(projectId,itemId){
+  const list=pProjects(),project=list.find(p=>p.id===projectId),item=project?.items.find(i=>i.id===itemId);
+  if(!item)return;item.done=!item.done;pSaveProjects(list);pRender();
+}
+function pEditItem(projectId,itemId){
+  const list=pProjects(),project=list.find(p=>p.id===projectId),item=project?.items.find(i=>i.id===itemId);
+  if(!item)return;
+  const text=prompt("項目名",item.text);if(text===null)return;
+  const memo=prompt("メモ",item.memo||"");if(memo===null)return;
+  item.text=text.trim()||item.text;item.memo=memo.trim();pSaveProjects(list);pRender();
+}
+function pDeleteItem(projectId,itemId){
+  if(!confirm("この項目を削除しますか？"))return;
+  const list=pProjects(),project=list.find(p=>p.id===projectId);
+  if(!project)return;project.items=project.items.filter(i=>i.id!==itemId);pSaveProjects(list);pRender();
+}
+function pEditCounter(counterId){
+  const list=pCounters(),counter=list.find(c=>c.id===counterId);
+  if(!counter)return;
+  const value=prompt("現在値",counter.value);if(value===null)return;
+  const target=prompt("目標値",counter.target);if(target===null)return;
+  const memo=prompt("メモ",counter.memo||"");if(memo===null)return;
+  counter.value=Number(value)||0;counter.target=Number(target)||0;counter.memo=memo.trim();
+  counter.date=new Date().toISOString().slice(0,10);pSaveCounters(list);pRender();
+}
+function pDeleteCounter(counterId){
+  if(!confirm("このカウンターを削除しますか？"))return;
+  pSaveCounters(pCounters().filter(c=>c.id!==counterId));pRender();
+}
+function pCard(project){
+  const total=project.items.length,done=project.items.filter(i=>i.done).length,rate=total?Math.round(done/total*100):0;
+  return `<div class="card project-card">
+    <div class="row"><div><span class="badge">${e(project.type)}</span><h3 style="margin:8px 0 4px">${e(project.name)}</h3>
+    <div class="meta">${project.stage?`現在段階：${e(project.stage)}`:"段階未設定"}</div></div><span class="count">${done}/${total}</span></div>
+    <div class="progress" style="margin-top:10px"><span style="width:${rate}%"></span></div>
+    ${project.memo?`<div style="margin-top:10px">${e(project.memo)}</div>`:""}
+    ${project.items.length?project.items.map(item=>`<div class="check-item ${item.done?"done":""}">
+      <input type="checkbox" ${item.done?"checked":""} data-p-toggle-item="${item.id}" data-p-project="${project.id}">
+      <div><b>${e(item.text)}</b>${item.memo?`<div class="small">${e(item.memo)}</div>`:""}</div>
+      <div><button class="secondary" data-p-edit-item="${item.id}" data-p-project="${project.id}">編集</button>
+      <button class="danger" data-p-delete-item="${item.id}" data-p-project="${project.id}">削除</button></div>
+    </div>`).join(""):'<div class="empty">まだ項目がありません。</div>'}
+    <div class="project-actions">
+      <button class="secondary" data-p-add-item="${project.id}">項目追加</button>
+      <button class="secondary" data-p-edit-project="${project.id}">編集</button>
+      <button class="secondary" data-p-toggle-project="${project.id}">${project.done?"進行中に戻す":"完了にする"}</button>
+      <button class="danger" data-p-delete-project="${project.id}">削除</button>
+    </div>
+  </div>`;
+}
+function pRender(){
+  const ps=pProjects(),cs=pCounters(),active=ps.filter(p=>!p.done);
+  $("pHomeActive").textContent=active.length;
+  $("pHomeDone").textContent=ps.filter(p=>p.done).length;
+  $("pHomeRemain").textContent=active.reduce((sum,p)=>sum+p.items.filter(i=>!i.done).length,0);
+  $("pHomeCounters").textContent=cs.length;
+  $("pHomeProjects").innerHTML=active.length?active.map(pCard).join(""):'<div class="empty">進行中プロジェクトはありません。</div>';
+  const next=active.flatMap(p=>p.items.filter(i=>!i.done).map(i=>({project:p.name,item:i.text,memo:i.memo}))).slice(0,8);
+  $("pNextActions").innerHTML=next.length?next.map(x=>`<div class="card"><b>${e(x.item)}</b><div class="meta">${e(x.project)}</div>${x.memo?`<div>${e(x.memo)}</div>`:""}</div>`).join(""):'<div class="empty">次にやる項目はありません。</div>';
+  $("pProjectList").innerHTML=ps.length?ps.map(pCard).join(""):'<div class="empty">プロジェクトはまだありません。</div>';
+  $("pCounterList").innerHTML=cs.length?cs.map(c=>{
+    const rate=c.target?Math.min(100,Math.round(c.value/c.target*100)):0;
+    return `<div class="card"><div class="row"><b>${e(c.name)}</b><span class="count">${c.value}${e(c.unit||"")}${c.target?` / ${c.target}${e(c.unit||"")}`:""}</span></div>
+      <div class="meta">最終確認：${c.date||"-"}</div>${c.target?`<div class="progress" style="margin-top:10px"><span style="width:${rate}%"></span></div>`:""}
+      ${c.memo?`<div style="margin-top:10px">${e(c.memo)}</div>`:""}<div class="project-actions">
+      <button class="secondary" data-p-edit-counter="${c.id}">編集</button><button class="danger" data-p-delete-counter="${c.id}">削除</button></div></div>`;
+  }).join(""):'<div class="empty">カウンターはまだありません。</div>';
+
+  document.querySelectorAll("[data-p-add-item]").forEach(b=>b.onclick=()=>pAddItem(b.dataset.pAddItem));
+  document.querySelectorAll("[data-p-edit-project]").forEach(b=>b.onclick=()=>pEditProject(b.dataset.pEditProject));
+  document.querySelectorAll("[data-p-toggle-project]").forEach(b=>b.onclick=()=>pToggleProject(b.dataset.pToggleProject));
+  document.querySelectorAll("[data-p-delete-project]").forEach(b=>b.onclick=()=>pDeleteProject(b.dataset.pDeleteProject));
+  document.querySelectorAll("[data-p-toggle-item]").forEach(b=>b.onchange=()=>pToggleItem(b.dataset.pProject,b.dataset.pToggleItem));
+  document.querySelectorAll("[data-p-edit-item]").forEach(b=>b.onclick=()=>pEditItem(b.dataset.pProject,b.dataset.pEditItem));
+  document.querySelectorAll("[data-p-delete-item]").forEach(b=>b.onclick=()=>pDeleteItem(b.dataset.pProject,b.dataset.pDeleteItem));
+  document.querySelectorAll("[data-p-edit-counter]").forEach(b=>b.onclick=()=>pEditCounter(b.dataset.pEditCounter));
+  document.querySelectorAll("[data-p-delete-counter]").forEach(b=>b.onclick=()=>pDeleteCounter(b.dataset.pDeleteCounter));
+}
+$("pProjectForm").onsubmit=ev=>{
+  ev.preventDefault();const list=pProjects();
+  list.push({id:crypto.randomUUID(),name:$("pProjectName").value.trim(),type:$("pProjectType").value,
+  stage:$("pProjectStage").value.trim(),memo:$("pProjectMemo").value.trim(),done:false,items:[],createdAt:Date.now()});
+  pSaveProjects(list);$("pProjectName").value="";$("pProjectStage").value="";$("pProjectMemo").value="";pRender();
+};
+$("pCounterForm").onsubmit=ev=>{
+  ev.preventDefault();const list=pCounters();
+  list.push({id:crypto.randomUUID(),name:$("pCounterName").value.trim(),value:Number($("pCounterValue").value)||0,
+  target:Number($("pCounterTarget").value)||0,unit:$("pCounterUnit").value.trim(),date:$("pCounterDate").value,
+  memo:$("pCounterMemo").value.trim()});
+  pSaveCounters(list);$("pCounterName").value="";$("pCounterValue").value=0;$("pCounterTarget").value=0;$("pCounterUnit").value="";$("pCounterMemo").value="";pRender();
+};
+$("pCounterDate").value=new Date().toISOString().slice(0,10);
+pRender();
 </script></body></html>
