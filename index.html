@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>エオルゼア冒険記録庫 v0.8.3</title>
+<title>エオルゼア冒険記録庫 v0.8.4</title>
 <style>
 :root{--p:#182431;--p2:#223247;--t:#f5f7f9;--m:#aeb8c7;--a:#d9b85e;--b:#3a4d64;--d:#df7a7a;--s:#88c99a}*{box-sizing:border-box}body{margin:0;font-family:"Segoe UI","Yu Gothic UI",sans-serif;color:var(--t);background:linear-gradient(#101822,#0b1118);min-height:100vh}header,nav,main{max-width:1280px;margin:auto;padding:20px}header{padding-bottom:10px}h1{margin:0}.sub,.meta,.small,label{color:var(--m)}nav{display:flex;gap:8px;flex-wrap:wrap;padding-top:0}.tab{background:#223044;color:var(--t);border:1px solid var(--b);padding:10px 14px;border-radius:999px}.tab.active{background:var(--a);color:#241f13}.view{display:none}.view.active{display:block}.layout{display:grid;gap:20px}@media(min-width:1040px){.layout{grid-template-columns:430px 1fr}}.panel,.card{background:var(--p);border:1px solid var(--b);border-radius:16px;padding:18px}.card{background:var(--p2);margin-top:10px}label{display:block;margin:12px 0 6px}input,select,textarea{width:100%;padding:11px;border-radius:9px;border:1px solid var(--b);background:var(--p2);color:var(--t);font:inherit}textarea{min-height:90px}button{padding:10px 14px;border:0;border-radius:9px;font-weight:700;cursor:pointer}.primary{width:100%;margin-top:14px;background:var(--a)}.danger{background:transparent;border:1px solid var(--d);color:#ffb2b2}.secondary{background:#3a4659;color:var(--t)}.row{display:flex;justify-content:space-between;gap:10px;align-items:center}.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}@media(min-width:800px){.stats{grid-template-columns:repeat(4,1fr)}}.stat{background:var(--p2);padding:13px;border-radius:10px;border:1px solid var(--b)}.stat strong{display:block;color:var(--a);font-size:1.4rem}.progress{height:14px;background:#15202e;border-radius:999px;overflow:hidden;border:1px solid var(--b)}.progress span{display:block;height:100%;background:linear-gradient(90deg,var(--a),#f4dfa1)}.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.tag{padding:4px 8px;border-radius:999px;background:#26384c}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;margin-top:10px}.grid img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:8px}.notice{display:none;background:#183d2b;padding:10px;border-radius:8px}.notice.show{display:block}.achievement{border-left:4px solid var(--s)}.count{color:var(--a);font-weight:800}.hero{padding:22px;border-radius:18px;border:1px solid var(--b);background:linear-gradient(135deg,rgba(217,184,94,.17),rgba(46,66,90,.88))}.inline{display:grid;grid-template-columns:1fr 1fr;gap:10px}@media(max-width:700px){.inline{grid-template-columns:1fr}}
 
@@ -12,10 +12,15 @@
 .check-item input{width:20px;height:20px;accent-color:var(--accent)}
 .badge{display:inline-block;padding:4px 8px;border-radius:999px;background:#1e3043;color:#c7dcff;font-size:.8rem}
 .project-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+
+.backup-box{border-left:4px solid var(--success)}
+.file-note{padding:10px;border-radius:10px;background:rgba(136,201,154,.1);color:var(--muted);margin-top:10px}
+.project-cover{width:100%;max-height:280px;object-fit:cover;border-radius:12px;border:1px solid var(--border);margin-top:12px}
+.edit-actions{display:flex;gap:7px;flex-wrap:wrap}
 </style></head>
 <body>
-<header><h1>エオルゼア冒険記録庫</h1><div class="sub">記録も思い出も、目標も、すべて積み重なる。 v0.8.3 “Projects Integrated”</div></header>
-<nav><button class="tab active" data-view="home">ホーム</button><button class="tab" data-view="log">行動ログ</button><button class="tab" data-view="achievements">アチーブ</button><button class="tab" data-view="leveling">レベリング</button><button class="tab" data-view="masters">マスター</button><button class="tab" data-view="projects">プロジェクト</button><button class="tab" data-view="counters">進捗メモ</button></nav>
+<header><h1>エオルゼア冒険記録庫</h1><div class="sub">消さずに直せる。まとめて守れる。 v0.8.4 “Safe Edit”</div></header>
+<nav><button class="tab active" data-view="home">ホーム</button><button class="tab" data-view="log">行動ログ</button><button class="tab" data-view="achievements">アチーブ</button><button class="tab" data-view="leveling">レベリング</button><button class="tab" data-view="masters">マスター</button><button class="tab" data-view="projects">プロジェクト</button><button class="tab" data-view="counters">進捗メモ</button><button class="tab" data-view="backup">バックアップ</button></nav>
 <main>
 <section id="home" class="view active"><div class="hero"><h2>おかえりなさい。</h2><p>ゲーム内の現在値を起点に、追加したログ分だけ正しく育ちます。</p></div><div class="stats" style="margin-top:18px"><div class="stat">行動ログ<strong id="homeLogs">0</strong></div><div class="stat">登録コンテンツ<strong id="homeContents">0</strong></div><div class="stat">登録ジョブ<strong id="homeJobs">0</strong></div><div class="stat">達成アチーブ<strong id="homeCompleted">0</strong></div></div><div class="panel" style="margin-top:18px"><h2>最近育ったもの</h2><div id="recentGrowth"></div></div><div class="panel" style="margin-top:18px"><h2>アチーブ進捗</h2><div id="homeAchievements"></div></div></section>
 <section id="log" class="view"><div class="layout"><section class="panel"><h2>行動を記録</h2><div id="notice" class="notice"></div><form id="logForm"><label>日付</label><input id="date" type="date" required><label>行動種別</label><select id="actionType"><option value="content">コンテンツ参加</option><option value="collectable">収集品納品</option></select><div id="contentFields"><label>コンテンツ</label><select id="contentSelect"></select><label>参加ジョブ</label><select id="jobSelect"></select><label>結果</label><select id="result"><option>参加</option><option>クリア</option><option>未クリア</option><option>完了</option></select><div id="resurrectionWrap" style="display:none"><label>蘇生回数</label><input id="resurrectionCount" type="number" min="0" value="0"></div><label>今回獲得経験値</label><input id="earnedExp" type="number" min="0" value="0"></div><div id="collectableFields" style="display:none"><label>クラス</label><select id="collectableJob"></select><label>納品数</label><input id="collectableCount" type="number" min="1" value="1"><label>今回獲得経験値</label><input id="collectableExp" type="number" min="0" value="0"></div><label>思い出メモ</label><textarea id="memo"></textarea><label>SS（複数可）</label><input id="shots" type="file" accept="image/png,image/jpeg,image/webp" multiple><button class="primary">保存する</button></form></section><section class="panel"><h2>最近の行動ログ</h2><div id="logs"></div></section></div></section>
@@ -39,6 +44,9 @@
       <input id="pProjectStage" placeholder="例：輝き（記憶）集め">
       <label>メモ</label>
       <textarea id="pProjectMemo" placeholder="次にやること、注意点など"></textarea>
+      <label>プロジェクトSS（表紙・任意）</label>
+      <input id="pProjectImage" type="file" accept="image/png,image/jpeg,image/webp">
+      <div class="small">保存時に軽量化して、このブラウザ内へ保存します。</div>
       <button class="primary">プロジェクト追加</button>
     </form>
   </section>
@@ -70,6 +78,24 @@
   </section>
 </div>
 </section>
+
+<section id="backup" class="view">
+<div class="layout">
+  <section class="panel backup-box">
+    <h2>バックアップを書き出す</h2>
+    <p class="meta">行動ログ、SS、マスター、アチーブ現在値、レベリング、プロジェクト、進捗メモを1ファイルへまとめます。</p>
+    <button id="exportBackup" class="primary">バックアップを保存</button>
+    <div class="file-note">推奨：大きな更新前や、月に1回程度保存してください。</div>
+  </section>
+  <section class="panel">
+    <h2>バックアップから復元</h2>
+    <p class="meta">同じアプリから書き出したJSONファイルを選びます。現在のデータは置き換わります。</p>
+    <input id="importBackupFile" type="file" accept="application/json,.json">
+    <button id="importBackup" class="primary">選択したバックアップを復元</button>
+    <div id="backupMessage" class="file-note">まだ操作していません。</div>
+  </section>
+</div>
+</section>
 </main>
 <script>
 const DB="EorzeaArchiveDB_v08",STORE="actionLogs",JOBS="eorzeaJobs_v081",CONTENTS="eorzeaContents_v081",ACH="eorzeaAchievements_v082",BASE="eorzeaAchievementBaselines_v082",LEVELS="eorzeaJobLevels_v082";const $=i=>document.getElementById(i);$("date").value=new Date().toISOString().slice(0,10);
@@ -82,7 +108,14 @@ function allowed(c){if(!c)return[];if(c.category==="バトル")return jobs().fil
 function applyExp(id,x){if(!id||!x)return;let a=levels(),d=a.find(v=>v.jobId===id);if(!d)return;d.currentExp+=+x||0;while(d.currentLevel<100&&d.currentExp>=d.neededExp){d.currentExp-=d.neededExp;d.currentLevel++}sj(LEVELS,a)}
 function select(){ $("contentSelect").innerHTML='<option value="">選択</option>'+contents().map(c=>`<option value="${c.id}">${e(c.name)}（${e(c.subcategory)}）</option>`).join("");$("collectableJob").innerHTML='<option value="">選択</option>'+jobs().filter(j=>["クラフター","ギャザラー"].includes(j.role)).map(j=>`<option value="${j.id}">${e(j.name)}</option>`).join("");$("baselineAchievement").innerHTML=ach().map(a=>`<option value="${a.id}">${e(a.name)}</option>`).join("");$("levelJob").innerHTML=jobs().map(j=>`<option value="${j.id}">${e(j.name)}</option>`).join("")}
 function jobselect(){let c=contents().find(x=>x.id===$("contentSelect").value);$("jobSelect").innerHTML='<option value="">選択</option>'+allowed(c).map(j=>`<option value="${j.id}">${e(j.name)}（${e(j.role)}）</option>`).join("")}function res(){let j=jobs().find(x=>x.id===$("jobSelect").value);$("resurrectionWrap").style.display=j?.role==="ヒーラー"?"block":"none"}
-async function render(){select();let ls=(await logs()).sort((a,b)=>String(b.date).localeCompare(String(a.date))),as=ach();$("homeLogs").textContent=ls.length;$("homeContents").textContent=contents().length;$("homeJobs").textContent=jobs().length;$("homeCompleted").textContent=as.filter(a=>base(a.id)+calc(a.rule,ls)>=a.target).length;$("recentGrowth").innerHTML=ls.slice(0,5).map(l=>`<div class="card"><b>${e(l.contentName||"収集品納品")}</b><div class="meta">${e(l.jobName||"")}</div>${l.resurrectionCount?`<div class="tags"><span class="tag">蘇生 ${l.resurrectionCount}</span></div>`:""}${l.earnedExp?`<div class="tags"><span class="tag">経験値 +${l.earnedExp}</span></div>`:""}</div>`).join("")||'<div class="card">まだログがありません。</div>';let ah=as.map(a=>{let b=base(a.id),x=calc(a.rule,ls),t=b+x,p=Math.min(100,Math.round(t/a.target*100));return `<div class="card achievement"><div class="row"><b>${e(a.name)}</b><span class="count">${t}/${a.target}</span></div><div class="small">現在値 ${b} ＋ ログ ${x}</div><div class="progress"><span style="width:${p}%"></span></div></div>`}).join("");$("homeAchievements").innerHTML=$("achievementList").innerHTML=ah;$("logs").innerHTML=ls.map(l=>`<div class="card"><div class="row"><b>${e(l.contentName||"収集品納品")}</b><button class="danger" data-del="${l.id}">削除</button></div><div class="meta">${e(l.jobName||"")} ${e(l.result||"")}</div>${l.resurrectionCount?`蘇生 ${l.resurrectionCount}回<br>`:""}${l.earnedExp?`経験値 +${l.earnedExp}<br>`:""}${e(l.memo||"")}</div>`).join("");$("levelingList").innerHTML=levels().map(d=>{let j=jobs().find(x=>x.id===d.jobId),p=Math.min(100,Math.round(d.currentExp/d.neededExp*100));return `<div class="card"><div class="row"><b>${e(j?.name||"不明")}</b><span class="count">Lv.${d.currentLevel}</span></div><div>${d.currentExp}/${d.neededExp}</div><div class="progress"><span style="width:${p}%"></span></div></div>`}).join("")||'<div class="card">レベル情報を登録してください。</div>';$("jobList").innerHTML=jobs().map(j=>`<div class="card row"><div><b>${e(j.name)}</b><div class="small">${e(j.role)}</div></div></div>`).join("");$("contentList").innerHTML=contents().map(c=>`<div class="card"><b>${e(c.name)}</b><div class="small">${e(c.category)} / ${e(c.subcategory)}</div></div>`).join("");$("achievementMasterList").innerHTML=as.map(a=>`<div class="card rule"><b>${e(a.name)}</b><div class="small">${e(a.rule)}</div></div>`).join("");document.querySelectorAll('[data-del]').forEach(b=>b.onclick=async()=>{await del(b.dataset.del);render()})}
+async function render(){select();let ls=(await logs()).sort((a,b)=>String(b.date).localeCompare(String(a.date))),as=ach();$("homeLogs").textContent=ls.length;$("homeContents").textContent=contents().length;$("homeJobs").textContent=jobs().length;$("homeCompleted").textContent=as.filter(a=>base(a.id)+calc(a.rule,ls)>=a.target).length;$("recentGrowth").innerHTML=ls.slice(0,5).map(l=>`<div class="card"><b>${e(l.contentName||"収集品納品")}</b><div class="meta">${e(l.jobName||"")}</div>${l.resurrectionCount?`<div class="tags"><span class="tag">蘇生 ${l.resurrectionCount}</span></div>`:""}${l.earnedExp?`<div class="tags"><span class="tag">経験値 +${l.earnedExp}</span></div>`:""}</div>`).join("")||'<div class="card">まだログがありません。</div>';let ah=as.map(a=>{let b=base(a.id),x=calc(a.rule,ls),t=b+x,p=Math.min(100,Math.round(t/a.target*100));return `<div class="card achievement"><div class="row"><b>${e(a.name)}</b><span class="count">${t}/${a.target}</span></div><div class="small">現在値 ${b} ＋ ログ ${x}</div><div class="progress"><span style="width:${p}%"></span></div></div>`}).join("");$("homeAchievements").innerHTML=$("achievementList").innerHTML=ah;$("logs").innerHTML=ls.map(l=>`<div class="card"><div class="row"><b>${e(l.contentName||"収集品納品")}</b><button class="danger" data-del="${l.id}">削除</button></div><div class="meta">${e(l.jobName||"")} ${e(l.result||"")}</div>${l.resurrectionCount?`蘇生 ${l.resurrectionCount}回<br>`:""}${l.earnedExp?`経験値 +${l.earnedExp}<br>`:""}${e(l.memo||"")}</div>`).join("");$("levelingList").innerHTML=levels().map(d=>{let j=jobs().find(x=>x.id===d.jobId),p=Math.min(100,Math.round(d.currentExp/d.neededExp*100));return `<div class="card"><div class="row"><b>${e(j?.name||"不明")}</b><span class="count">Lv.${d.currentLevel}</span></div><div>${d.currentExp}/${d.neededExp}</div><div class="progress"><span style="width:${p}%"></span></div></div>`}).join("")||'<div class="card">レベル情報を登録してください。</div>';$("jobList").innerHTML=jobs().map(j=>`<div class="card row"><div><b>${e(j.name)}</b><div class="small">${e(j.role)}</div></div><div class="edit-actions"><button class="secondary" data-edit-job="${j.id}">編集</button><button class="danger" data-delete-job="${j.id}">削除</button></div></div>`).join("");$("contentList").innerHTML=contents().map(c=>`<div class="card row"><div><b>${e(c.name)}</b><div class="small">${e(c.category)} / ${e(c.subcategory)}${c.highDifficulty?" / 高難易度":""}</div></div><div class="edit-actions"><button class="secondary" data-edit-content="${c.id}">編集</button><button class="danger" data-delete-content="${c.id}">削除</button></div></div>`).join("");$("achievementMasterList").innerHTML=as.map(a=>`<div class="card rule row"><div><b>${e(a.name)}</b><div class="small">${e(a.rule)} / 目標 ${a.target}</div></div><div class="edit-actions"><button class="secondary" data-edit-achievement="${a.id}">編集</button><button class="danger" data-delete-achievement="${a.id}">削除</button></div></div>`).join("");document.querySelectorAll('[data-del]').forEach(b=>b.onclick=async()=>{await del(b.dataset.del);render()});
+document.querySelectorAll('[data-edit-job]').forEach(b=>b.onclick=()=>editJobMaster(b.dataset.editJob));
+document.querySelectorAll('[data-delete-job]').forEach(b=>b.onclick=()=>deleteJobMaster(b.dataset.deleteJob));
+document.querySelectorAll('[data-edit-content]').forEach(b=>b.onclick=()=>editContentMaster(b.dataset.editContent));
+document.querySelectorAll('[data-delete-content]').forEach(b=>b.onclick=()=>deleteContentMaster(b.dataset.deleteContent));
+document.querySelectorAll('[data-edit-achievement]').forEach(b=>b.onclick=()=>editAchievementMaster(b.dataset.editAchievement));
+document.querySelectorAll('[data-delete-achievement]').forEach(b=>b.onclick=()=>deleteAchievementMaster(b.dataset.deleteAchievement))
+}
 $("contentSelect").onchange=()=>{jobselect();res()};$("jobSelect").onchange=res;$("actionType").onchange=()=>{let c=$("actionType").value==="content";$("contentFields").style.display=c?"block":"none";$("collectableFields").style.display=c?"none":"block"};
 $("logForm").onsubmit=async ev=>{ev.preventDefault();let type=$("actionType").value,l={id:crypto.randomUUID(),date:$("date").value,actionType:type,memo:$("memo").value,createdAt:Date.now()};if(type==="content"){let c=contents().find(x=>x.id===$("contentSelect").value),j=jobs().find(x=>x.id===$("jobSelect").value);if(!c||!j)return;let xp=+$("earnedExp").value||0;Object.assign(l,{contentId:c.id,contentName:c.name,contentCategory:c.category,contentSubcategory:c.subcategory,highDifficulty:c.highDifficulty,jobId:j.id,jobName:j.name,role:j.role,result:$("result").value,resurrectionCount:j.role==="ヒーラー"?+$("resurrectionCount").value||0:0,earnedExp:xp});applyExp(j.id,xp)}else{let j=jobs().find(x=>x.id===$("collectableJob").value);if(!j)return;let xp=+$("collectableExp").value||0;Object.assign(l,{jobId:j.id,jobName:j.name,role:j.role,count:+$("collectableCount").value||1,earnedExp:xp});applyExp(j.id,xp)}await put(l);$("notice").textContent="保存して再集計しました。";$("notice").classList.add("show");setTimeout(()=>$("notice").classList.remove("show"),2000);render()};
 $("baselineForm").onsubmit=ev=>{ev.preventDefault();let id=$("baselineAchievement").value,a=baselines().filter(x=>x.achievementId!==id);a.push({achievementId:id,value:+$("baselineValue").value||0});sj(BASE,a);render()};$("levelForm").onsubmit=ev=>{ev.preventDefault();let id=$("levelJob").value,a=levels().filter(x=>x.jobId!==id);a.push({jobId:id,currentLevel:+$("currentLevel").value||1,currentExp:+$("currentExp").value||0,neededExp:+$("neededExp").value||1});sj(LEVELS,a);render()};
@@ -157,6 +190,7 @@ function pCard(project){
     <div class="meta">${project.stage?`現在段階：${e(project.stage)}`:"段階未設定"}</div></div><span class="count">${done}/${total}</span></div>
     <div class="progress" style="margin-top:10px"><span style="width:${rate}%"></span></div>
     ${project.memo?`<div style="margin-top:10px">${e(project.memo)}</div>`:""}
+    ${project.imageData?`<img class="project-cover" src="${project.imageData}" alt="${e(project.name)}のSS">`:""}
     ${project.items.length?project.items.map(item=>`<div class="check-item ${item.done?"done":""}">
       <input type="checkbox" ${item.done?"checked":""} data-p-toggle-item="${item.id}" data-p-project="${project.id}">
       <div><b>${e(item.text)}</b>${item.memo?`<div class="small">${e(item.memo)}</div>`:""}</div>
@@ -199,11 +233,13 @@ function pRender(){
   document.querySelectorAll("[data-p-edit-counter]").forEach(b=>b.onclick=()=>pEditCounter(b.dataset.pEditCounter));
   document.querySelectorAll("[data-p-delete-counter]").forEach(b=>b.onclick=()=>pDeleteCounter(b.dataset.pDeleteCounter));
 }
-$("pProjectForm").onsubmit=ev=>{
+$("pProjectForm").onsubmit=async ev=>{
   ev.preventDefault();const list=pProjects();
+  const imageFile=$("pProjectImage").files[0];
+  const imageData=imageFile?await pCompressImage(imageFile):"";
   list.push({id:crypto.randomUUID(),name:$("pProjectName").value.trim(),type:$("pProjectType").value,
-  stage:$("pProjectStage").value.trim(),memo:$("pProjectMemo").value.trim(),done:false,items:[],createdAt:Date.now()});
-  pSaveProjects(list);$("pProjectName").value="";$("pProjectStage").value="";$("pProjectMemo").value="";pRender();
+  stage:$("pProjectStage").value.trim(),memo:$("pProjectMemo").value.trim(),imageData,done:false,items:[],createdAt:Date.now()});
+  pSaveProjects(list);$("pProjectName").value="";$("pProjectStage").value="";$("pProjectMemo").value="";$("pProjectImage").value="";pRender();
 };
 $("pCounterForm").onsubmit=ev=>{
   ev.preventDefault();const list=pCounters();
@@ -213,5 +249,134 @@ $("pCounterForm").onsubmit=ev=>{
   pSaveCounters(list);$("pCounterName").value="";$("pCounterValue").value=0;$("pCounterTarget").value=0;$("pCounterUnit").value="";$("pCounterMemo").value="";pRender();
 };
 $("pCounterDate").value=new Date().toISOString().slice(0,10);
+
+function editJobMaster(id){
+  const list=jobs(),item=list.find(x=>x.id===id);if(!item)return;
+  const name=prompt("ジョブ名",item.name);if(name===null)return;
+  const role=prompt("ロール",item.role);if(role===null)return;
+  item.name=name.trim()||item.name;item.role=role.trim()||item.role;sj(JOBS,list);render();
+}
+function deleteJobMaster(id){
+  if(!confirm("このジョブを削除しますか？過去ログの表示名は保存時点のまま残ります。"))return;
+  sj(JOBS,jobs().filter(x=>x.id!==id));render();
+}
+function editContentMaster(id){
+  const list=contents(),item=list.find(x=>x.id===id);if(!item)return;
+  const name=prompt("コンテンツ名",item.name);if(name===null)return;
+  const category=prompt("大分類",item.category);if(category===null)return;
+  const subcategory=prompt("小分類",item.subcategory);if(subcategory===null)return;
+  const high=confirm("高難易度として扱いますか？\nOK＝はい／キャンセル＝いいえ");
+  item.name=name.trim()||item.name;item.category=category.trim()||item.category;
+  item.subcategory=subcategory.trim()||item.subcategory;item.highDifficulty=high;
+  sj(CONTENTS,list);render();
+}
+function deleteContentMaster(id){
+  if(!confirm("このコンテンツを削除しますか？過去の行動ログ自体は残ります。"))return;
+  sj(CONTENTS,contents().filter(x=>x.id!==id));render();
+}
+function editAchievementMaster(id){
+  const list=ach(),item=list.find(x=>x.id===id);if(!item)return;
+  const name=prompt("アチーブ名",item.name);if(name===null)return;
+  const target=prompt("目標値",item.target);if(target===null)return;
+  item.name=name.trim()||item.name;item.target=Math.max(1,Number(target)||item.target);
+  sj(ACH,list);render();
+}
+function deleteAchievementMaster(id){
+  if(!confirm("このアチーブを削除しますか？設定した現在値も削除されます。"))return;
+  sj(ACH,ach().filter(x=>x.id!==id));
+  sj(BASE,baselines().filter(x=>x.achievementId!==id));render();
+}
+async function pCompressImage(file){
+  return new Promise((resolve,reject)=>{
+    const reader=new FileReader();
+    reader.onerror=()=>reject(reader.error);
+    reader.onload=()=>{
+      const img=new Image();
+      img.onerror=()=>reject(new Error("画像を読み込めませんでした"));
+      img.onload=()=>{
+        const max=1280,scale=Math.min(1,max/Math.max(img.width,img.height));
+        const canvas=document.createElement("canvas");
+        canvas.width=Math.round(img.width*scale);canvas.height=Math.round(img.height*scale);
+        canvas.getContext("2d").drawImage(img,0,0,canvas.width,canvas.height);
+        resolve(canvas.toDataURL("image/jpeg",0.78));
+      };
+      img.src=reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+function blobToDataURL(blob){
+  return new Promise((resolve,reject)=>{
+    if(!blob){resolve(null);return}
+    const reader=new FileReader();reader.onload=()=>resolve(reader.result);reader.onerror=()=>reject(reader.error);
+    reader.readAsDataURL(blob);
+  });
+}
+async function serializeLogsForBackup(){
+  const all=await logs();
+  return Promise.all(all.map(async log=>{
+    const copy={...log};
+    copy.screenshots=await Promise.all((log.screenshots||[]).map(async shot=>({
+      ...shot,file:undefined,image:undefined,
+      dataUrl:await blobToDataURL(shot.file||shot.image)
+    })));
+    return copy;
+  }));
+}
+function dataURLToBlob(dataUrl){
+  if(!dataUrl)return null;
+  const [header,data]=dataUrl.split(",");
+  const mime=(header.match(/data:(.*?);/)||[])[1]||"application/octet-stream";
+  const bytes=atob(data),arr=new Uint8Array(bytes.length);
+  for(let i=0;i<bytes.length;i++)arr[i]=bytes.charCodeAt(i);
+  return new Blob([arr],{type:mime});
+}
+async function restoreLogsFromBackup(items){
+  const db=await open();await new Promise((resolve,reject)=>{
+    const tx=db.transaction(STORE,"readwrite"),store=tx.objectStore(STORE);store.clear();
+    (items||[]).forEach(log=>{
+      const copy={...log};
+      copy.screenshots=(log.screenshots||[]).map(shot=>{
+        const blob=dataURLToBlob(shot.dataUrl);
+        return {...shot,dataUrl:undefined,file:blob};
+      });
+      store.put(copy);
+    });
+    tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);
+  });
+}
+async function exportAllBackup(){
+  const payload={
+    app:"Eorzea Adventure Archive",version:"0.8.4",exportedAt:new Date().toISOString(),
+    logs:await serializeLogsForBackup(),
+    localStorage:{
+      [JOBS]:gj(JOBS),[CONTENTS]:gj(CONTENTS),[ACH]:gj(ACH),[BASE]:gj(BASE),[LEVELS]:gj(LEVELS),
+      [P_PROJECTS_KEY]:pProjects(),[P_COUNTERS_KEY]:pCounters()
+    }
+  };
+  const blob=new Blob([JSON.stringify(payload)],{type:"application/json"});
+  const url=URL.createObjectURL(blob),a=document.createElement("a");
+  a.href=url;a.download=`eorzea-archive-backup-${new Date().toISOString().slice(0,10)}.json`;
+  a.click();URL.revokeObjectURL(url);
+  $("backupMessage").textContent="バックアップを書き出しました。";
+}
+async function importAllBackup(){
+  const file=$("importBackupFile").files[0];
+  if(!file){$("backupMessage").textContent="先にJSONファイルを選んでください。";return}
+  if(!confirm("現在のアプリ内データをバックアップ内容で置き換えます。続けますか？"))return;
+  try{
+    const payload=JSON.parse(await file.text());
+    if(!payload||payload.app!=="Eorzea Adventure Archive")throw new Error("対応していないファイルです");
+    Object.entries(payload.localStorage||{}).forEach(([key,value])=>sj(key,value));
+    await restoreLogsFromBackup(payload.logs||[]);
+    $("backupMessage").textContent="復元しました。画面を更新します。";
+    render();pRender();
+  }catch(err){
+    console.error(err);$("backupMessage").textContent="復元に失敗しました："+err.message;
+  }
+}
+$("exportBackup").onclick=exportAllBackup;
+$("importBackup").onclick=importAllBackup;
+
 pRender();
 </script></body></html>
