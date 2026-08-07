@@ -96,7 +96,7 @@ hr{border:0;border-top:1px solid var(--line);margin:18px 0}.tool-result{font-fam
 <aside class="sidebar" id="sidebar">
   <div class="brand">
     <h1>Life Archive</h1>
-    <div class="sub">v0.9336 “Parent Render Fix”<br>ヒカセン、PL、そして日常。すべてを一つの記録庫へ。</div>
+    <div class="sub">v0.9341 “Child Records in Archive”<br>ヒカセン、PL、そして日常。すべてを一つの記録庫へ。</div>
   </div>
   <nav class="sidebar-nav">
     <button class="tab active" data-view="home">⌂ 今日</button>
@@ -488,9 +488,9 @@ hr{border:0;border-top:1px solid var(--line);margin:18px 0}.tool-result{font-fam
 <div class="row"><h2 id="stackAddDialogTitle">子記録を追加</h2><button id="stackAddDialogClose" class="secondary">閉じる</button></div>
 <input id="stackAddParentId" type="hidden">
 <input id="stackAddDayId" type="hidden">
-<label>日・段階</label><select id="stackAddDaySelect"></select>
-<label>子記録の種類</label><select id="stackAddEntryType">
-<option>セッション記録</option><option>感想</option><option>ダイスログ</option><option>SS・画像</option><option>進捗</option><option>参考URL</option><option>チェックリスト</option><option>その他</option>
+<label>追加先の子ページ</label><select id="stackAddDaySelect"></select>
+<label>ページ内の記録種類</label><select id="stackAddEntryType">
+<option>記録・メモ</option><option>画像・SS</option><option>チェックリスト</option><option>リンク・資料</option><option>ログ・データ</option><option>感想</option><option>結果・まとめ</option><option>その他</option>
 </select>
 <label>タイトル</label><input id="stackAddTitle" placeholder="任意">
 <label>本文</label><textarea id="stackAddText" placeholder="感想、ログ、進捗など"></textarea>
@@ -567,10 +567,10 @@ hr{border:0;border-top:1px solid var(--line);margin:18px 0}.tool-result{font-fam
 <label>役割・種類</label><input id="orgStackNewRole" placeholder="例：PL、KP、零式">
 </div>
 <div class="inline2">
-<div><label>日・段階</label><select id="orgStackDay"><option value="auto">次の日／次の段階</option><option value="existing">既存の日へ追加</option></select></div>
-<div><label>子記録の種類</label><select id="orgStackEntryType"><option>セッション記録</option><option>感想</option><option>ダイスログ</option><option>SS・画像</option><option>進捗</option><option>参考URL</option><option>チェックリスト</option><option>その他</option></select></div>
+<div><label>追加先の子ページ</label><select id="orgStackDay"><option value="auto">新しい子ページを作る</option><option value="existing">既存の子ページへ追加</option></select></div>
+<div><label>ページ内の記録種類</label><select id="orgStackEntryType"><option>記録・メモ</option><option>画像・SS</option><option>チェックリスト</option><option>リンク・資料</option><option>ログ・データ</option><option>感想</option><option>結果・まとめ</option><option>その他</option></select></div>
 </div>
-<div id="orgStackExistingDayWrap" style="display:none"><label>既存の日・段階</label><select id="orgStackExistingDay"></select></div>
+<div id="orgStackExistingDayWrap" style="display:none"><label>既存の子ページ</label><select id="orgStackExistingDay"></select></div>
 <label>実施時間（分・任意）</label><input id="orgStackMinutes" type="number" min="0">
 </div>
 
@@ -766,30 +766,46 @@ function clearLegacyAutoRecoveryMarker(){
 }
 async function initializePersistentData(){
  setSaveStatus("保存データ確認中…",true);
- let local=null;
+
+ // localStorage と IndexedDB は「統合」せず、同じ保存データの二重保管として扱う。
+ // どちらか片方が古くても、_savedAt が新しい方だけを正規データとして採用する。
+ let local=null,idb=null;
  try{local=JSON.parse(localStorage.getItem(KEY)||"null")}catch(e){}
-
- // 正規データは現在のlocalStorageを最優先し、存在する限り他の保存を混ぜない。
- if(local){
-  LIVE_DATA=normalizeData(local);
-  upgradeAutoStackPageLabels(LIVE_DATA);
-  setSaveStatus(`現在の保存データを使用（親 ${(LIVE_DATA.stackParents||[]).length} ／ 子ページ ${(LIVE_DATA.stackDays||[]).length}）`,true);
-  return;
- }
-
- // localStorageが本当に空の時だけIndexedDBを単独の救済元として使う。
- // バックアップや旧版データとの「統合」はしない。
- let idb=null;
  try{idb=await idbRead()}catch(e){}
- if(idb&&hasUsefulData(idb)){
-  LIVE_DATA=normalizeData(idb);
+
+ const localValid=!!local;
+ const idbValid=!!idb;
+
+ if(localValid||idbValid){
+  const localStamp=Number(local?._savedAt||0);
+  const idbStamp=Number(idb?._savedAt||0);
+
+  let chosen=null,source="";
+  if(localValid&&idbValid){
+   if(idbStamp>localStamp){
+    chosen=idb;source="IndexedDB（新しい保存）";
+   }else{
+    chosen=local;source="ブラウザ保存（新しい保存）";
+   }
+  }else if(localValid){
+   chosen=local;source="ブラウザ保存";
+  }else{
+   chosen=idb;source="IndexedDB";
+  }
+
+  LIVE_DATA=normalizeData(chosen);
   upgradeAutoStackPageLabels(LIVE_DATA);
-  try{localStorage.setItem(KEY,JSON.stringify(LIVE_DATA))}catch(e){}
-  setSaveStatus(`IndexedDBから復帰（親 ${(LIVE_DATA.stackParents||[]).length} ／ 子ページ ${(LIVE_DATA.stackDays||[]).length}）`,true);
+
+  // 選ばれた最新データを両方へ同期する。古いデータとのマージはしない。
+  const snapshot=structuredClone(LIVE_DATA);
+  try{localStorage.setItem(KEY,JSON.stringify(snapshot))}catch(e){}
+  try{await idbWrite(snapshot)}catch(e){}
+
+  setSaveStatus(`${source}を使用（親 ${(LIVE_DATA.stackParents||[]).length} ／ 子ページ ${(LIVE_DATA.stackDays||[]).length}）`,true);
   return;
  }
 
- // さらに何もない完全初回は空の新規データで開始。古い固定復旧データは自動投入しない。
+ // 完全初回のみ空データで開始。古い固定復旧データ・自動バックアップは採用しない。
  LIVE_DATA=normalizeData(base());
  LIVE_DATA._savedAt=Date.now();
  try{localStorage.setItem(KEY,JSON.stringify(LIVE_DATA))}catch(e){}
@@ -1114,6 +1130,7 @@ function openOrganize(id){
  $("orgTags").value=(x.tags||[]).join(", ");$("orgHistoryName").value=x.title||"";
  refreshOrganizerStack(x.stackParentId||"");
  if($("orgStackCreateNew"))$("orgStackCreateNew").checked=!x.stackParentId;
+ refreshOrganizerEntryTypes(x.stackEntryType||"");
  if($("orgStackNewName"))$("orgStackNewName").value=x.stackParentName||x.title||"";if($("orgStackNewRole"))$("orgStackNewRole").value="";if($("orgStackMinutes"))$("orgStackMinutes").value="";$("organizeDialog").showModal();
 }
 function toggleOrgDestination(){
@@ -1534,11 +1551,31 @@ function renderRecords(){
  const list=$("recordList");
  if(!list)return;
  list.innerHTML=a.length?a.map(x=>`<div class="card ${statusClass(x.status)}"><div class="row"><div><b>${esc(x.title)}</b><div class="time">${fmt(x.time)}</div></div><div><span class="badge ${getClassification(x)==="FF14"?"gold":getClassification(x)==="TRPG"?"purple":""}">${esc(getClassification(x))}</span><span class="badge">${esc(statusLabel(x.status))}</span></div></div><p>${nl(x.text)}</p>${(x.checklist||[]).length?`<div class="card"><b>チェック項目</b>${x.checklist.map(i=>`<div class="listitem">${i.done?"☑":"□"} ${esc(i.name||i)}</div>`).join("")}</div>`:""}${x.url?mediaPreview(x.url):""}<div>${(x.tags||[]).map(t=>`<span class="badge">#${esc(t)}</span>`).join("")}</div><div class="wrap">${x.sourceInboxId?'<span class="badge">元：受信箱</span>':""}<button class="primary openRecordDetail" data-id="${x.id}">詳細</button><button class="ghost setRecordStatus" data-id="${x.id}" data-status="完了">完了</button><button class="ghost setRecordStatus" data-id="${x.id}" data-status="延期">延期</button><button class="ghost setRecordStatus" data-id="${x.id}" data-status="中止">中止</button><button class="ghost setRecordStatus" data-id="${x.id}" data-status="取消">取消</button><button class="secondary editRecord" data-id="${x.id}">編集</button><button class="danger delRecord" data-id="${x.id}">削除</button></div></div>`).join(""):'<div class="empty">該当する記録はありません。</div>';
+ // 親子ページ内の子記録も、同じデータを複製せず記録庫から参照表示する。
+ const childRows=(Array.isArray(d.stackEntries)?d.stackEntries:[]).map(e=>{
+  const day=(d.stackDays||[]).find(v=>v.id===e.dayId);
+  const parent=day?(d.stackParents||[]).find(v=>v.id===day.parentId):null;
+  const category=parent?.category||"その他";
+  return {e,day,parent,category};
+ }).filter(({e,day,parent,category})=>{
+  const filterCategory=category==="生活"?"日常":category;
+  const hay=JSON.stringify({entry:e,day:day?.label,parent:parent?.name,category}).toLowerCase();
+  return (!f||filterCategory===f)&&(!sf||(e.status||"実施")===sf)&&(!q||hay.includes(q));
+ }).sort((x,y)=>(Number(y.e.time)||0)-(Number(x.e.time)||0));
+ const childHtml=childRows.length?childRows.map(({e,day,parent,category})=>`<div class="card ${statusClass(e.status)}" style="border-left:4px solid var(--blue)">
+  <div class="row"><div><b>${esc(e.title||e.entryType||"子記録")}</b><div class="time">${fmt(e.time)}</div></div><div><span class="badge ${category==="FF14"?"gold":category==="TRPG"?"purple":""}">${esc(category)}</span><span class="badge">${esc(statusLabel(e.status))}</span></div></div>
+  <div class="small" style="margin:6px 0">🔗 ${esc(parent?.name||"親不明")} ＞ ${esc(day?.label||"ページ不明")} ＞ ${esc(e.entryType||"記録")}</div>
+  ${e.text?`<p>${nl(e.text)}</p>`:""}
+  ${(e.tags||[]).length?`<div>${e.tags.map(tag=>`<span class="badge">#${esc(tag)}</span>`).join("")}</div>`:""}
+  <div class="wrap" style="margin-top:8px"><span class="badge">親子ページ内の記録</span><button type="button" class="primary archiveChildDetail" data-id="${e.id}">詳細</button></div>
+ </div>`).join(""):'<div class="empty">該当する子記録はありません。</div>';
+ list.insertAdjacentHTML("beforeend",`<div class="card" style="border-color:var(--blue);margin-top:18px"><b>親子ページ内の子記録</b><div class="small">親子ページの中身を記録庫からも参照できます。データは複製していません。</div></div>${childHtml}`);
  // 通常記録の操作ボタンは親子ページとは独立して必ず登録。
  document.querySelectorAll(".openRecordDetail").forEach(b=>b.onclick=()=>openRecordDetail(b.dataset.id));
  document.querySelectorAll(".editRecord").forEach(b=>b.onclick=()=>openEdit("record",b.dataset.id));
  document.querySelectorAll(".delRecord").forEach(b=>b.onclick=()=>{if(!confirm("この記録を削除しますか？"))return;const x=load();x.records=(x.records||[]).filter(v=>v.id!==b.dataset.id);save(x);renderRecords()});
  document.querySelectorAll(".setRecordStatus").forEach(b=>b.onclick=()=>{const x=load(),r=(x.records||[]).find(v=>v.id===b.dataset.id);if(!r)return;r.status=b.dataset.status;save(x);renderRecords()});
+ document.querySelectorAll(".archiveChildDetail").forEach(b=>b.onclick=()=>openStackEntryDetail(b.dataset.id));
 }
 function archiveDateKey(value){
  const d=value instanceof Date?value:new Date(value);
@@ -1611,11 +1648,48 @@ function moveStackDay(dayId,direction){
  save(d);renderRecords();
  if(CURRENT_STACK_PARENT_ID===day.parentId)openStackDetail(day.parentId);
 }
+const ENTRY_TYPE_COMMON=["記録・メモ","画像・SS","チェックリスト","リンク・資料","ログ・データ","感想","結果・まとめ","その他"];
+const ENTRY_TYPE_BY_CATEGORY={
+ "TRPG":["セッション記録","ダイスログ","成長・報酬"],
+ "FF14":["コンテンツ記録","攻略メモ","戦利品","進捗"],
+ "生活":["日記","買い物","家事・片付け","出来事"],
+ "健康":["体調記録","服薬・ケア","経過"],
+ "家事":["家事記録","片付け","Before／After"],
+ "買い物":["購入記録","価格メモ","在庫・消費"],
+ "猫":["猫の記録","写真","体調・様子"],
+ "制作":["制作記録","素材・進捗","完成記録"]
+};
+function entryTypesForCategory(category){
+ const specific=ENTRY_TYPE_BY_CATEGORY[String(category||"")]||[];
+ return [...specific,...ENTRY_TYPE_COMMON.filter(x=>!specific.includes(x))];
+}
+function fillEntryTypeSelect(select,category,preferred=""){
+ if(!select)return;
+ const types=entryTypesForCategory(category);
+ if(preferred&&!types.includes(preferred))types.unshift(preferred);
+ select.innerHTML=types.map(v=>`<option value="${esc(v)}">${esc(v)}</option>`).join("");
+ select.value=preferred&&types.includes(preferred)?preferred:types[0];
+}
+function selectedParentCategory(parentId,d=load()){
+ const p=(Array.isArray(d.stackParents)?d.stackParents:[]).find(x=>x&&x.id===parentId);
+ return p?.category||$("orgType")?.value||"";
+}
+function refreshOrganizerEntryTypes(preferred=""){
+ const d=load();
+ const creatingNew=$("orgStackCreateNew")?.checked;
+ const category=creatingNew?($("orgType")?.value||""):selectedParentCategory($("orgStackParent")?.value||"",d);
+ fillEntryTypeSelect($("orgStackEntryType"),category,preferred||$("orgStackEntryType")?.value||"");
+}
+function refreshStackAddEntryTypes(parentId,preferred=""){
+ const d=load(),parent=(Array.isArray(d.stackParents)?d.stackParents:[]).find(x=>x&&x.id===parentId);
+ fillEntryTypeSelect($("stackAddEntryType"),parent?.category||"",preferred||$("stackAddEntryType")?.value||"");
+}
 function refreshOrganizerStack(parentId=""){
  const d=load(),sel=$("orgStackParent");if(!sel)return;
  sel.innerHTML=stackParentOptions(parentId);
  if(parentId&&[...sel.options].some(o=>o.value===parentId))sel.value=parentId;
  refreshOrganizerDays();
+ refreshOrganizerEntryTypes();
 }
 
 function refreshOrganizerDays(){
@@ -1767,7 +1841,7 @@ function openStackAddDialog(parentId,dayId=""){
  $("stackAddParentId").value=parentId;
  $("stackAddDayId").value=dayId;
  $("stackAddDaySelect").innerHTML=days.map(day=>`<option value="${day.id}" ${day.id===dayId?"selected":""}>${esc(day.label)}</option>`).join("");
- $("stackAddEntryType").value="セッション記録";
+ refreshStackAddEntryTypes(parentId);
  $("stackAddTitle").value="";
  $("stackAddText").value="";
  $("stackAddTime").value=localValue();
@@ -2203,6 +2277,8 @@ $("orgDestination").onchange=toggleOrgDestination;$("orgRecordMode").onchange=to
 $("orgStackCreateNew").onchange=()=>{$("orgStackNewFields").style.display=$("orgStackCreateNew").checked?"block":"none"};
 $("orgStackParent").onchange=()=>refreshOrganizerStack($("orgStackParent").value);
 $("orgStackDay").onchange=()=>refreshOrganizerDays();
+if($("orgType"))$("orgType").addEventListener("change",()=>refreshOrganizerEntryTypes());
+if($("orgStackCreateNew"))$("orgStackCreateNew").addEventListener("change",()=>refreshOrganizerEntryTypes());
 $("stackParentAdd").onclick=()=>{const name=$("stackParentName").value.trim();if(!name)return alert("親記録名を入力してください");const d=load();d.stackParents.push({id:uid(),name,category:$("stackParentCategory").value,role:$("stackParentRole").value.trim(),tags:$("stackParentTags").value.split(/[,、]/).map(v=>v.trim()).filter(Boolean),time:Date.now(),createdAt:Date.now(),updatedAt:Date.now()});save(d);$("stackParentName").value="";$("stackParentRole").value="";$("stackParentTags").value="";renderStacks()};
 $("stackSearch").oninput=renderStacks;$("stackCategoryFilter").onchange=renderStacks;$("closeDialog").onclick=()=>$("organizeDialog").close();$("confirmOrganize").onclick=organize;$("closeEditDialog").onclick=()=>$("editDialog").close();$("editUrl").oninput=updateEditUrlPreview;$("saveEdit").onclick=saveEdited;
 $("recordSearch").oninput=renderRecords;$("recordFilter").onchange=renderRecords;$("recordStatusFilter").onchange=renderRecords;$("inboxFilter").onchange=renderInbox;
@@ -2290,7 +2366,7 @@ window.addEventListener("beforeunload",()=>{
 });
 restoreInboxDraft();
 
-$("exportBtn").onclick=()=>{const blob=new Blob([JSON.stringify(load(),null,2)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=`life_archive_v09334_${new Date().toISOString().slice(0,10)}.json`;a.click();URL.revokeObjectURL(a.href);$("backupMsg").textContent="書き出しました。"};
+$("exportBtn").onclick=()=>{const blob=new Blob([JSON.stringify(load(),null,2)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=`life_archive_v09340_${new Date().toISOString().slice(0,10)}.json`;a.click();URL.revokeObjectURL(a.href);$("backupMsg").textContent="書き出しました。"};
 $("importBtn").onclick=()=>{const f=$("importFile").files[0];if(!f)return alert("ファイルを選んでください");const r=new FileReader();r.onload=()=>{try{save({...base(),...JSON.parse(r.result),migrated:true});render();$("backupMsg").textContent="復元しました。"}catch{alert("読み込めませんでした")}};r.readAsText(f)};
 initializePersistentData().then(()=>{
  migrate();migrateClassifications();recoverMisroutedChecklists();repairDestinationConflicts();
