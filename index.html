@@ -96,7 +96,7 @@ hr{border:0;border-top:1px solid var(--line);margin:18px 0}.tool-result{font-fam
 <aside class="sidebar" id="sidebar">
   <div class="brand">
     <h1>Life Archive</h1>
-    <div class="sub">v0.9328 “Safe Date Editing & Save Guard”<br>ヒカセン、PL、そして日常。すべてを一つの記録庫へ。</div>
+    <div class="sub">v0.9336 “Parent Render Fix”<br>ヒカセン、PL、そして日常。すべてを一つの記録庫へ。</div>
   </div>
   <nav class="sidebar-nav">
     <button class="tab active" data-view="home">⌂ 今日</button>
@@ -151,7 +151,7 @@ hr{border:0;border-top:1px solid var(--line);margin:18px 0}.tool-result{font-fam
   </header>
 <main>
 <div id="localStorageWarning" class="storage-warning"><b>⚠ ローカル保存モード</b><div>Life Archive の記録は、ブラウザ上ではこのHTMLファイルの場所に結び付いて保存されます。GitHub Pagesでは、更新版を同じリポジトリの <b>index.html</b> に上書きして、同じ公開URLから使い続けてください。</div><div class="small storage-path" id="localStoragePath"></div></div>
-<section id="home" class="view active"><div class="card" style="border-color:var(--green)"><b>復旧データを本体へ組み込み済み</b><div class="small">受信箱 10件 ／ 記録 10件 ／ 購入履歴 9件 ／ アチーブ進捗 18件</div></div>
+<section id="home" class="view active">
 <div class="hero"><h2>おかえりなさい、はいびす。</h2><p>冒険も、卓も、買い物も。今日を丸ごと置いていきましょう。</p></div>
 <div class="stats" style="margin-top:16px">
 <div class="stat">今日の記録<b id="sToday">0</b></div><div class="stat">未整理<b id="sInbox">0</b></div><div class="stat">FF14<b id="sFF14">0</b></div><div class="stat">TRPG<b id="sTRPG">0</b></div><div class="stat">生活記録<b id="sLife">0</b></div>
@@ -626,7 +626,54 @@ function hasUsefulData(d){
   (Array.isArray(d.trpgAnalyses)&&d.trpgAnalyses.length)
  );
 }
-function normalizeData(d){return {...base(),...(d||{}),migrated:true}}
+function normalizeData(d){
+ const src=(d&&typeof d==="object")?d:{};
+ const out={...base(),...src,migrated:true};
+ const arrKeys=["inbox","records","stackParents","stackDays","stackEntries","historyItems","historyEvents","toolChecklists","trpgAnalyses","shopping","purchases","achievements","fishing","weapons"];
+ for(const k of arrKeys)if(!Array.isArray(out[k]))out[k]=[];
+ if(!out.achievementProgress||typeof out.achievementProgress!=="object"||Array.isArray(out.achievementProgress))out.achievementProgress={};
+ if(!out.settings||typeof out.settings!=="object"||Array.isArray(out.settings))out.settings={...base().settings};
+
+ out.stackParents=out.stackParents.filter(Boolean).map((p,i)=>({
+  ...p,
+  id:p.id||uid(),
+  name:String(p.name||p.title||`親ページ ${i+1}`),
+  category:String(p.category||p.type||"その他"),
+  role:String(p.role||""),
+  tags:Array.isArray(p.tags)?p.tags:(typeof p.tags==="string"?p.tags.split(/[,、]/).map(v=>v.trim()).filter(Boolean):[]),
+  status:p.status||"実施",
+  time:Number(p.time||p.createdAt||Date.now()),
+  createdAt:Number(p.createdAt||p.time||Date.now()),
+  updatedAt:Number(p.updatedAt||p.createdAt||p.time||Date.now())
+ }));
+ out.stackDays=out.stackDays.filter(Boolean).map((day,i)=>({
+  ...day,
+  id:day.id||uid(),
+  parentId:day.parentId||day.stackParentId||"",
+  order:Number.isFinite(Number(day.order))?Number(day.order):i+1,
+  label:String(day.label||day.name||`${i+1}ページ目`),
+  time:Number(day.time||day.createdAt||Date.now()),
+  status:day.status||"実施",
+  createdAt:Number(day.createdAt||day.time||Date.now())
+ }));
+ out.stackEntries=out.stackEntries.filter(Boolean).map((e)=>({
+  ...e,
+  id:e.id||uid(),
+  dayId:e.dayId||e.stackDayId||"",
+  entryType:String(e.entryType||e.type||"記録"),
+  title:String(e.title||""),
+  text:String(e.text||e.note||""),
+  tags:Array.isArray(e.tags)?e.tags:(typeof e.tags==="string"?e.tags.split(/[,、]/).map(v=>v.trim()).filter(Boolean):[]),
+  checklist:Array.isArray(e.checklist)?e.checklist.map(item=>typeof item==="object"&&item!==null?{id:item.id||uid(),name:String(item.name||""),done:!!item.done}:{id:uid(),name:String(item),done:false}):[],
+  status:e.status||"実施",
+  minutes:Number(e.minutes||0)||0,
+  url:String(e.url||""),
+  time:Number(e.time||e.createdAt||Date.now()),
+  createdAt:Number(e.createdAt||e.time||Date.now()),
+  updatedAt:Number(e.updatedAt||e.createdAt||e.time||Date.now())
+ }));
+ return out;
+}
 function load(){
  if(LIVE_DATA)return normalizeData(LIVE_DATA);
  try{
@@ -637,7 +684,7 @@ function load(){
    if(hasUsefulData(legacy)){LIVE_DATA=normalizeData(legacy);return normalizeData(LIVE_DATA)}
   }
  }catch(e){}
- LIVE_DATA=normalizeData(structuredClone(RECOVERED_V09272));
+ LIVE_DATA=normalizeData(base());
  return normalizeData(LIVE_DATA);
 }
 function openArchiveDB(){
@@ -742,8 +789,8 @@ async function initializePersistentData(){
   return;
  }
 
- // さらに何もない完全初回のみ、内蔵復旧データを使う。
- LIVE_DATA=normalizeData(structuredClone(RECOVERED_V09272));
+ // さらに何もない完全初回は空の新規データで開始。古い固定復旧データは自動投入しない。
+ LIVE_DATA=normalizeData(base());
  LIVE_DATA._savedAt=Date.now();
  try{localStorage.setItem(KEY,JSON.stringify(LIVE_DATA))}catch(e){}
  try{await idbWrite(structuredClone(LIVE_DATA))}catch(e){}
@@ -763,6 +810,7 @@ function esc(v){return String(v??"").replaceAll("&","&amp;").replaceAll("<","&lt
 function nl(v){return esc(v).replaceAll("\n","<br>")}
 function fmt(ms){return new Date(ms).toLocaleString("ja-JP",{year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit"})}
 function localValue(ms=Date.now()){const d=new Date(ms),z=n=>String(n).padStart(2,"0");return `${d.getFullYear()}-${z(d.getMonth()+1)}-${z(d.getDate())}T${z(d.getHours())}:${z(d.getMinutes())}`}
+function toLocalInput(ms=Date.now()){return localValue(ms)}
 function day(ms){const d=new Date(ms);return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`}
 
 function statusClass(status){
@@ -1246,7 +1294,7 @@ function renderRecordGroups(){
  const d=load(),target=$("recordGroupedList");if(!target)return;
  // 親子ページは通常記録の検索・分類・状態フィルターから独立させる。
  // 下の記録一覧をFF14等で絞っても、親子ページが消えないようにする。
- const parents=[...(d.stackParents||[])].sort((a,b)=>(b.updatedAt||b.createdAt)-(a.updatedAt||a.createdAt));
+ const parents=[...(Array.isArray(d.stackParents)?d.stackParents:[])].filter(Boolean).sort((a,b)=>(Number(b.updatedAt||b.createdAt)||0)-(Number(a.updatedAt||a.createdAt)||0));
  const orphanDays=(d.stackDays||[]).filter(day=>!(d.stackParents||[]).some(p=>p.id===day.parentId)).length;
  target.innerHTML=`<div class="card" style="border-color:var(--green)"><b>親子ページ</b><div class="small">親 ${parents.length}件 ／ 子ページ ${(d.stackDays||[]).length}件 ／ 子記録 ${(d.stackEntries||[]).length}件${orphanDays?` ／ 親を失った子ページ ${orphanDays}件`:""}</div><div class="small">古いバックアップからの自動復元・自動統合は停止しました。</div></div>` + (parents.length?parents.map(p=>{
   const days=stackDaysFor(p.id,d);
@@ -1469,15 +1517,29 @@ function bindRecordParentCreate(){
  };
 }
 
-function renderRecords(){renderRecordGroups();bindRecordParentCreate();const d=load();if($("recordClassificationSummary")){const counts={};d.records.forEach(x=>{const c=getClassification(x);counts[c]=(counts[c]||0)+1});$("recordClassificationSummary").textContent=Object.entries(counts).map(([k,v])=>`${k}:${v}`).join(" ／ ")||"記録なし"}const q=$("recordSearch").value.toLowerCase(),f=$("recordFilter").value,sf=$("recordStatusFilter").value;let a=d.records.slice().sort((a,b)=>b.time-a.time).filter(x=>(!f||getClassification(x)===f)&&(!sf||(x.status||"実施")===sf)&&(!q||JSON.stringify(x).toLowerCase().includes(q)));
- $("recordList").innerHTML=a.length?a.map(x=>`<div class="card ${statusClass(x.status)}"><div class="row"><div><b>${esc(x.title)}</b><div class="time">${fmt(x.time)}</div></div><div><span class="badge ${getClassification(x)==="FF14"?"gold":getClassification(x)==="TRPG"?"purple":""}">${esc(getClassification(x))}</span><span class="badge">${esc(statusLabel(x.status))}</span></div></div><p>${nl(x.text)}</p>${(x.checklist||[]).length?`<div class="card"><b>チェック項目</b>${x.checklist.map(i=>`<div class="listitem">${i.done?"☑":"□"} ${esc(i.name||i)}</div>`).join("")}</div>`:""}${x.url?mediaPreview(x.url):""}<div>${(x.tags||[]).map(t=>`<span class="badge">#${esc(t)}</span>`).join("")}</div><div class="wrap">${x.sourceInboxId?'<span class="badge">元：受信箱</span>':""}<button class="primary openRecordDetail" data-id="${x.id}">詳細</button><button class="ghost setRecordStatus" data-id="${x.id}" data-status="完了">完了</button><button class="ghost setRecordStatus" data-id="${x.id}" data-status="延期">延期</button><button class="ghost setRecordStatus" data-id="${x.id}" data-status="中止">中止</button><button class="ghost setRecordStatus" data-id="${x.id}" data-status="取消">取消</button><button class="secondary editRecord" data-id="${x.id}">編集</button><button class="danger delRecord" data-id="${x.id}">削除</button></div></div>`).join(""):'<div class="empty">該当する記録はありません。</div>';
- document.querySelectorAll(".openRecordDetail").forEach(b=>b.onclick=()=>openRecordDetail(b.dataset.id));document.querySelectorAll(".setRecordStatus").forEach(b=>b.onclick=()=>{const d=load(),x=d.records.find(v=>v.id===b.dataset.id);if(x){x.status=b.dataset.status;save(d);render()}});document.querySelectorAll(".editRecord").forEach(b=>b.onclick=()=>openEdit("record",b.dataset.id));document.querySelectorAll(".delRecord").forEach(b=>b.onclick=()=>{
- if(!confirm("この記録庫データを削除しますか？\n元の受信箱データは残ります。"))return;
- const d=load();d.records=d.records.filter(x=>x.id!==b.dataset.id);save(d);render();
-});
+function renderRecords(){
+ // 親子ページの描画エラーで通常記録一覧まで消えないよう完全分離。
+ try{renderRecordGroups()}catch(e){
+   console.error("parent/child record render error",e);
+   const g=$("recordGroupedList");
+   if(g)g.innerHTML='<div class="card" style="border-color:var(--red)"><b>親子ページの表示でエラーが発生しました</b><div class="small">通常記録は下にそのまま表示します。親子データは削除していません。v0.9336では親子描画で欠けていた日付変換関数を復旧しました。</div></div>';
+ }
+ try{bindRecordParentCreate()}catch(e){console.error("parent create bind error",e)}
+ const d=load();
+ const summary=$("recordClassificationSummary");
+ if(summary){const counts={};(d.records||[]).forEach(x=>{const c=getClassification(x);counts[c]=(counts[c]||0)+1});summary.textContent=Object.entries(counts).map(([k,v])=>`${k}:${v}`).join(" ／ ")||"記録なし"}
+ const search=$("recordSearch"),filter=$("recordFilter"),statusFilter=$("recordStatusFilter");
+ const q=(search?.value||"").toLowerCase(),f=filter?.value||"",sf=statusFilter?.value||"";
+ let a=(d.records||[]).slice().sort((a,b)=>(b.time||0)-(a.time||0)).filter(x=>(!f||getClassification(x)===f)&&(!sf||(x.status||"実施")===sf)&&(!q||JSON.stringify(x).toLowerCase().includes(q)));
+ const list=$("recordList");
+ if(!list)return;
+ list.innerHTML=a.length?a.map(x=>`<div class="card ${statusClass(x.status)}"><div class="row"><div><b>${esc(x.title)}</b><div class="time">${fmt(x.time)}</div></div><div><span class="badge ${getClassification(x)==="FF14"?"gold":getClassification(x)==="TRPG"?"purple":""}">${esc(getClassification(x))}</span><span class="badge">${esc(statusLabel(x.status))}</span></div></div><p>${nl(x.text)}</p>${(x.checklist||[]).length?`<div class="card"><b>チェック項目</b>${x.checklist.map(i=>`<div class="listitem">${i.done?"☑":"□"} ${esc(i.name||i)}</div>`).join("")}</div>`:""}${x.url?mediaPreview(x.url):""}<div>${(x.tags||[]).map(t=>`<span class="badge">#${esc(t)}</span>`).join("")}</div><div class="wrap">${x.sourceInboxId?'<span class="badge">元：受信箱</span>':""}<button class="primary openRecordDetail" data-id="${x.id}">詳細</button><button class="ghost setRecordStatus" data-id="${x.id}" data-status="完了">完了</button><button class="ghost setRecordStatus" data-id="${x.id}" data-status="延期">延期</button><button class="ghost setRecordStatus" data-id="${x.id}" data-status="中止">中止</button><button class="ghost setRecordStatus" data-id="${x.id}" data-status="取消">取消</button><button class="secondary editRecord" data-id="${x.id}">編集</button><button class="danger delRecord" data-id="${x.id}">削除</button></div></div>`).join(""):'<div class="empty">該当する記録はありません。</div>';
+ // 通常記録の操作ボタンは親子ページとは独立して必ず登録。
+ document.querySelectorAll(".openRecordDetail").forEach(b=>b.onclick=()=>openRecordDetail(b.dataset.id));
+ document.querySelectorAll(".editRecord").forEach(b=>b.onclick=()=>openEdit("record",b.dataset.id));
+ document.querySelectorAll(".delRecord").forEach(b=>b.onclick=()=>{if(!confirm("この記録を削除しますか？"))return;const x=load();x.records=(x.records||[]).filter(v=>v.id!==b.dataset.id);save(x);renderRecords()});
+ document.querySelectorAll(".setRecordStatus").forEach(b=>b.onclick=()=>{const x=load(),r=(x.records||[]).find(v=>v.id===b.dataset.id);if(!r)return;r.status=b.dataset.status;save(x);renderRecords()});
 }
-
-let dateArchiveDate=new Date();
 function archiveDateKey(value){
  const d=value instanceof Date?value:new Date(value);
  if(Number.isNaN(d.getTime()))return "";
@@ -1535,8 +1597,8 @@ function stackParentOptions(selected=""){
  const d=load(),items=d.stackParents.slice().sort((a,b)=>(b.updatedAt||b.createdAt)-(a.updatedAt||a.createdAt));
  return items.map(p=>`<option value="${p.id}" ${p.id===selected?"selected":""}>${esc(p.name)}${p.role?`（${esc(p.role)}）`:""}</option>`).join("");
 }
-function stackDaysFor(parentId,d=load()){return d.stackDays.filter(x=>x.parentId===parentId).sort((a,b)=>a.order-b.order)}
-function stackEntriesFor(dayId,d=load()){return d.stackEntries.filter(x=>x.dayId===dayId).sort((a,b)=>a.time-b.time)}
+function stackDaysFor(parentId,d=load()){return (Array.isArray(d.stackDays)?d.stackDays:[]).filter(x=>x&&x.parentId===parentId).sort((a,b)=>(Number(a.order)||0)-(Number(b.order)||0))}
+function stackEntriesFor(dayId,d=load()){return (Array.isArray(d.stackEntries)?d.stackEntries:[]).filter(x=>x&&x.dayId===dayId).sort((a,b)=>(Number(a.time)||0)-(Number(b.time)||0))}
 function moveStackDay(dayId,direction){
  const d=load(),day=d.stackDays.find(x=>x.id===dayId);if(!day)return;
  const days=stackDaysFor(day.parentId,d);
@@ -2056,7 +2118,22 @@ function renderTrpgDays(){
 }
 
 function renderSettings(){const d=load();$("guideUrl").value=d.settings.guideUrl;$("youtubeUrl").value=d.settings.youtubeUrl;$("ruleView").innerHTML=Object.entries(rules).map(([k,v])=>`<div class="listitem"><b>${k}</b><div class="small">${v.join("・")}</div></div>`).join("")}
-function render(){renderDateArchive();renderHome();renderInbox();renderRecords();renderStacks();renderHistory();renderShopping();renderFF14();renderTRPG();renderTrpgDays();renderSavedDiceAnalyses();renderToolChecklists();renderSettings()}
+function safeRender(name,fn){try{fn()}catch(e){console.error("Life Archive render error:",name,e);const st=$("saveStatus");if(st)st.textContent=`⚠ ${name}表示エラー（他の画面は継続）`;}}
+function render(){
+ safeRender("日付アーカイブ",renderDateArchive);
+ safeRender("今日",renderHome);
+ safeRender("受信箱",renderInbox);
+ safeRender("記録庫",renderRecords);
+ safeRender("親子詳細",renderStacks);
+ safeRender("履歴",renderHistory);
+ safeRender("買い物",renderShopping);
+ safeRender("FF14",renderFF14);
+ safeRender("TRPG",renderTRPG);
+ safeRender("TRPG日程",renderTrpgDays);
+ safeRender("ダイス解析",renderSavedDiceAnalyses);
+ safeRender("チェックメモ",renderToolChecklists);
+ safeRender("設定",renderSettings);
+}
 function openTemplate(t,q){if(!q.trim()){alert("検索語を入力してください");return}window.open(t.replace("{query}",encodeURIComponent(q.trim())),"_blank","noopener")}
 document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{
  switchView(b.dataset.view);
@@ -2213,15 +2290,15 @@ window.addEventListener("beforeunload",()=>{
 });
 restoreInboxDraft();
 
-$("exportBtn").onclick=()=>{const blob=new Blob([JSON.stringify(load(),null,2)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=`life_archive_v09332_${new Date().toISOString().slice(0,10)}.json`;a.click();URL.revokeObjectURL(a.href);$("backupMsg").textContent="書き出しました。"};
+$("exportBtn").onclick=()=>{const blob=new Blob([JSON.stringify(load(),null,2)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=`life_archive_v09334_${new Date().toISOString().slice(0,10)}.json`;a.click();URL.revokeObjectURL(a.href);$("backupMsg").textContent="書き出しました。"};
 $("importBtn").onclick=()=>{const f=$("importFile").files[0];if(!f)return alert("ファイルを選んでください");const r=new FileReader();r.onload=()=>{try{save({...base(),...JSON.parse(r.result),migrated:true});render();$("backupMsg").textContent="復元しました。"}catch{alert("読み込めませんでした")}};r.readAsText(f)};
 initializePersistentData().then(()=>{
  migrate();migrateClassifications();recoverMisroutedChecklists();repairDestinationConflicts();
  const initialView=loadUI().activeView||"home";
  switchView(document.getElementById(initialView)?initialView:"home");
 }).catch(()=>{
- LIVE_DATA=normalizeData(structuredClone(RECOVERED_V09272));
- setSaveStatus("⚠ 永続保存の初期化に失敗しました",false);
+ LIVE_DATA=normalizeData(base());
+ setSaveStatus("⚠ 永続保存の初期化に失敗しました（古い復旧データは自動投入しません）",false);
  migrate();
  const initialView=loadUI().activeView||"home";
  switchView(document.getElementById(initialView)?initialView:"home");
