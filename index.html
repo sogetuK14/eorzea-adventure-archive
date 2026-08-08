@@ -288,7 +288,7 @@ button{font-size:.86rem!important}
 <aside class="sidebar" id="sidebar">
   <div class="brand">
     <h1>Life Archive</h1>
-    <div class="sub">v0.9589 “バックアップ復元確定版”<br>ヒカセン、PL、そして日常。すべてを一つの記録庫へ。</div>
+    <div class="sub">v0.9594 “図鑑 差分更新”<br>ヒカセン、PL、そして日常。すべてを一つの記録庫へ。</div>
   </div>
   <nav class="sidebar-nav">
     <button class="tab active" data-view="home">⌂ 今日</button>
@@ -895,7 +895,7 @@ button{font-size:.86rem!important}
   <div class="small" style="margin-top:7px">取得情報はLife Archiveに保存されます。</div>
  </details>
 <div class="card" style="margin-top:12px">
- <div class="row"><div><b>🔎 外部図鑑を見る</b><div class="small">カテゴリや名前、入手方法から探せます。タイトルは日本語名を優先します。</div></div></div>
+ <div class="row"><div><b>🔎 外部図鑑を見る</b><div class="small">未取得品も入手方法から探せます。</div></div></div>
  <div class="grid3" style="margin-top:8px">
   <div><label>カテゴリ</label><select id="fcExplorerKind">
    <option value="minions">ミニオン</option>
@@ -910,6 +910,9 @@ button{font-size:.86rem!important}
   </select></div>
   <div><label>検索</label><input id="fcExplorerSearch" placeholder="名前・入手方法"></div>
   <div><label>取得状況</label><select id="fcExplorerStatus"><option value="all">すべて</option><option value="owned">取得済み</option><option value="missing">未取得</option></select></div>
+ </div>
+ <div class="inline2" style="margin-top:8px">
+  <div><label>入手方法</label><select id="fcExplorerSource"><option value="">すべて</option><option>ダンジョン</option><option>討伐・討滅戦</option><option>レイド</option><option>クエスト</option><option>製作</option><option>採集</option><option>交換</option><option>ショップ</option><option>ゴールドソーサー</option><option>シーズナルイベント</option><option>オンラインストア</option><option>宝の地図</option><option>F.A.T.E.</option><option>PvP</option></select></div>
  </div>
  <div id="fcExplorerSummary" class="small"></div>
  <div id="fcExplorerList"></div>
@@ -1308,7 +1311,7 @@ button{font-size:.86rem!important}
  <div class="small">更新前にバックアップしておくと安全です。</div>
  <div class="actions" style="margin-top:8px">
   <button class="primary" id="stableBackupDownload">バックアップ保存</button>
-  <button id="stableBackupImport">バックアップ読込</button>
+  <button id="stableBackupImport">バックアップ読込（共通）</button>
   <input id="stableBackupFile" type="file" accept=".json,application/json" style="display:none">
  </div>
 </section>
@@ -1669,25 +1672,23 @@ function normalizeData(d){
  return out;
 }
 function loadRaw(){
- if(LIVE_DATA)return normalizeData(LIVE_DATA);
+ if(LIVE_DATA)return LIVE_DATA;
  try{
   const saved=JSON.parse(localStorage.getItem(KEY)||"null");
-  if(saved){LIVE_DATA=normalizeData(saved);return normalizeData(LIVE_DATA)}
+  if(saved){LIVE_DATA=normalizeData(saved);return LIVE_DATA}
   for(const k of LEGACY_KEYS){
    const legacy=JSON.parse(localStorage.getItem(k)||"null");
-   if(hasUsefulData(legacy)){LIVE_DATA=normalizeData(legacy);return normalizeData(LIVE_DATA)}
+   if(hasUsefulData(legacy)){LIVE_DATA=normalizeData(legacy);return LIVE_DATA}
   }
  }catch(e){}
  LIVE_DATA=normalizeData(base());
- return normalizeData(LIVE_DATA);
+ return LIVE_DATA;
 }
 function load(){
- const current=loadRaw();
- const backup=stableLoadSnapshot();
- const merged=stableMergeMissing(current,backup);
- // Refresh stable snapshot so future app updates keep the latest known data.
- stableSaveSnapshot(merged);
- return merged;
+ // 起動後はLIVE_DATAだけを正規データとして使う。
+ // ページ移動のたびにlocalStorage/補助スナップショットを再合成しない。
+ if(!LIVE_DATA)LIVE_DATA=loadRaw();
+ return LIVE_DATA;
 }
 function openArchiveDB(){
  return new Promise((resolve,reject)=>{
@@ -3862,35 +3863,85 @@ async function fcFetchCatalogCandidates(endpoints){
  throw last||new Error("利用できるAPIエンドポイントが見つかりません");
 }
 function renderFFXIVCollectHub(){
- const p=ffProfileData(load()),fc=p.ffxivCollect||{catalogs:{}};
+ const d=load(),p=ffProfileData(d),fc=p.ffxivCollect||{catalogs:{}};
  for(const [key,cfg] of Object.entries(FFXIV_COLLECT_CATALOGS)){
   const el=$(cfg.hub),c=fc.catalogs?.[key];
   if(el)el.textContent=c?.count?`${c.count}件 ／ 更新 ${fmt(c.updatedAt)}`:"未取得";
  }
  const st=$("ffxivCollectHubStatus");
- if(st&&fc.lastCatalogSyncAt)st.innerHTML=`最終更新：<b>${fmt(fc.lastCatalogSyncAt)}</b>　外部API停止時も前回キャッシュを使用します。`;
+ const catCount=Object.keys(fc.catalogs||{}).length;
+ if(st){
+  if(fc.lastCatalogSyncAt)st.innerHTML=`最終更新：<b>${fmt(fc.lastCatalogSyncAt)}</b> ／ ${catCount}カテゴリ`;
+  else st.textContent=catCount?`${catCount}カテゴリ`:"未取得";
+ }
  renderFCExplorer();
 }
 async function syncFFXIVCollectCatalogs(){
  const btn=$("ffxivCollectCatalogSync"),st=$("ffxivCollectHubStatus");
  if(btn)btn.disabled=true;
- if(st)st.innerHTML="<b>更新中…</b> 図鑑データを取得しています。";
+ if(st)st.innerHTML="<b>更新中…</b> 図鑑データを確認しています。";
+
  const d=load(),p=ffProfileData(d),fc=p.ffxivCollect||(p.ffxivCollect={lastCatalogSyncAt:0,catalogs:{},sources:{}});
+ fc.catalogs=fc.catalogs||{};
  const results=[];
+ let totalNew=0,totalUpdated=0,totalSame=0;
+
  for(const [key,cfg] of Object.entries(FFXIV_COLLECT_CATALOGS)){
   try{
    const got=await fcFetchCatalogCandidates(cfg.endpoints||[cfg.endpoint]);
-   const items=got.items;if(!items.length)throw new Error("0件");
-   fc.catalogs[key]={items,count:items.length,updatedAt:Date.now(),endpoint:got.endpoint};
-   results.push(`${cfg.label} ${items.length}件`);
+   const incoming=got.items||[];
+   if(!incoming.length)throw new Error("0件");
+
+   const oldCat=fc.catalogs[key]||{items:[]};
+   const oldItems=Array.isArray(oldCat.items)?oldCat.items:[];
+   const oldMap=new Map(oldItems.map(x=>[String(x.id??x.name),x]));
+   let added=0,updated=0,same=0;
+
+   for(const item of incoming){
+    const id=String(item.id??item.name);
+    const prev=oldMap.get(id);
+    if(!prev){
+     oldMap.set(id,item);
+     added++;
+     continue;
+    }
+
+    // Compare only the fetched catalog item itself. User progress is stored elsewhere.
+    const before=JSON.stringify(prev);
+    const after=JSON.stringify(item);
+    if(before!==after){
+     oldMap.set(id,{...prev,...item});
+     updated++;
+    }else{
+     same++;
+    }
+   }
+
+   const merged=[...oldMap.values()];
+   fc.catalogs[key]={
+    ...oldCat,
+    items:merged,
+    count:merged.length,
+    updatedAt:Date.now(),
+    endpoint:got.endpoint
+   };
+
+   totalNew+=added;totalUpdated+=updated;totalSame+=same;
+   results.push(`${cfg.label}：新規 ${added} ／ 更新 ${updated}`);
   }catch(e){
    console.error("FFXIV Collect catalog sync",key,e);
    results.push(`${cfg.label}：前回データ維持`);
   }
  }
- fc.lastCatalogSyncAt=Date.now();save(d);
- renderFFXIVCollectHub();renderCollections();
- if(st)st.innerHTML=`<b>✓ 基本図鑑の更新完了</b>：${results.map(esc).join(" ／ ")}`;
+
+ fc.lastCatalogSyncAt=Date.now();
+ save(d);
+ renderFFXIVCollectHub();
+ renderCollections();
+
+ if(st){
+  st.innerHTML=`<b>✓ 図鑑の更新完了</b>　新規 <b>${totalNew}</b> ／ 更新 <b>${totalUpdated}</b> ／ 変更なし <b>${totalSame}</b><div class="small">${results.map(esc).join(" ／ ")}</div>`;
+ }
  if(btn)btn.disabled=false;
 }
 function fcCatalogMap(kind){
@@ -3902,10 +3953,47 @@ function fcCatalogMap(kind){
 }
 
 
+
+function fcAcquisitionInfo(item){
+ const s=item?.sources??item?.source??[];
+ const rows=Array.isArray(s)?s:[s];
+ const out=[];
+ for(const x of rows){
+  if(!x)continue;
+  if(typeof x==="string"){
+   const txt=fcCompactAcquisitionText(x);
+   if(txt)out.push({kind:"",detail:txt});
+   continue;
+  }
+  const kind=fcJapaneseAcquisitionType(x.type||x.category||"");
+  const detail=fcCompactAcquisitionText(x.text||x.name||x.description||"");
+  const extra=[
+   x.cost?String(x.cost):"",
+   x.currency?fcJapaneseText(x.currency):"",
+   x.zone?fcJapaneseProperName(x.zone):"",
+   x.location?fcJapaneseProperName(x.location):"",
+   x.npc?fcJapaneseProperName(x.npc):""
+  ].filter(Boolean);
+  out.push({kind,detail,extra});
+ }
+ return out.filter(x=>x.kind||x.detail||(x.extra&&x.extra.length));
+}
+function fcAcquisitionHTML(item){
+ const rows=fcAcquisitionInfo(item);
+ if(!rows.length)return "";
+ return `<div class="acq-list">${rows.map(r=>{
+  const same=r.kind&&r.detail&&normalizeCollectionName(r.kind)===normalizeCollectionName(r.detail);
+  const main=same?r.kind:[r.kind,r.detail].filter(Boolean).join("：");
+  const extra=(r.extra||[]).join(" ／ ");
+  return `<div class="small">📍 ${esc(main)}${extra?` <span class="muted">／ ${esc(extra)}</span>`:""}</div>`;
+ }).join("")}</div>`;
+}
+
 function renderFCExplorer(){
  const kind=$("fcExplorerKind")?.value||"minions";
  const q=($("fcExplorerSearch")?.value||"").trim().toLowerCase();
  const status=$("fcExplorerStatus")?.value||"all";
+ const sourceFilter=$("fcExplorerSource")?.value||"";
  const d=load(),p=ffProfileData(d),c=p.ffxivCollect?.catalogs?.[kind],box=$("fcExplorerList"),sum=$("fcExplorerSummary");
  if(!box)return;
  const progress=kind==="minions"?(d.minionProgress||{}):kind==="mounts"?(d.mountProgress||{}):null;
@@ -3919,18 +4007,18 @@ function renderFCExplorer(){
  };
  let source=(c?.items||[]);
  let filtered=source.filter(x=>{
-  const src=fcSourceText(x),hay=[x.name,x.description,x.category,x.type,src].join(" ").toLowerCase();
+  const src=fcSourceText(x),acq=fcAcquisitionInfo(x).map(r=>[r.kind,r.detail,...(r.extra||[])].join(" ")).join(" "),hay=[x.name,x.description,x.category,x.type,src,acq].join(" ").toLowerCase();
   const owned=isOwned(x);
-  return (!q||hay.includes(q))&&(status==="all"||(status==="owned"&&owned)||(status==="missing"&&!owned));
+  return (!q||hay.includes(q))&&(!sourceFilter||acq.includes(sourceFilter))&&(status==="all"||(status==="owned"&&owned)||(status==="missing"&&!owned));
  });
  const totalFiltered=filtered.length,rows=filtered.slice(0,200);
  if(sum)sum.textContent=c?`${c.count}件中 ${totalFiltered}件${totalFiltered>200?"（200件まで表示）":""}`:"このカテゴリはまだ取得されていません。";
  box.innerHTML=rows.length?rows.map(x=>{
-  const src=fcSourceText(x),owned=isOwned(x);
+  const owned=isOwned(x);
   const name=fcJapaneseTitle(x,kind)||fcJapaneseProperName(x.name||"")||x.name||`#${x.id}`;
   const meta=[x.patch?`Patch ${x.patch}`:"",x.points!=null?`${x.points}pt`:"",x.category?fcJapaneseText(x.category):"",x.type?fcJapaneseText(x.type):""].filter(Boolean).join(" ／ ");
   const ownedBadge=progress?`<span class="badge ${owned?"green":""}">${owned?"✓ 取得済み":"未取得"}</span>`:"";
-  return `<div class="listitem"><div class="row"><div><b>${esc(name)}</b> ${ownedBadge}</div><span class="small">${esc(meta)}</span></div>${src?`<div class="small">📍 ${esc(src)}</div>`:""}${x.description?`<div class="small" style="margin-top:3px">${esc(x.description)}</div>`:""}</div>`;
+  return `<div class="listitem"><div class="row"><div><b>${esc(name)}</b> ${ownedBadge}</div><span class="small">${esc(meta)}</span></div>${fcAcquisitionHTML(x)}${x.description?`<details style="margin-top:4px"><summary class="small">説明</summary><div class="small" style="margin-top:3px">${esc(x.description)}</div></details>`:""}</div>`;
  }).join(""):'<div class="empty">該当データはありません。</div>';
 }
 
@@ -4063,6 +4151,75 @@ function fcOfficialName(item,kind){
  return fcJapaneseTitle(item,kind);
 }
 
+
+
+const FC_ACQ_JA_RULES=[
+ [/Dungeon/i,"ダンジョン"],
+ [/Trial/i,"討伐・討滅戦"],
+ [/Raid/i,"レイド"],
+ [/Quest/i,"クエスト"],
+ [/Craft(?:ed|ing)?/i,"製作"],
+ [/Gather(?:ed|ing)?/i,"採集"],
+ [/Vendor|Purchase|Purchased/i,"ショップ"],
+ [/Exchange|Trade/i,"交換"],
+ [/Gold Saucer|MGP/i,"ゴールドソーサー"],
+ [/Seasonal Event|Seasonal/i,"シーズナルイベント"],
+ [/Online Store|Mog Station/i,"オンラインストア"],
+ [/Treasure Map|Treasure Hunt/i,"宝の地図"],
+ [/F\.?A\.?T\.?E\.?/i,"F.A.T.E."],
+ [/PvP/i,"PvP"],
+ [/Achievement/i,"アチーブメント"],
+ [/Deep Dungeon/i,"ディープダンジョン"],
+ [/Retainer Venture|Venture/i,"リテイナーベンチャー"],
+ [/Hunt/i,"モブハント"],
+ [/Island Sanctuary/i,"無人島開拓"],
+ [/Variant Dungeon/i,"ヴァリアントダンジョン"],
+ [/Criterion Dungeon/i,"アナザーダンジョン"],
+ [/Field Operation/i,"特殊フィールド探索"],
+ [/Bozja|Bozjan/i,"ボズヤ"],
+ [/Eureka/i,"禁断の地 エウレカ"]
+];
+function fcJapaneseAcquisitionType(v){
+ const raw=String(v||"").trim();
+ if(!raw)return "";
+ for(const [re,ja] of FC_ACQ_JA_RULES)if(re.test(raw))return ja;
+ return fcJapaneseText(raw);
+}
+function fcCompactAcquisitionText(v){
+ let s=String(v||"").trim();
+ if(!s)return "";
+ // よく出る定型だけを日本語化。固有名詞は無理に翻訳しない。
+ const rules=[
+  [/\bPurchased from\b/gi,"購入"],
+  [/\bPurchase from\b/gi,"購入"],
+  [/\bReward from\b/gi,"報酬"],
+  [/\bDropped by\b/gi,"ドロップ"],
+  [/\bDrops from\b/gi,"ドロップ"],
+  [/\bObtained from\b/gi,"入手"],
+  [/\bObtained via\b/gi,"入手"],
+  [/\bAwarded for\b/gi,"報酬"],
+  [/\bExchange(?:d)? for\b/gi,"交換"],
+  [/\bComplete\b/gi,"クリア"],
+  [/\bCompleting\b/gi,"クリア"],
+  [/\bCrafted by\b/gi,"製作"],
+  [/\bGathered by\b/gi,"採集"],
+  [/\bAvailable during\b/gi,"期間"],
+  [/\bAvailable from\b/gi,"入手先"],
+  [/\bAchievement\b/gi,"アチーブメント"],
+  [/\bQuest\b/gi,"クエスト"],
+  [/\bDungeon\b/gi,"ダンジョン"],
+  [/\bTrial\b/gi,"討伐・討滅戦"],
+  [/\bRaid\b/gi,"レイド"],
+  [/\bVendor\b/gi,"ショップ"],
+  [/\bGold Saucer\b/gi,"ゴールドソーサー"],
+  [/\bOnline Store\b/gi,"オンラインストア"],
+  [/\bMog Station\b/gi,"オンラインストア"],
+  [/\bTreasure Map\b/gi,"宝の地図"],
+  [/\bSeasonal Event\b/gi,"シーズナルイベント"]
+ ];
+ for(const [re,ja] of rules)s=s.replace(re,ja);
+ return fcJapaneseSourceDetail(s);
+}
 
 function fcJapaneseSourceDetail(value){
  const raw=String(value||"").trim();if(!raw)return "";
@@ -5363,6 +5520,8 @@ function render(){
  safeRender("買い物",renderShopping);
  safeRender("料理図鑑",renderCooking);
  safeRender("FF14",renderFF14);
+ safeRender("収集図鑑",renderFFXIVCollectHub);
+ safeRender("データ引き継ぎ確認",renderPersistenceTest);
  safeRender("ギルドリーヴ",renderGuildleves);
  safeRender("妖怪ウォッチ",renderYokai);
  safeRender("バックアップ状態",renderBackupStatus);
@@ -5548,24 +5707,17 @@ $("exportBtn").onclick=()=>{
  $("backupMsg").innerHTML="<b>✓ バックアップを書き出しました。</b><div class='small'>このJSONファイルを安全な場所に保管してください。</div>";
  renderBackupStatus();
 };
-$("importBtn").onclick=()=>{
+$("importBtn").onclick=async()=>{
  const f=$("importFile").files[0];if(!f)return alert("復元するバックアップファイルを選んでください");
- const r=new FileReader();
- r.onload=()=>{
-  try{
-   const parsed=JSON.parse(r.result);
-   if(!parsed||typeof parsed!=="object"||Array.isArray(parsed))throw new Error("invalid");
-   if(!confirm("選択したバックアップで現在のLife Archiveを復元します。\n復元前の現在データも退避ファイルとして書き出します。"))return;
-   const current=structuredClone(load());
-   downloadArchiveJSON(current,`life_archive_before_restore_${backupFileStamp()}.json`);
-   const restored=normalizeData(parsed);
-   restored.backupMeta={...(restored.backupMeta||{}),lastImportAt:Date.now()};
-   save(restored);render();
-   $("backupMsg").innerHTML=`<b>✓ 復元しました。</b><div class="small">${esc(f.name)} を現在のデータとして読み込みました。復元前データも自動で書き出しています。</div>`;
-   renderBackupStatus();
-  }catch(e){alert("Life Archiveのバックアップとして読み込めませんでした")}
- };
- r.readAsText(f);
+ if(!confirm("選択したバックアップで現在のLife Archiveを復元します。"))return;
+ try{
+  const current=structuredClone(load());
+  downloadArchiveJSON(current,`life_archive_before_restore_${backupFileStamp()}.json`);
+  await importStableBackupFile(f);
+ }catch(e){
+  console.error("backup restore failed",e);
+  alert("Life Archiveのバックアップを復元できませんでした："+(e?.message||e));
+ }
 };
 ["fishSearch"].forEach(id=>{if($(id))$(id).oninput=()=>renderFishing()});["fishExpansion","fishStatus","fishKind"].forEach(id=>{if($(id))$(id).onchange=()=>renderFishing()});
 
@@ -5789,44 +5941,46 @@ function downloadStableBackup(){
 }
 async function importStableBackupFile(file){
  const raw=await file.text(),p=JSON.parse(raw),incoming=p?.data||p;
- if(!incoming||typeof incoming!=="object")throw new Error("バックアップ形式が正しくありません");
+ if(!incoming||typeof incoming!=="object"||Array.isArray(incoming))throw new Error("バックアップ形式が正しくありません");
 
  const restored=normalizeData(incoming);
  restored._savedAt=Date.now();
+
+ // 実バックアップで必須データを確認
+ const cats=restored?.ffProfile?.ffxivCollect?.catalogs||{};
+ const catCount=Object.keys(cats).length;
+ const totalCount=Object.values(cats).reduce((n,c)=>n+Number(c?.count||c?.items?.length||0),0);
+ const minionCount=Object.keys(restored?.minionProgress||{}).length;
+ const mountCount=Object.keys(restored?.mountProgress||{}).length;
+
+ // まず現在メモリへ採用。再読込を待たず画面に反映できるようにする。
  LIVE_DATA=structuredClone(restored);
 
- // まずIndexedDBへ完全保存。図鑑キャッシュのような大容量データはこちらを正とする。
+ // IndexedDBを正として確実に保存
  await idbWrite(structuredClone(restored));
 
- // localStorageは容量に収まる場合のみ二重保存。
- let localOK=false;
- try{
-  localStorage.setItem(KEY,JSON.stringify(restored));
-  localOK=true;
- }catch(e){
-  console.warn("localStorage capacity exceeded; IndexedDB restore is primary",e);
- }
-
- // 補助スナップショット。容量超過しても復元失敗扱いにはしない。
+ // localStorageは容量内なら補助保存
+ try{localStorage.setItem(KEY,JSON.stringify(restored))}catch(e){console.warn("localStorage backup copy skipped",e)}
  try{stableSaveSnapshot(restored)}catch(e){}
 
- // 書き込み直後にIndexedDBから再読込して、図鑑キャッシュまで入ったか検証。
+ // IndexedDBから再読込して中身を検証
  const verify=await idbRead();
  const verifyCats=verify?.ffProfile?.ffxivCollect?.catalogs||{};
- const restoredCats=restored?.ffProfile?.ffxivCollect?.catalogs||{};
- const expected=Object.keys(restoredCats).length;
- const actual=Object.keys(verifyCats).length;
+ const verifyCatCount=Object.keys(verifyCats).length;
+ if(catCount && verifyCatCount!==catCount)throw new Error(`図鑑復元確認に失敗しました（${verifyCatCount}/${catCount}カテゴリ）`);
 
- if(!verify || (expected>0 && actual===0)){
-  throw new Error("IndexedDBへの復元確認に失敗しました");
- }
+ // 画面をその場で再描画。location.reload()はしない。
+ LIVE_DATA=normalizeData(verify||restored);
+ render();
+ renderPersistenceTest();
+ renderFFXIVCollectHub();
+ renderCollections();
+ renderBackupStatus();
 
- // 復元完了フラグをlocalStorageへ残し、次回起動時に必ずIndexedDB側を優先させる。
- try{localStorage.setItem("life_archive_restore_pending","1")}catch(e){}
-
- setSaveStatus(`バックアップ復元済み（図鑑 ${actual}カテゴリ）`,true);
- await new Promise(resolve=>setTimeout(resolve,300));
- location.reload();
+ const msg=`復元完了：図鑑 ${catCount}カテゴリ・${totalCount}件 ／ ミニオン進捗 ${minionCount} ／ マウント進捗 ${mountCount}`;
+ setSaveStatus(msg,true);
+ if($("backupMsg"))$("backupMsg").innerHTML=`<b>✓ ${esc(msg)}</b>`;
+ alert(msg);
 }
 if($("stableBackupDownload"))$("stableBackupDownload").onclick=downloadStableBackup;
 if($("stableBackupImport"))$("stableBackupImport").onclick=()=>$("stableBackupFile")?.click();
@@ -5848,6 +6002,7 @@ function renderPersistenceTest(){
  el.innerHTML=`図鑑：<b>${catCount?`${catCount}カテゴリ・${count}件`:"未取得"}</b> ／ ミニオン進捗：<b>${minions}</b> ／ マウント進捗：<b>${mounts}</b>`;
 }
 
+if($("fcExplorerSource"))$("fcExplorerSource").onchange=renderFCExplorer;
 initializePersistentData().then(()=>{renderPersistenceTest();
  initializeWarRelicDefaults();
  refreshPeopleSelectors();
