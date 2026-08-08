@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Life Archive v0.9333</title>
+<title>Life Archive v0.9600</title>
 <style>
 :root{--bg:#0b1118;--panel:#172331;--panel2:#223247;--text:#f5f7fa;--muted:#aeb9c8;--gold:#d7b55b;--line:#3a4d64;--green:#8fd0a2;--red:#ed9191;--blue:#8fc5ff;--purple:#c8adff}
 *{box-sizing:border-box}body{margin:0;font-family:"Segoe UI","Yu Gothic UI",sans-serif;color:var(--text);background:radial-gradient(circle at 85% 0,rgba(215,181,91,.13),transparent 30%),linear-gradient(#101925,var(--bg));min-height:100vh}
@@ -288,7 +288,7 @@ button{font-size:.86rem!important}
 <aside class="sidebar" id="sidebar">
   <div class="brand">
     <h1>Life Archive</h1>
-    <div class="sub">v0.9597 “説明文 日本語表示”<br>ヒカセン、PL、そして日常。すべてを一つの記録庫へ。</div>
+    <div class="sub">v0.9600 “日本語説明 同期”<br>ヒカセン、PL、そして日常。すべてを一つの記録庫へ。</div>
   </div>
   <nav class="sidebar-nav">
     <button class="tab active" data-view="home">⌂ 今日</button>
@@ -521,7 +521,13 @@ button{font-size:.86rem!important}
   <h3>🥬 食材在庫</h3>
   <div class="inline2"><div><label>食材名</label><input id="foodName" placeholder="豚こま"></div><div><label>数量</label><input id="foodQty" type="number" min="0" step="0.1" value="1"></div></div>
   <div class="inline2"><div><label>単位</label><input id="foodUnit" placeholder="g / 個 / 袋"></div><div><label>期限（任意）</label><input id="foodExpiry" type="date"></div></div>
-  <button id="foodAdd" class="primary" style="width:100%">在庫へ追加・更新</button>
+  <label>保管場所</label>
+  <select id="foodStorage">
+   <option value="冷蔵">冷蔵</option>
+   <option value="冷凍">冷凍</option>
+   <option value="常温">常温</option>
+  </select>
+  <button id="foodAdd" class="primary" style="width:100%;margin-top:8px">在庫へ追加・更新</button>
   <div id="foodInventoryList"></div>
  </div>
  <div class="card">
@@ -876,9 +882,13 @@ button{font-size:.86rem!important}
  <div class="section-kicker">FFXIV COLLECT DATA HUB</div>
  <div class="row">
   <div><h2>🌐 FF14 収集図鑑</h2><div class="small">FF14の収集品と入手方法をまとめて確認できます。</div></div>
-  <button type="button" id="ffxivCollectCatalogSync" class="primary">図鑑を更新</button>
- <button class="secondary" id="ffxivCollectOwnershipSync">所持状況を同期</button>
+  <div class="wrap">
+   <button type="button" id="ffxivCollectCatalogSync" class="primary">図鑑を更新</button>
+   <button type="button" id="ffxivCollectJapaneseSync" class="secondary">日本語説明を同期</button>
+   <button type="button" class="secondary" id="ffxivCollectOwnershipSync">所持状況を同期</button>
+  </div>
  <div class="small">公開プロフィールから同期できる分だけ反映します。</div>
+ <div id="ffxivCollectJapaneseStatus" class="small" style="margin-top:6px">ミニオン・マウントの日本語説明：未同期</div>
  <div id="ffxivCollectOwnershipStatus" class="small" style="margin-top:6px"></div>
  </div>
  <div class="grid3" style="margin-top:10px">
@@ -3163,41 +3173,113 @@ function renderHistory(){
 
 
 let cookingMode="now";
-function parseCookIngredients(v){
- return String(v||"").split(/\r?\n/).map(x=>x.trim()).filter(Boolean).map(line=>{
-  const [name,qty,unit]=line.split("|").map(x=>String(x||"").trim());
-  return {name,qty:qty===""?null:Number(qty),unit};
- }).filter(x=>x.name);
+function parseCookNumber(v){
+ const s=String(v??"").trim().replace(/／/g,"/");
+ if(!s||/^(適量|少々|お好み|適宜|ひとつまみ|少量)$/u.test(s))return null;
+ const mix=s.match(/^(\d+)\s+(\d+)\/(\d+)$/);
+ if(mix)return Number(mix[1])+Number(mix[2])/Number(mix[3]);
+ const frac=s.match(/^(\d+)\/(\d+)$/);
+ if(frac&&Number(frac[2]))return Number(frac[1])/Number(frac[2]);
+ const n=Number(s);
+ return Number.isFinite(n)?n:null;
 }
-function cookIngredientsToText(a){return (a||[]).map(x=>`${x.name} | ${x.qty??""} | ${x.unit||""}`).join("\n")}
+function normalizeCookUnit(u){
+ const s=String(u||"").trim().replace(/\s+/g,"");
+ const map={"グラム":"g","ｇ":"g","G":"g","キログラム":"kg","Ｋｇ":"kg","ml":"ml","ｍｌ":"ml","mL":"ml","ミリリットル":"ml","L":"l","リットル":"l","個":"個","玉":"玉","袋":"袋","本":"本","枚":"枚","缶":"缶","パック":"パック","大さじ":"大さじ","小さじ":"小さじ"};
+ return map[s]||s;
+}
+function splitNaturalCookIngredient(line){
+ const s=String(line||"").trim().replace(/^[-・●○■□]\s*/,"");
+ if(!s)return null;
+ if(s.includes("|")){
+  const [name,qraw,uraw]=s.split("|").map(x=>String(x||"").trim());
+  const qty=parseCookNumber(qraw);
+  return {name,qty,unit:normalizeCookUnit(uraw),rawQty:qraw};
+ }
+ // 「ごま油……小さじ1」「醤油 大さじ1」「砂糖 小さじ1/2」などを許容
+ const natural=s.match(/^(.+?)(?:\s*[\.．…・:：]+\s*|\s+)(大さじ|小さじ)\s*([0-9０-９]+(?:\s*[\/／]\s*[0-9０-９]+)?|適量|少々)$/u);
+ if(natural){
+  const q=natural[3].replace(/[０-９]/g,c=>String.fromCharCode(c.charCodeAt(0)-0xFEE0));
+  return {name:natural[1].trim(),qty:parseCookNumber(q),unit:normalizeCookUnit(natural[2]),rawQty:q};
+ }
+ const tail=s.match(/^(.+?)(?:\s*[\.．…・:：]+\s*|\s+)([0-9０-９]+(?:\s*[\/／]\s*[0-9０-９]+)?)(\s*(?:g|kg|ml|mL|l|L|個|玉|袋|本|枚|缶|パック))$/u);
+ if(tail){
+  const q=tail[2].replace(/[０-９]/g,c=>String.fromCharCode(c.charCodeAt(0)-0xFEE0));
+  return {name:tail[1].trim(),qty:parseCookNumber(q),unit:normalizeCookUnit(tail[3]),rawQty:q};
+ }
+ return {name:s,qty:null,unit:"",rawQty:""};
+}
+function normalizeCookIngredient(ing){
+ if(!ing)return {name:"",qty:null,unit:""};
+ let name=String(ing.name||"").trim(),unit=normalizeCookUnit(ing.unit||""),qty=Number(ing.qty);
+ qty=Number.isFinite(qty)?qty:null;
+ // 旧版で「ごま油……小さじ1」の全体がnameに保存されたレシピをその場で救済
+ if(name && qty==null && !unit){
+  const parsed=splitNaturalCookIngredient(name);
+  if(parsed && parsed.name!==name)return {name:parsed.name,qty:parsed.qty,unit:parsed.unit};
+ }
+ return {name,qty,unit};
+}
+function parseCookIngredients(v){
+ return String(v||"").split(/\r?\n/).map(x=>x.trim()).filter(Boolean).map(splitNaturalCookIngredient).filter(x=>x&&x.name).map(normalizeCookIngredient);
+}
+function cookIngredientsToText(a){return (a||[]).map(raw=>{const x=normalizeCookIngredient(raw);return `${x.name} | ${x.qty??""} | ${x.unit||""}`}).join("\n")}
 function parseCookAlternatives(v){
  const out={};String(v||"").split(/\r?\n/).map(x=>x.trim()).filter(Boolean).forEach(line=>{const [a,b]=line.split("=");if(a&&b)out[a.trim()]=b.split(/[,、]/).map(x=>x.trim()).filter(Boolean)});return out;
 }
 function cookAlternativesToText(o){return Object.entries(o||{}).map(([k,v])=>`${k} = ${(v||[]).join(", ")}`).join("\n")}
 function foodKey(s){return String(s||"").trim().toLowerCase()}
 function foodStockMap(d){
- const m={};(d.foodInventory||[]).forEach(x=>{m[foodKey(x.name)]={...x,qty:Number(x.qty)||0}});return m;
+ const m={};(d.foodInventory||[]).forEach(x=>{m[foodKey(x.name)]={...x,qty:Number(x.qty)||0,unit:normalizeCookUnit(x.unit||"")}});return m;
+}
+function cookUnitFactor(unit){
+ const u=normalizeCookUnit(unit);
+ if(u==="kg")return {base:"g",factor:1000};
+ if(u==="g")return {base:"g",factor:1};
+ if(u==="l")return {base:"ml",factor:1000};
+ if(u==="ml")return {base:"ml",factor:1};
+ return {base:u,factor:1};
+}
+function hasEnoughCookStock(stockItem,ingredient){
+ if(!stockItem||Number(stockItem.qty)<=0)return false;
+ const ing=normalizeCookIngredient(ingredient),need=ing.qty;
+ if(need==null)return true;
+ const su=cookUnitFactor(stockItem.unit),iu=cookUnitFactor(ing.unit);
+ // 同じ単位（g↔kg、ml↔L含む）なら数量比較。それ以外は「在庫あり」を優先。
+ if(su.base&&iu.base&&su.base===iu.base)return Number(stockItem.qty)*su.factor>=need*iu.factor;
+ if(!ing.unit || !stockItem.unit)return true;
+ return true;
 }
 function analyzeCookRecipe(r,d){
  const stock=foodStockMap(d),missing=[],usedAlt=[];
- for(const ing of r.ingredients||[]){
-  const direct=stock[foodKey(ing.name)],need=ing.qty;
-  let ok=direct&&(need==null?direct.qty>0:direct.qty>=need);
+ for(const rawIng of r.ingredients||[]){
+  const ing=normalizeCookIngredient(rawIng);
+  const direct=stock[foodKey(ing.name)];
+  let ok=hasEnoughCookStock(direct,ing);
   if(!ok){
-   for(const alt of (r.alternatives?.[ing.name]||[])){
+   for(const alt of (r.alternatives?.[rawIng.name]||r.alternatives?.[ing.name]||[])){
     const a=stock[foodKey(alt)];
-    if(a&&(need==null?a.qty>0:a.qty>=need)){ok=true;usedAlt.push(`${ing.name}→${alt}`);break}
+    if(hasEnoughCookStock(a,ing)){ok=true;usedAlt.push(`${ing.name}→${alt}`);break}
    }
   }
-  if(!ok)missing.push({name:ing.name,need:need,unit:ing.unit||""});
+  if(!ok)missing.push({name:ing.name,need:ing.qty,unit:ing.unit||""});
  }
  return {possible:missing.length===0,missing,usedAlt};
 }
 function renderFoodInventory(){
  const d=load(),box=$("foodInventoryList");if(!box)return;
- const rows=(d.foodInventory||[]).slice().sort((a,b)=>(a.expiry||Infinity)-(b.expiry||Infinity)||a.name.localeCompare(b.name,"ja"));
- box.innerHTML=rows.length?rows.map(x=>`<div class="listitem"><div class="row"><b>${esc(x.name)}</b><div class="wrap"><input class="foodQtyEdit" data-id="${x.id}" type="number" min="0" step="0.1" value="${x.qty}" style="width:75px"><span>${esc(x.unit||"")}</span><button class="danger foodDel" data-id="${x.id}">×</button></div></div>${x.expiry?`<div class="small">期限：${localDateValue(x.expiry)}</div>`:""}</div>`).join(""):'<div class="empty">食材在庫はまだありません。</div>';
+ const storageOrder=["冷蔵","冷凍","常温"];
+ const normalized=(d.foodInventory||[]).map(x=>({...x,storage:x.storage||"冷蔵"}));
+ const groups=storageOrder.map(storage=>({
+  storage,
+  rows:normalized.filter(x=>x.storage===storage).sort((a,b)=>(a.expiry||Infinity)-(b.expiry||Infinity)||a.name.localeCompare(b.name,"ja"))
+ }));
+ const unknown=normalized.filter(x=>!storageOrder.includes(x.storage)).sort((a,b)=>a.name.localeCompare(b.name,"ja"));
+ if(unknown.length)groups.push({storage:"その他",rows:unknown});
+ const total=normalized.length;
+ box.innerHTML=total?groups.filter(g=>g.rows.length).map(g=>`<div style="margin-top:12px"><div class="row" style="margin-bottom:6px"><b>${g.storage==="冷蔵"?"🧊":g.storage==="冷凍"?"❄️":g.storage==="常温"?"📦":"📍"} ${esc(g.storage)}</b><span class="badge">${g.rows.length}件</span></div>${g.rows.map(x=>`<div class="listitem"><div class="row"><b>${esc(x.name)}</b><div class="wrap"><input class="foodQtyEdit" data-id="${x.id}" type="number" min="0" step="0.1" value="${x.qty}" style="width:75px"><span>${esc(x.unit||"")}</span><button class="danger foodDel" data-id="${x.id}">×</button></div></div><div class="row" style="margin-top:6px"><div class="small">${x.expiry?`期限：${localDateValue(x.expiry)}`:"期限なし"}</div><select class="foodStorageEdit" data-id="${x.id}" style="width:auto;min-width:92px"><option value="冷蔵" ${x.storage==="冷蔵"?"selected":""}>冷蔵</option><option value="冷凍" ${x.storage==="冷凍"?"selected":""}>冷凍</option><option value="常温" ${x.storage==="常温"?"selected":""}>常温</option></select></div></div>`).join("")}</div>`).join(""):'<div class="empty">食材在庫はまだありません。</div>';
  document.querySelectorAll(".foodQtyEdit").forEach(i=>i.onchange=()=>{const d=load(),x=d.foodInventory.find(v=>v.id===i.dataset.id);if(!x)return;x.qty=Math.max(0,Number(i.value)||0);save(d);renderCooking()});
+ document.querySelectorAll(".foodStorageEdit").forEach(s=>s.onchange=()=>{const d=load(),x=d.foodInventory.find(v=>v.id===s.dataset.id);if(!x)return;x.storage=s.value||"冷蔵";x.updatedAt=Date.now();save(d);renderCooking()});
  document.querySelectorAll(".foodDel").forEach(b=>b.onclick=()=>{const d=load();d.foodInventory=d.foodInventory.filter(x=>x.id!==b.dataset.id);save(d);renderCooking()});
 }
 function renderCookSuggestions(){
@@ -3233,7 +3315,7 @@ function renderCooking(){
  if(!$("cookRecipeList"))return;renderFoodInventory();renderCookSuggestions();
  const d=load(),q=($("cookSearch")?.value||"").trim().toLowerCase(),tag=($("cookTagFilter")?.value||"").trim().toLowerCase();
  let rows=(d.cookingRecipes||[]).filter(r=>{const hay=[r.name,...(r.tags||[]),...(r.ingredients||[]).map(x=>x.name)].join(" ").toLowerCase();return(!q||hay.includes(q))&&(!tag||(r.tags||[]).some(t=>t.toLowerCase().includes(tag)))});
- $("cookRecipeList").innerHTML=rows.length?rows.map(r=>{const count=(d.cookingHistory||[]).filter(h=>h.recipeId===r.id).length;return `<details class="card"><summary><b>${esc(r.name)}</b> <span class="small">作った回数 ${count}</span></summary><div style="margin-top:8px">${(r.tags||[]).map(t=>`<span class="badge">${esc(t)}</span>`).join(" ")}<div class="small" style="margin-top:6px">${(r.ingredients||[]).map(x=>`${esc(x.name)}${x.qty!=null?` ${x.qty}${esc(x.unit||"")}`:""}`).join(" ／ ")}</div>${r.memo?`<p>${nl(r.memo)}</p>`:""}<div class="wrap"><button class="success cookMade" data-id="${r.id}">作った</button><button class="secondary cookEdit" data-id="${r.id}">編集</button><button class="danger cookDelete" data-id="${r.id}">削除</button></div></div></details>`}).join(""):'<div class="empty">料理レシピはまだありません。</div>';
+ $("cookRecipeList").innerHTML=rows.length?rows.map(r=>{const count=(d.cookingHistory||[]).filter(h=>h.recipeId===r.id).length;return `<details class="card"><summary><b>${esc(r.name)}</b> <span class="small">作った回数 ${count}</span></summary><div style="margin-top:8px">${(r.tags||[]).map(t=>`<span class="badge">${esc(t)}</span>`).join(" ")}<div class="small" style="margin-top:8px">${(r.ingredients||[]).map(raw=>{const x=normalizeCookIngredient(raw);return `<div style="padding:2px 0">・${esc(x.name)}${x.qty!=null?` ${x.qty}${esc(x.unit||"")}`:""}</div>`}).join("")}</div>${r.memo?`<p>${nl(r.memo)}</p>`:""}<div class="wrap"><button class="success cookMade" data-id="${r.id}">作った</button><button class="secondary cookEdit" data-id="${r.id}">編集</button><button class="danger cookDelete" data-id="${r.id}">削除</button></div></div></details>`}).join(""):'<div class="empty">料理レシピはまだありません。</div>';
  document.querySelectorAll("#cookRecipeList .cookMade").forEach(b=>b.onclick=()=>cookMade(b.dataset.id));
  document.querySelectorAll(".cookEdit").forEach(b=>b.onclick=()=>editCookRecipe(b.dataset.id));
  document.querySelectorAll(".cookDelete").forEach(b=>b.onclick=()=>{if(!confirm("このレシピを削除しますか？"))return;const d=load();d.cookingRecipes=d.cookingRecipes.filter(x=>x.id!==b.dataset.id);save(d);renderCooking()});
@@ -4045,7 +4127,93 @@ function fcCatalogMap(kind){
  };
 }
 
-
+const XIVAPI_V2_SHEET="https://v2.xivapi.com/api/sheet";
+const FC_JA_DESCRIPTION_SHEETS={
+ minions:{sheet:"Companion",label:"ミニオン"},
+ mounts:{sheet:"Mount",label:"マウント"}
+};
+function fcPlainXivapiText(v){
+ return String(v??"").replace(/\r/g,"").replace(/\n{3,}/g,"\n\n").trim();
+}
+function fcXivapiEnglishName(row){
+ return String(row?.fields?.["Singular@lang(en)"]??row?.fields?.Singular??"").trim();
+}
+function fcXivapiJapaneseName(row){
+ return String(row?.fields?.Singular??"").trim();
+}
+function fcXivapiJapaneseDescription(row){
+ const t=row?.transient||{};
+ const v=t.Description??t["Description@lang(ja)"]??"";
+ return fcPlainXivapiText(v);
+}
+async function fcFetchXivapiJaSheet(sheet){
+ const rows=[];
+ let after=-1;
+ // Companion / Mount are small sheets, but paginate so future additions are safe.
+ for(let guard=0;guard<20;guard++){
+  const q=new URLSearchParams({
+   fields:"Singular,Singular@lang(en)",
+   transient:"Description",
+   language:"ja",
+   limit:"500"
+  });
+  if(after>=0)q.set("after",String(after));
+  const r=await fetch(`${XIVAPI_V2_SHEET}/${encodeURIComponent(sheet)}?${q}`,{headers:{Accept:"application/json"},cache:"no-store"});
+  if(!r.ok)throw new Error(`${sheet}: HTTP ${r.status}`);
+  const j=await r.json();
+  const part=Array.isArray(j?.rows)?j.rows:[];
+  if(!part.length)break;
+  rows.push(...part);
+  const last=Number(part[part.length-1]?.row_id);
+  if(!Number.isFinite(last)||last<=after)break;
+  after=last;
+  if(part.length<500)break;
+ }
+ return rows;
+}
+async function syncFFXIVCollectJapaneseDescriptions(){
+ const btn=$("ffxivCollectJapaneseSync"),st=$("ffxivCollectJapaneseStatus");
+ if(btn)btn.disabled=true;
+ if(st)st.innerHTML="<b>取得中…</b> 日本語説明を確認しています。";
+ try{
+  const d=load(),p=ffProfileData(d),fc=p.ffxivCollect||(p.ffxivCollect={lastCatalogSyncAt:0,catalogs:{},sources:{}});
+  fc.catalogs=fc.catalogs||{};
+  let total=0;
+  const result=[];
+  for(const [kind,cfg] of Object.entries(FC_JA_DESCRIPTION_SHEETS)){
+   const cat=fc.catalogs[kind];
+   const items=Array.isArray(cat?.items)?cat.items:[];
+   if(!items.length){result.push(`${cfg.label}：図鑑未取得`);continue}
+   const rows=await fcFetchXivapiJaSheet(cfg.sheet);
+   const byId=new Map(rows.map(r=>[String(r.row_id),r]));
+   const byEnglishName=new Map(rows.map(r=>[normalizeCollectionName(fcXivapiEnglishName(r)),r]).filter(([k])=>k));
+   let applied=0;
+   for(const item of items){
+    const row=byId.get(String(item.id))||byEnglishName.get(normalizeCollectionName(item.name));
+    if(!row)continue;
+    const desc=fcXivapiJapaneseDescription(row);
+    const jaName=fcXivapiJapaneseName(row);
+    if(desc){item.description_ja=desc;applied++}
+    if(jaName)item.name_ja=jaName;
+   }
+   cat.jpDescriptionUpdatedAt=Date.now();
+   cat.jpDescriptionSource="XIVAPI v2 / FFXIV game client Japanese data";
+   total+=applied;
+   result.push(`${cfg.label}：${applied}件`);
+  }
+  fc.lastJapaneseDescriptionSyncAt=Date.now();
+  save(d);
+  renderFFXIVCollectHub();
+  renderCollections();
+  renderFCExplorer();
+  if(st)st.innerHTML=`<b>✓ 日本語説明を同期</b>　${total}件<div class="small">${result.map(esc).join(" ／ ")}</div>`;
+ }catch(e){
+  console.error("Japanese description sync",e);
+  if(st)st.innerHTML=`<b>⚠ 日本語説明の取得に失敗</b><div class="small">${esc(String(e?.message||e))}</div>`;
+ }finally{
+  if(btn)btn.disabled=false;
+ }
+}
 
 
 function fcJapaneseDescription(item){
@@ -6009,9 +6177,9 @@ if($("craftReverseRun"))$("craftReverseRun").onclick=runCraftReverse;
 
 if($("foodAdd"))$("foodAdd").onclick=()=>{
  const name=$("foodName").value.trim();if(!name)return alert("食材名を入力してください");
- const d=load(),key=foodKey(name),old=d.foodInventory.find(x=>foodKey(x.name)===key),qty=Math.max(0,Number($("foodQty").value)||0),unit=$("foodUnit").value.trim(),expiry=$("foodExpiry").value?new Date($("foodExpiry").value+"T12:00:00").getTime():0;
- if(old){old.qty=qty;old.unit=unit||old.unit;old.expiry=expiry;old.updatedAt=Date.now()}else d.foodInventory.push({id:uid(),name,qty,unit,expiry,createdAt:Date.now(),updatedAt:Date.now()});
- save(d);$("foodName").value="";$("foodQty").value="1";$("foodUnit").value="";$("foodExpiry").value="";renderCooking();
+ const d=load(),key=foodKey(name),old=d.foodInventory.find(x=>foodKey(x.name)===key),qty=Math.max(0,Number($("foodQty").value)||0),unit=$("foodUnit").value.trim(),expiry=$("foodExpiry").value?new Date($("foodExpiry").value+"T12:00:00").getTime():0,storage=$("foodStorage")?.value||"冷蔵";
+ if(old){old.qty=qty;old.unit=unit||old.unit;old.expiry=expiry;old.storage=storage;old.updatedAt=Date.now()}else d.foodInventory.push({id:uid(),name,qty,unit,expiry,storage,createdAt:Date.now(),updatedAt:Date.now()});
+ save(d);$("foodName").value="";$("foodQty").value="1";$("foodUnit").value="";$("foodExpiry").value="";if($("foodStorage"))$("foodStorage").value="冷蔵";renderCooking();
 };
 if($("cookSave"))$("cookSave").onclick=()=>{
  const name=$("cookName").value.trim();if(!name)return alert("料理名を入力してください");
@@ -6054,6 +6222,7 @@ if($("minionCollectOpen"))$("minionCollectOpen").onclick=()=>{
 };
 
 if($("ffxivCollectCatalogSync"))$("ffxivCollectCatalogSync").onclick=syncFFXIVCollectCatalogs;
+if($("ffxivCollectJapaneseSync"))$("ffxivCollectJapaneseSync").onclick=syncFFXIVCollectJapaneseDescriptions;
 if($("ffxivCollectOwnershipSync"))$("ffxivCollectOwnershipSync").onclick=syncFFXIVCollectOwnership;
 if($("fcExplorerKind"))$("fcExplorerKind").onchange=renderFCExplorer;
 if($("fcExplorerSearch"))$("fcExplorerSearch").oninput=renderFCExplorer;
