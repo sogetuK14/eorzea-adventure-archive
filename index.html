@@ -288,7 +288,7 @@ button{font-size:.86rem!important}
 <aside class="sidebar" id="sidebar">
   <div class="brand">
     <h1>Life Archive</h1>
-    <div class="sub">v0.9588 “バックアップ復元修正”<br>ヒカセン、PL、そして日常。すべてを一つの記録庫へ。</div>
+    <div class="sub">v0.9589 “バックアップ復元確定版”<br>ヒカセン、PL、そして日常。すべてを一つの記録庫へ。</div>
   </div>
   <nav class="sidebar-nav">
     <button class="tab active" data-view="home">⌂ 今日</button>
@@ -1784,7 +1784,11 @@ async function initializePersistentData(){
   const idbStamp=Number(idb?._savedAt||0);
 
   let chosen=null,source="";
-  if(localValid&&idbValid){
+  const restorePending=localStorage.getItem("life_archive_restore_pending")==="1";
+  if(restorePending&&idbValid){
+   chosen=idb;source="バックアップ復元（IndexedDB）";
+   try{localStorage.removeItem("life_archive_restore_pending")}catch(e){}
+  }else if(localValid&&idbValid){
    if(idbStamp>localStamp){
     chosen=idb;source="IndexedDB（新しい保存）";
    }else{
@@ -5789,32 +5793,39 @@ async function importStableBackupFile(file){
 
  const restored=normalizeData(incoming);
  restored._savedAt=Date.now();
- LIVE_DATA=restored;
- const snapshot=structuredClone(restored);
+ LIVE_DATA=structuredClone(restored);
 
- // 大きい図鑑キャッシュはlocalStorage容量を超えることがあるため、
- // IndexedDBへの保存完了を必ず待ってから再読み込みする。
- let localOK=false,idbOK=false;
+ // まずIndexedDBへ完全保存。図鑑キャッシュのような大容量データはこちらを正とする。
+ await idbWrite(structuredClone(restored));
+
+ // localStorageは容量に収まる場合のみ二重保存。
+ let localOK=false;
  try{
-  localStorage.setItem(KEY,JSON.stringify(snapshot));
+  localStorage.setItem(KEY,JSON.stringify(restored));
   localOK=true;
  }catch(e){
-  console.warn("backup localStorage restore skipped",e);
- }
- try{
-  await idbWrite(snapshot);
-  idbOK=true;
- }catch(e){
-  console.error("backup IndexedDB restore failed",e);
+  console.warn("localStorage capacity exceeded; IndexedDB restore is primary",e);
  }
 
- // stable snapshotは容量に収まる場合のみ補助として保存。
- try{stableSaveSnapshot(snapshot)}catch(e){}
+ // 補助スナップショット。容量超過しても復元失敗扱いにはしない。
+ try{stableSaveSnapshot(restored)}catch(e){}
 
- if(!localOK&&!idbOK)throw new Error("ブラウザの保存領域へ復元できませんでした");
+ // 書き込み直後にIndexedDBから再読込して、図鑑キャッシュまで入ったか検証。
+ const verify=await idbRead();
+ const verifyCats=verify?.ffProfile?.ffxivCollect?.catalogs||{};
+ const restoredCats=restored?.ffProfile?.ffxivCollect?.catalogs||{};
+ const expected=Object.keys(restoredCats).length;
+ const actual=Object.keys(verifyCats).length;
 
- setSaveStatus(`バックアップ復元済み（${idbOK?"IndexedDB":""}${localOK&&idbOK?"＋":""}${localOK?"ブラウザ保存":""}）`,true);
- await new Promise(resolve=>setTimeout(resolve,250));
+ if(!verify || (expected>0 && actual===0)){
+  throw new Error("IndexedDBへの復元確認に失敗しました");
+ }
+
+ // 復元完了フラグをlocalStorageへ残し、次回起動時に必ずIndexedDB側を優先させる。
+ try{localStorage.setItem("life_archive_restore_pending","1")}catch(e){}
+
+ setSaveStatus(`バックアップ復元済み（図鑑 ${actual}カテゴリ）`,true);
+ await new Promise(resolve=>setTimeout(resolve,300));
  location.reload();
 }
 if($("stableBackupDownload"))$("stableBackupDownload").onclick=downloadStableBackup;
@@ -5824,18 +5835,17 @@ if($("stableBackupFile"))$("stableBackupFile").onchange=async e=>{
  catch(err){alert("バックアップを読み込めませんでした："+err.message)}
 };
 
-window.addEventListener("beforeunload",()=>{try{stableSaveSnapshot(loadRaw())}catch(e){}});
+window.addEventListener("beforeunload",()=>{try{if(LIVE_DATA)stableSaveSnapshot(LIVE_DATA)}catch(e){}});
 
 function renderPersistenceTest(){
  const el=$("persistTestStatus");if(!el)return;
- let stable=null,current=null;
- try{stable=stableLoadSnapshot()}catch(e){}
- try{current=loadRaw()}catch(e){}
- const fc=current?.ffProfile?.ffxivCollect||stable?.ffProfile?.ffxivCollect;
- const cats=fc?.catalogs||{};
+ const current=LIVE_DATA||null;
+ const cats=current?.ffProfile?.ffxivCollect?.catalogs||{};
  const count=Object.values(cats).reduce((n,c)=>n+Number(c?.count||c?.items?.length||0),0);
  const catCount=Object.keys(cats).length;
- el.innerHTML=`保存データ：<b>${current?"あり":"なし"}</b> ／ 図鑑：<b>${catCount?`${catCount}カテゴリ・${count}件`:"未取得"}</b>`;
+ const minions=Object.keys(current?.minionProgress||{}).length;
+ const mounts=Object.keys(current?.mountProgress||{}).length;
+ el.innerHTML=`図鑑：<b>${catCount?`${catCount}カテゴリ・${count}件`:"未取得"}</b> ／ ミニオン進捗：<b>${minions}</b> ／ マウント進捗：<b>${mounts}</b>`;
 }
 
 initializePersistentData().then(()=>{renderPersistenceTest();
