@@ -288,7 +288,7 @@ button{font-size:.86rem!important}
 <aside class="sidebar" id="sidebar">
   <div class="brand">
     <h1>Life Archive</h1>
-    <div class="sub">v0.9594 “図鑑 差分更新”<br>ヒカセン、PL、そして日常。すべてを一つの記録庫へ。</div>
+    <div class="sub">v0.9597 “説明文 日本語表示”<br>ヒカセン、PL、そして日常。すべてを一つの記録庫へ。</div>
   </div>
   <nav class="sidebar-nav">
     <button class="tab active" data-view="home">⌂ 今日</button>
@@ -876,7 +876,10 @@ button{font-size:.86rem!important}
  <div class="section-kicker">FFXIV COLLECT DATA HUB</div>
  <div class="row">
   <div><h2>🌐 FF14 収集図鑑</h2><div class="small">FF14の収集品と入手方法をまとめて確認できます。</div></div>
-  <button type="button" id="ffxivCollectCatalogSync" class="primary">基本図鑑を更新</button>
+  <button type="button" id="ffxivCollectCatalogSync" class="primary">図鑑を更新</button>
+ <button class="secondary" id="ffxivCollectOwnershipSync">所持状況を同期</button>
+ <div class="small">公開プロフィールから同期できる分だけ反映します。</div>
+ <div id="ffxivCollectOwnershipStatus" class="small" style="margin-top:6px"></div>
  </div>
  <div class="grid3" style="margin-top:10px">
   <div class="listitem"><b>🐾 ミニオン</b><div id="fcHubMinions" class="small">未取得</div></div>
@@ -895,7 +898,7 @@ button{font-size:.86rem!important}
   <div class="small" style="margin-top:7px">取得情報はLife Archiveに保存されます。</div>
  </details>
 <div class="card" style="margin-top:12px">
- <div class="row"><div><b>🔎 外部図鑑を見る</b><div class="small">未取得品も入手方法から探せます。</div></div></div>
+ <div class="row"><div><b>🔎 外部図鑑を見る</b><div class="small">未取得品も入手方法から探せます。説明は日本語データを優先します。</div></div></div>
  <div class="grid3" style="margin-top:8px">
   <div><label>カテゴリ</label><select id="fcExplorerKind">
    <option value="minions">ミニオン</option>
@@ -3797,6 +3800,33 @@ function normalizeCollectionName(s){
 
 
 const FFXIV_COLLECT_API="https://ffxivcollect.com/api";
+
+const FC_OWNERSHIP_LABELS={
+ minions:"ミニオン",mounts:"マウント",achievements:"アチーブメント",
+ hairstyles:"ヘアカタログ",emotes:"エモート",orchestrions:"オーケストリオン",
+ portraits:"ポートレート",spells:"青魔法",cards:"カード"
+};
+function fcProgressKey(kind){
+ const map={minions:"minionProgress",mounts:"mountProgress",achievements:"achievementProgress",
+ hairstyles:"hairstyleProgress",emotes:"emoteProgress",orchestrions:"orchestrionProgress",
+ portraits:"portraitProgress",spells:"spellProgress",cards:"cardProgress",facewear:"facewearProgress"};
+ return map[kind]||`${kind}Progress`;
+}
+function fcOwnedIdsFromPayload(payload){
+ const candidates=[
+  payload?.owned,payload?.items,payload?.results,payload?.data,
+  payload?.minions,payload?.mounts,payload?.achievements,payload?.hairstyles,
+  payload?.emotes,payload?.orchestrions,payload?.portraits,payload?.spells,payload?.cards
+ ];
+ for(const arr of candidates){
+  if(!Array.isArray(arr))continue;
+  const ids=arr.map(x=>typeof x==="object"?(x.id??x.ID??x.item_id??x.itemId):x)
+               .filter(v=>v!==undefined&&v!==null).map(String);
+  if(ids.length)return ids;
+ }
+ return [];
+}
+
 const FFXIV_COLLECT_CATALOGS={
  minions:{label:"ミニオン",endpoints:["minions"],hub:"fcHubMinions"},
  mounts:{label:"マウント",endpoints:["mounts"],hub:"fcHubMounts"},
@@ -3876,6 +3906,69 @@ function renderFFXIVCollectHub(){
  }
  renderFCExplorer();
 }
+
+async function syncFFXIVCollectOwnership(){
+ const btn=$("ffxivCollectOwnershipSync"),st=$("ffxivCollectOwnershipStatus");
+ const d=load(),p=ffProfileData(d);
+ const cid=String(p.lodestoneId||p.characterId||"").trim();
+ if(!cid){alert("先にLodestone IDを登録してください。");return}
+
+ if(btn)btn.disabled=true;
+ if(st)st.innerHTML="<b>同期中…</b> 所持状況を確認しています。";
+
+ // Lodestone公開情報からFFXIV Collectが自動更新できるカテゴリだけを対象にする。
+ const supported=[
+  ["minions","ミニオン"],
+  ["mounts","マウント"],
+  ["achievements","アチーブメント"],
+  ["emotes","エモート"],
+  ["facewear","フェイスアクセ"]
+ ];
+
+ let total=0;
+ const rows=[];
+
+ for(const [kind,label] of supported){
+  try{
+   const url=`https://ffxivcollect.com/api/characters/${encodeURIComponent(cid)}/${kind}/owned`;
+   const r=await fetch(url,{headers:{Accept:"application/json"},cache:"no-store"});
+   if(!r.ok)throw new Error(`HTTP ${r.status}`);
+   const payload=await r.json();
+
+   let ids=fcOwnedIdsFromPayload(payload);
+
+   // Some endpoints may return a bare array.
+   if(!ids.length&&Array.isArray(payload)){
+    ids=payload.map(x=>typeof x==="object"?(x.id??x.ID??x.item_id??x.itemId):x)
+               .filter(v=>v!==undefined&&v!==null).map(String);
+   }
+
+   const key=fcProgressKey(kind);
+   d[key]=d[key]||{};
+
+   for(const id of ids){
+    const prev=d[key][id]||{};
+    d[key][id]={...prev,done:true,owned:true,syncedAt:Date.now()};
+   }
+
+   total+=ids.length;
+   rows.push(`${label}：${ids.length}件`);
+  }catch(e){
+   console.error("FFXIV Collect ownership sync",kind,e);
+   rows.push(`${label}：取得できませんでした`);
+  }
+ }
+
+ save(d);
+ renderCollections();
+ renderFFXIVCollectHub();
+ renderFFSummary();
+
+ const manual=["ヘアカタログ","オーケストリオン","ポートレート","青魔法","カード"];
+ if(st)st.innerHTML=`<b>✓ 所持状況を同期</b>　${total}件<div class="small">${rows.map(esc).join(" ／ ")}</div><div class="small">手動管理：${manual.join("・")}</div>`;
+ if(btn)btn.disabled=false;
+}
+
 async function syncFFXIVCollectCatalogs(){
  const btn=$("ffxivCollectCatalogSync"),st=$("ffxivCollectHubStatus");
  if(btn)btn.disabled=true;
@@ -3954,6 +4047,33 @@ function fcCatalogMap(kind){
 
 
 
+
+function fcJapaneseDescription(item){
+ if(!item)return "";
+ // APIに日本語説明フィールドが含まれる場合は必ずそちらを優先。
+ const direct=[
+  item.description_ja,item.descriptionJa,item.japanese_description,
+  item.ja?.description,item.translations?.ja?.description,
+  item.localization?.ja?.description
+ ].find(v=>typeof v==="string"&&v.trim());
+ if(direct)return direct.trim();
+
+ const raw=String(item.description||"").trim();
+ if(!raw)return "";
+
+ // 英語説明を勝手に機械翻訳して「公式文」に見せない。
+ // 日本語が含まれている説明だけ、そのまま表示する。
+ if(/[ぁ-んァ-ヶ一-龯々〆〤]/.test(raw))return raw;
+ return "";
+}
+function fcDescriptionHTML(item){
+ const ja=fcJapaneseDescription(item);
+ if(ja)return `<details style="margin-top:4px"><summary class="small">説明</summary><div class="small" style="margin-top:3px">${esc(ja)}</div></details>`;
+ const raw=String(item?.description||"").trim();
+ if(raw)return `<details style="margin-top:4px"><summary class="small">説明</summary><div class="small muted" style="margin-top:3px">日本語説明は未取得</div></details>`;
+ return "";
+}
+
 function fcAcquisitionInfo(item){
  const s=item?.sources??item?.source??[];
  const rows=Array.isArray(s)?s:[s];
@@ -4018,7 +4138,7 @@ function renderFCExplorer(){
   const name=fcJapaneseTitle(x,kind)||fcJapaneseProperName(x.name||"")||x.name||`#${x.id}`;
   const meta=[x.patch?`Patch ${x.patch}`:"",x.points!=null?`${x.points}pt`:"",x.category?fcJapaneseText(x.category):"",x.type?fcJapaneseText(x.type):""].filter(Boolean).join(" ／ ");
   const ownedBadge=progress?`<span class="badge ${owned?"green":""}">${owned?"✓ 取得済み":"未取得"}</span>`:"";
-  return `<div class="listitem"><div class="row"><div><b>${esc(name)}</b> ${ownedBadge}</div><span class="small">${esc(meta)}</span></div>${fcAcquisitionHTML(x)}${x.description?`<details style="margin-top:4px"><summary class="small">説明</summary><div class="small" style="margin-top:3px">${esc(x.description)}</div></details>`:""}</div>`;
+  return `<div class="listitem"><div class="row"><div><b>${esc(name)}</b> ${ownedBadge}</div><span class="small">${esc(meta)}</span></div>${fcAcquisitionHTML(x)}${fcDescriptionHTML(x)}</div>`;
  }).join(""):'<div class="empty">該当データはありません。</div>';
 }
 
@@ -4164,6 +4284,12 @@ const FC_ACQ_JA_RULES=[
  [/Exchange|Trade/i,"交換"],
  [/Gold Saucer|MGP/i,"ゴールドソーサー"],
  [/Seasonal Event|Seasonal/i,"シーズナルイベント"],
+ [/Tomestones?/i,"アラガントームストーン"],
+ [/Allied Seals?/i,"同盟記章"],
+ [/Centurio Seals?/i,"セントリオ記章"],
+ [/Bicolor Gemstones?/i,"バイカラージェム"],
+ [/Wolf Marks?/i,"対人戦績"],
+ [/Achievement Certificates?/i,"アチーブメントスクリップ"],
  [/Online Store|Mog Station/i,"オンラインストア"],
  [/Treasure Map|Treasure Hunt/i,"宝の地図"],
  [/F\.?A\.?T\.?E\.?/i,"F.A.T.E."],
@@ -5928,6 +6054,7 @@ if($("minionCollectOpen"))$("minionCollectOpen").onclick=()=>{
 };
 
 if($("ffxivCollectCatalogSync"))$("ffxivCollectCatalogSync").onclick=syncFFXIVCollectCatalogs;
+if($("ffxivCollectOwnershipSync"))$("ffxivCollectOwnershipSync").onclick=syncFFXIVCollectOwnership;
 if($("fcExplorerKind"))$("fcExplorerKind").onchange=renderFCExplorer;
 if($("fcExplorerSearch"))$("fcExplorerSearch").oninput=renderFCExplorer;
 if($("fcExplorerStatus"))$("fcExplorerStatus").onchange=renderFCExplorer;
