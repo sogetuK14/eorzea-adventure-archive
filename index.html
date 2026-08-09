@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Life Archive v0.9703</title>
+<title>Life Archive v0.9704</title>
 <style>
 :root{--bg:#0b1118;--panel:#172331;--panel2:#223247;--text:#f5f7fa;--muted:#aeb9c8;--gold:#d7b55b;--line:#3a4d64;--green:#8fd0a2;--red:#ed9191;--blue:#8fc5ff;--purple:#c8adff}
 *{box-sizing:border-box}body{margin:0;font-family:"Segoe UI","Yu Gothic UI",sans-serif;color:var(--text);background:radial-gradient(circle at 85% 0,rgba(215,181,91,.13),transparent 30%),linear-gradient(#101925,var(--bg));min-height:100vh}
@@ -353,7 +353,7 @@ button{font-size:.86rem!important}
 <aside class="sidebar" id="sidebar">
   <div class="brand">
     <h1>Life Archive</h1>
-    <div class="sub">v0.9703 “日本語説明 同期”<br>ヒカセン、PL、そして日常。すべてを一つの記録庫へ。</div>
+    <div class="sub">v0.9704 “日本語説明 同期”<br>ヒカセン、PL、そして日常。すべてを一つの記録庫へ。</div>
   </div>
   <nav class="sidebar-nav">
     <button class="tab active" data-view="home">⌂ ホーム</button>
@@ -6935,6 +6935,24 @@ $("importBtn").onclick=async()=>{
   console.error("backup restore failed",e);
   alert("Life Archiveのバックアップを復元できませんでした："+(e?.message||e));
  }
+};
+if($("quickImportBtn"))$("quickImportBtn").onclick=async()=>{
+ const f=$("quickImportFile")?.files?.[0];if(!f)return alert("QUICK転送ファイルを選んでください。");
+ try{
+  const payload=JSON.parse(await f.text());
+  if(payload?.format!=="life-archive-quick"||!Array.isArray(payload.items))throw new Error("Life Archive QUICKの転送ファイルではありません。");
+  const d=load();d.inbox=d.inbox||[];
+  const existing=new Set(d.inbox.map(x=>String(x.quickSourceId||"")));
+  let added=0;
+  payload.items.forEach(q=>{
+   if(!q?.id||existing.has(String(q.id)))return;
+   const ts=q.date?new Date(q.date+"T12:00:00").getTime():Number(q.createdAt||Date.now());
+   d.inbox.push({id:uid(),text:String(q.text||""),kind:String(q.kind||"記録"),classification:String(q.kind||"記録"),tags:Array.isArray(q.tags)?q.tags:[],date:q.date||"",createdAt:ts,updatedAt:Date.now(),done:false,doneAt:0,quickSourceId:String(q.id),source:"Life Archive QUICK"});
+   added++;
+  });
+  save(d);renderAll();if(typeof renderTodayHub==="function")renderTodayHub();if(typeof renderDateArchive==="function")renderDateArchive();
+  $("backupMsg").textContent=`QUICK受信箱から ${added}件追加しました。${payload.items.length-added}件は取り込み済みのためスキップしました。`;
+ }catch(e){console.error(e);alert("QUICK受信箱を取り込めませんでした："+(e?.message||e))}
 };
 ["fishSearch"].forEach(id=>{if($(id))$(id).oninput=()=>renderFishing()});["fishExpansion","fishStatus","fishKind"].forEach(id=>{if($(id))$(id).onchange=()=>renderFishing()});
 
