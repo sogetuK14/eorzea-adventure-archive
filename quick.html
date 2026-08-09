@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Life Archive QUICK v0.05</title>
+<title>Life Archive QUICK v0.06</title>
 <style>
 :root{color-scheme:dark;--bg:#071017;--panel:#0d1922;--line:#24404f;--text:#e9f6fb;--muted:#93a9b5;--accent:#62dcff;--gold:#e6c56e}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:"Segoe UI","Noto Sans JP",sans-serif}
@@ -40,11 +40,14 @@ textarea{min-height:110px;resize:vertical}button{cursor:pointer;background:#102a
  <div id="list"></div>
 </div>
 <div class="card">
- <div class="row"><div><b>今日やること</b><div class="muted" id="todayTaskCount">PCから未読込</div></div><div><button id="todayImportBtn">↑ 今日を読み込む</button></div></div>
- <input id="todayImportFile" type="file" accept=".json,application/json,text/plain" style="margin-top:10px">
- <details style="margin-top:8px"><summary class="muted">ファイルを読めない場合</summary>
-  <textarea id="todayImportText" placeholder="PC版で書き出したTODAY JSONの内容を貼り付け"></textarea>
-  <button id="todayImportPaste" style="margin-top:8px">貼り付けた「今日」を読み込む</button>
+ <div><b>今日やること</b><div class="muted" id="todayTaskCount">PCから未読込</div></div>
+ <label>PC版の TODAY JSON</label>
+ <input id="todayImportFile" type="file" accept=".json,application/json,*/*">
+ <button id="todayImportNow" class="primary" style="margin-top:8px">↑ 選んだ「今日」を読み込む</button>
+ <div id="todaySelectedFile" class="muted" style="margin-top:6px">ファイル未選択</div>
+ <details style="margin-top:8px"><summary class="muted">どうしても読めない場合</summary>
+  <textarea id="todayImportText" placeholder="TODAY JSONの中身を貼り付け"></textarea>
+  <button id="todayImportPaste" style="margin-top:8px">貼り付けデータを読み込む</button>
  </details>
  <div id="todayTaskStatus" class="muted" style="margin-top:8px"></div>
  <div id="todayTaskList"></div>
@@ -95,44 +98,51 @@ function renderTodayTasks(){
  $("todayTaskList").innerHTML=items.length?items.map(x=>`<div class="item"><label style="margin:0;color:var(--text)"><input type="checkbox" data-today-id="${esc(x.id)}" ${x.done?"checked":""} style="width:auto"> ${esc(x.text||x.title||"タスク")}</label>${(x.tags||[]).length?`<div class="muted">#${x.tags.map(esc).join(" #")}</div>`:""}</div>`).join(""):'<div class="empty">今日やることはありません。</div>';
  document.querySelectorAll("[data-today-id]").forEach(el=>el.onchange=()=>{const d=loadToday(),x=(d.items||[]).find(v=>String(v.id)===String(el.dataset.todayId));if(!x)return;x.done=el.checked;x.doneAt=el.checked?Date.now():0;saveToday(d);renderTodayTasks()});
 }
-function readFileText(file){
- return new Promise((resolve,reject)=>{
-  try{
-   const r=new FileReader();
-   r.onload=()=>resolve(String(r.result||""));
-   r.onerror=()=>reject(r.error||new Error("ファイルを読み込めませんでした。"));
-   r.readAsText(file,"UTF-8");
-  }catch(e){reject(e)}
- });
-}
-function applyTodayPayload(text){
- const payload=typeof text==="string"?JSON.parse(text):text;
- if(payload?.format!=="life-archive-today"||!Array.isArray(payload.items))throw new Error("Life Archiveの「今日」転送ファイルではありません。");
- saveToday({date:payload.date||"",items:payload.items,importedAt:Date.now()});
+function applyTodayPayload(payload){
+ if(typeof payload==="string")payload=JSON.parse(payload);
+ if(!payload||payload.format!=="life-archive-today"||!Array.isArray(payload.items)){
+  throw new Error("Life Archiveの「今日」転送データではありません。");
+ }
+ saveToday({date:String(payload.date||""),items:payload.items,importedAt:Date.now()});
  $("todayTaskStatus").textContent=`${payload.date||"今日"}：${payload.items.length}件読み込みました。`;
  renderTodayTasks();
- return payload;
 }
-$("todayImportBtn").onclick=()=>$("todayImportFile").click();
-$("todayImportFile").onchange=async()=>{
- const f=$("todayImportFile").files?.[0];if(!f)return;
- $("todayTaskStatus").textContent=`${f.name||"ファイル"} を読み込み中…`;
- try{
-  const text=await readFileText(f);
-  applyTodayPayload(text);
- }catch(e){
-  console.error("today import failed",e);
-  $("todayTaskStatus").textContent="ファイルを読み込めませんでした。下の貼り付け読み込みも使えます。";
-  alert("「今日」を読み込めませんでした："+(e?.message||e));
- }finally{
-  $("todayImportFile").value="";
- }
+$("todayImportFile").onchange=()=>{
+ const f=$("todayImportFile").files&&$("todayImportFile").files[0];
+ $("todaySelectedFile").textContent=f?`選択：${f.name}（${f.size} bytes）`:"ファイル未選択";
+};
+$("todayImportNow").onclick=()=>{
+ const f=$("todayImportFile").files&&$("todayImportFile").files[0];
+ if(!f)return alert("TODAY JSONを選んでください。");
+ $("todayTaskStatus").textContent="読み込み中…";
+ const reader=new FileReader();
+ reader.onload=()=>{
+  try{
+   applyTodayPayload(String(reader.result||""));
+   $("todayImportFile").value="";
+   $("todaySelectedFile").textContent="ファイル未選択";
+  }catch(e){
+   console.error(e);
+   $("todayTaskStatus").textContent="JSONの解析に失敗しました。";
+   alert("「今日」を読み込めませんでした："+(e&&e.message?e.message:e));
+  }
+ };
+ reader.onerror=()=>{
+  $("todayTaskStatus").textContent="ファイルを開けませんでした。";
+  alert("スマホからファイルを開けませんでした。下の貼り付け読み込みを使えます。");
+ };
+ reader.readAsText(f);
 };
 $("todayImportPaste").onclick=()=>{
  const text=$("todayImportText").value.trim();
  if(!text)return alert("TODAY JSONを貼り付けてください。");
- try{applyTodayPayload(text);$("todayImportText").value=""}
- catch(e){$("todayTaskStatus").textContent="貼り付けデータを読み込めませんでした。";alert(e?.message||e)}
+ try{
+  applyTodayPayload(text);
+  $("todayImportText").value="";
+ }catch(e){
+  $("todayTaskStatus").textContent="貼り付けデータを読み込めませんでした。";
+  alert("「今日」を読み込めませんでした："+(e&&e.message?e.message:e));
+ }
 };
 $("export").onclick=async()=>{
  const payload=transferPayload(),text=JSON.stringify(payload,null,2),name=`LifeArchive_QUICK_${localDate()}.json`,blob=new Blob([text],{type:"application/json"});
