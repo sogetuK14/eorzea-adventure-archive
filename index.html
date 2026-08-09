@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Life Archive v0.9600</title>
+<title>Life Archive v0.9703</title>
 <style>
 :root{--bg:#0b1118;--panel:#172331;--panel2:#223247;--text:#f5f7fa;--muted:#aeb9c8;--gold:#d7b55b;--line:#3a4d64;--green:#8fd0a2;--red:#ed9191;--blue:#8fc5ff;--purple:#c8adff}
 *{box-sizing:border-box}body{margin:0;font-family:"Segoe UI","Yu Gothic UI",sans-serif;color:var(--text);background:radial-gradient(circle at 85% 0,rgba(215,181,91,.13),transparent 30%),linear-gradient(#101925,var(--bg));min-height:100vh}
@@ -281,17 +281,84 @@ button{font-size:.86rem!important}
 @media(max-width:700px){.ff-profile-card{grid-template-columns:90px minmax(0,1fr)}.ff-profile-avatar{width:90px;height:110px}}
 </style>
 
-</head>
+
+<style id="pomodoroMiniStyle">
+#pomodoroMini{position:fixed;right:16px;bottom:16px;z-index:80;width:250px;background:rgba(8,16,27,.97);border:1px solid rgba(77,220,255,.42);box-shadow:0 10px 36px #0009,0 0 20px rgba(77,220,255,.08);border-radius:8px;overflow:hidden;backdrop-filter:blur(10px)}
+#pomodoroMini.pomo-break{border-color:rgba(101,231,189,.62)}
+#pomodoroMini.pomo-paused{opacity:.88}
+.pomo-head{display:flex;align-items:center;gap:8px;padding:7px 9px;background:rgba(77,220,255,.08);border-bottom:1px solid rgba(77,220,255,.18);cursor:default}
+.pomo-dot{width:7px;height:7px;border-radius:50%;background:var(--sn-cyan);box-shadow:0 0 9px var(--sn-cyan)}
+.pomo-break .pomo-dot{background:var(--green);box-shadow:0 0 9px var(--green)}
+.pomo-title{font-size:.72rem;font-weight:800;letter-spacing:.08em;flex:1}.pomo-collapse{border:0!important;background:transparent!important;padding:2px 5px!important;color:var(--muted)!important}
+.pomo-body{padding:9px 10px 10px}.pomo-time{font:700 1.65rem/1 Consolas,"Segoe UI",sans-serif;letter-spacing:.05em;text-align:center;margin:4px 0 7px;color:#f4fbff}.pomo-mode{text-align:center;font-size:.75rem;color:var(--muted);margin-bottom:8px}.pomo-actions{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px}.pomo-actions button{padding:6px 5px!important;font-size:.72rem!important}.pomo-settings{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px}.pomo-settings label{margin:0;font-size:.68rem}.pomo-settings input{padding:5px!important;font-size:.74rem!important;margin-top:3px}.pomo-count{text-align:center;font-size:.68rem;color:var(--muted);margin-top:7px}
+#pomodoroMini.collapsed{width:auto;min-width:155px}.collapsed .pomo-body{display:none}.collapsed .pomo-head{border-bottom:0}.collapsed .pomo-title:after{content:"  " attr(data-mini)}
+#pomodoroAlert{position:fixed;left:50%;top:62px;transform:translateX(-50%) translateY(-14px);z-index:95;min-width:min(520px,calc(100vw - 28px));padding:12px 18px;border:1px solid var(--green);background:rgba(10,28,24,.97);box-shadow:0 10px 35px #0009;border-radius:6px;text-align:center;font-weight:800;opacity:0;pointer-events:none;transition:.2s}.pomo-alert-show{opacity:1!important;transform:translateX(-50%) translateY(0)!important}
+/* Eorzea clock + saved ET alarms */
+.eorzea-clock{padding:8px 10px;border-bottom:1px solid rgba(77,220,255,.18);background:rgba(5,13,23,.58)}
+.et-clock-row{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.et-clock-box{background:#09131f;border:1px solid rgba(77,220,255,.18);border-radius:4px;padding:6px 7px;text-align:center}
+.et-clock-label{font-size:.61rem;letter-spacing:.12em;color:var(--muted)}
+.et-clock-value{font:700 1.05rem/1.2 Consolas,"Segoe UI",sans-serif;margin-top:2px;color:#f4fbff}
+.et-clock-value.et{color:#8feaff}
+.et-next{font-size:.67rem;color:var(--muted);margin-top:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.et-alarm-details{padding:0 10px 9px}
+.et-alarm-details>summary{cursor:pointer;font-size:.7rem;color:#bcd3df;padding:7px 0 2px}
+.et-alarm-form{display:grid;grid-template-columns:1fr 72px;gap:5px;margin-top:6px}
+.et-alarm-form input{padding:5px 6px!important;font-size:.72rem!important}
+.et-alarm-form textarea{grid-column:1/-1;min-height:46px!important;padding:5px 6px!important;font-size:.72rem!important}
+.et-alarm-form button{grid-column:1/-1;padding:6px!important;font-size:.72rem!important}
+.et-alarm-tools{display:flex;gap:5px;align-items:center;margin-top:6px}
+.et-alarm-tools button{padding:5px 7px!important;font-size:.68rem!important}
+.et-alarm-list{max-height:190px;overflow:auto;margin-top:7px}
+.et-alarm-item{border-top:1px solid rgba(77,220,255,.12);padding:6px 0}
+.et-alarm-item:first-child{border-top:0}
+.et-alarm-main{display:grid;grid-template-columns:auto 1fr auto;gap:6px;align-items:center}
+.et-alarm-main input[type="checkbox"]{width:auto!important;margin:0}
+.et-alarm-time{font:700 .78rem Consolas,"Segoe UI",sans-serif;color:#8feaff}
+.et-alarm-name{font-size:.72rem;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.et-alarm-delete{padding:2px 5px!important;font-size:.65rem!important}
+.et-alarm-memo{font-size:.64rem;color:var(--muted);margin:3px 0 0 23px;white-space:pre-wrap;overflow-wrap:anywhere}
+#etAlarmAlert{position:fixed;left:50%;top:62px;transform:translateX(-50%) translateY(-14px);z-index:96;min-width:min(560px,calc(100vw - 28px));padding:13px 18px;border:1px solid var(--sn-cyan);background:rgba(7,24,34,.98);box-shadow:0 10px 35px #0009,0 0 22px rgba(77,220,255,.1);border-radius:6px;text-align:center;font-weight:800;opacity:0;pointer-events:none;transition:.2s}
+#etAlarmAlert.show{opacity:1;transform:translateX(-50%) translateY(0)}
+#pomodoroMini.collapsed .eorzea-clock{border-bottom:0}
+#pomodoroMini.collapsed .et-alarm-details{display:none}
+@media(max-width:650px){#pomodoroMini{right:8px;bottom:8px;width:235px}.pomo-time{font-size:1.45rem}.et-clock-value{font-size:.95rem}}
+</style>
+
+
+<style id="collectionJournalStyle">
+.fc-journal{margin-top:8px;padding:8px;border-top:1px dashed rgba(77,220,255,.18)}
+.fc-journal summary{cursor:pointer;color:#cfe9f7;font-weight:700}
+.fc-journal-grid{display:grid;grid-template-columns:170px 1fr;gap:8px;margin-top:8px}
+.fc-journal textarea{min-height:64px!important}
+.fc-check-list{display:grid;gap:5px;margin-top:7px}
+.fc-check-row{display:grid;grid-template-columns:auto 1fr auto;gap:7px;align-items:start;padding:4px 0}
+.fc-check-row input[type="checkbox"]{width:auto!important;margin-top:4px}
+.fc-check-row.done .fc-check-text{text-decoration:line-through;opacity:.65}
+.fc-check-text{font-size:.78rem;white-space:pre-wrap;overflow-wrap:anywhere}
+.fc-check-add{display:grid;grid-template-columns:1fr auto;gap:6px;margin-top:7px}
+@media(max-width:650px){.fc-journal-grid{grid-template-columns:1fr}}
+</style>
+<style id="achievementTimelineStyle">
+.ach-check-date{font-size:.66rem;color:var(--muted);margin-left:6px;white-space:nowrap}
+.ach-progress-timeline{margin-top:8px;padding-top:7px;border-top:1px dashed rgba(77,220,255,.18)}
+.ach-progress-event{font-size:.72rem;padding:3px 0;color:#cfe1eb}
+</style>
+<style id="activityTimerStyleV09640">
+.activity-mini{padding:8px 10px;border-top:1px solid rgba(77,220,255,.18)}.activity-head{display:flex;justify-content:space-between;gap:8px;align-items:center}.activity-clock{font:800 1.2rem Consolas,"Segoe UI",sans-serif;color:#9eeeff}.activity-name{font-size:.7rem;max-width:145px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.activity-controls{display:flex;gap:5px;margin-top:6px}.activity-controls button{flex:1;padding:6px!important;font-size:.68rem!important}.activity-form{display:grid;gap:5px;margin-top:7px}.activity-form input,.activity-form select,.activity-form textarea{font-size:.72rem!important;padding:5px 6px!important}.activity-form textarea{min-height:42px!important}.activity-history{max-height:190px;overflow:auto;margin-top:7px}.activity-history-item{border-top:1px solid rgba(77,220,255,.12);padding:6px 0;font-size:.7rem}.activity-history-time{font-family:Consolas,"Segoe UI",sans-serif;color:#9eeeff}.activity-lap-row{display:flex;justify-content:space-between;gap:8px;padding:3px 0;border-top:1px dashed rgba(77,220,255,.12)}#pomodoroMini.collapsed .activity-mini .activity-form,#pomodoroMini.collapsed .activity-mini .activity-controls,#pomodoroMini.collapsed .activity-mini details{display:none}
+</style></head>
 <body>
 <div class="sidebar-overlay" id="sidebarOverlay"></div>
 <div class="app-shell">
 <aside class="sidebar" id="sidebar">
   <div class="brand">
     <h1>Life Archive</h1>
-    <div class="sub">v0.9600 “日本語説明 同期”<br>ヒカセン、PL、そして日常。すべてを一つの記録庫へ。</div>
+    <div class="sub">v0.9703 “日本語説明 同期”<br>ヒカセン、PL、そして日常。すべてを一つの記録庫へ。</div>
   </div>
   <nav class="sidebar-nav">
-    <button class="tab active" data-view="home">⌂ 今日</button>
+    <button class="tab active" data-view="home">⌂ ホーム</button>
+    <button class="tab" data-view="todayHub">📅 今日</button>
+    <button class="tab" data-view="activityLog">⏱ 時間記録</button>
     <button class="tab" data-view="dateArchive">📅 日付アーカイブ</button>
     <button class="tab" data-view="inbox">📥 受信箱</button>
     <button class="tab" data-view="records">📚 記録庫</button>
@@ -306,6 +373,7 @@ button{font-size:.86rem!important}
         <button class="tab" data-view="weapons">武器制作</button>
         <button class="tab" data-view="fishing">釣り手帳</button>
         <button class="tab" data-view="ffcollect">収集図鑑</button>
+        <button class="tab" data-view="bicolor">バイカラージェム</button>
         <button class="tab" data-view="cards">トリプルトライアド</button>
         <button class="nav-anchor" data-view="records" data-record-type="FF14">冒険記録</button>
         <button class="nav-anchor" data-view="history" data-history-category="FF14">挑戦履歴</button>
@@ -325,7 +393,6 @@ button{font-size:.86rem!important}
       <div class="nav-children">
         <button class="tab" data-view="trpg">PL履歴</button>
         <button class="tab" data-view="trpg_kp">KP履歴</button>
-        <button class="tab" data-view="todayHub">今日</button>
         <button class="tab" data-view="peopleCodex">人物・PC図鑑</button>
         <button class="tab" data-view="scenarioLibrary">所持シナリオ</button>
         <button class="nav-anchor" data-view="records" data-record-type="TRPG">卓の記録</button>
@@ -375,7 +442,7 @@ button{font-size:.86rem!important}
 <section id="dateArchive" class="view">
 <section class="panel">
  <div class="row">
-  <div><h2>📅 日付アーカイブ</h2><div class="small">記録庫のデータを日付から振り返ります。ここに別保存はしません。</div></div>
+  <div><h2>📅 日付アーカイブ</h2><div class="small">Life Archive内の日付を持つ記録をまとめて振り返ります。アチーブ達成や途中チェックも自動でここに並びます。ここに別保存はしません。</div></div>
   <button type="button" class="secondary" id="dateArchiveToday">今日へ</button>
  </div>
  <div class="row" style="margin-top:12px">
@@ -681,22 +748,24 @@ button{font-size:.86rem!important}
 <div class="card" id="craftInventoryPanel" style="border-color:var(--blue);margin:14px 0">
 <div class="row">
  <div><b>📦 素材在庫から逆引き</b><div class="small">持っている素材を登録すると、未制作レシピから「今すぐ作れる／加工すれば作れる／あと少し」を抽出します。</div></div>
- <div class="wrap"><button type="button" id="craftIndexBuild" class="secondary">必要素材データを準備</button><span id="craftIndexStatus" class="small">未準備</span></div>
+ <div class="wrap"><button type="button" id="craftIndexBuild" class="secondary">必要素材データを再取得</button><span id="craftIndexStatus" class="small">未準備</span></div>
 </div>
 <div class="inline2" style="margin-top:10px">
- <div><label>素材</label><input id="craftInventoryName" list="craftIngredientCatalog" placeholder="例：鉄鉱"><datalist id="craftIngredientCatalog"></datalist></div>
+ <div><label>素材</label><input id="craftInventoryName" list="craftIngredientCatalog" placeholder="例：鉄鉱"><datalist id="craftIngredientCatalog"></datalist><div class="small">候補から選択／直接入力のどちらでも登録できます。直接入力した素材も、同じ名前のレシピ素材として照合します。</div></div>
  <div><label>所持数</label><input id="craftInventoryQty" type="number" min="0" step="1" value="1"></div>
 </div>
 <button type="button" id="craftInventoryAdd" class="primary">在庫へ追加・更新</button>
 <div id="craftInventoryList" style="margin-top:10px"></div>
 <div class="row" style="margin-top:12px">
  <div class="wrap">
+  <button type="button" class="secondary craftReverseMode" data-mode="uses">この素材を使う</button>
   <button type="button" class="secondary craftReverseMode" data-mode="now">今すぐ作れる</button>
   <button type="button" class="secondary craftReverseMode" data-mode="process">加工すれば作れる</button>
   <button type="button" class="secondary craftReverseMode" data-mode="near">あと少し</button>
  </div>
  <div class="wrap"><label style="margin:0">不足数 <input id="craftNearLimit" type="number" min="1" max="20" value="3" style="width:70px"></label><button type="button" id="craftReverseRun" class="primary">判定する</button></div>
 </div>
+<div class="small" style="margin-top:8px">「この素材を使う」は所持素材を1つでも使うレシピを表示。「今すぐ作れる」は必要素材がすべて揃っているレシピだけを表示します。</div>
 <div id="craftReverseStatus" class="small" style="margin-top:8px"></div>
 <div id="craftReverseResults" style="margin-top:8px"></div>
 </div>
@@ -722,7 +791,7 @@ button{font-size:.86rem!important}
 
 <section id="guildleves" class="view">
 <section class="panel">
-<h2>📜 ギルドリーヴ</h2>
+<h2>📜 ギルドリーヴ</h2><p class="small">正式な日本語タイトルが取得できるリーヴのみ表示します。受注場所と納品NPCも、ゲームデータから取得できる範囲で表示します。クラスはLeveAssignmentTypeの正式データから、クラフター／ギャザラー職ごとに分けます。番号だけの仮タイトルは表示しません。</p>
 <p class="small">ギルドリーヴの一覧と達成状況を管理します。データ本体と自分のチェックは分離保存です。</p>
 <div class="card" style="border-color:var(--blue)">
 <b>📦 ギルドリーヴ・データパック v0.9480</b>
@@ -739,12 +808,12 @@ button{font-size:.86rem!important}
 <div><label>達成状態</label><select id="leveStatus"><option value="">すべて</option><option value="todo">未達成</option><option value="done">達成済み</option></select></div>
 </div>
 <div class="inline2">
-<div><label>カテゴリ</label><select id="leveCategory"><option value="">すべて</option></select></div>
+<div><label>クラス</label><select id="leveCategory"><option value="">すべて</option></select></div>
 <div><label>レベル帯</label><select id="leveLevel"><option value="">すべて</option></select></div>
 </div>
 <div class="inline2">
 <div><label>表示件数</label><select id="levePageSize"><option value="100">100件</option><option value="200">200件</option><option value="500">500件</option></select></div>
-<div class="row" style="align-items:end"><button type="button" id="leveReload" class="secondary">データを再読込</button><span id="leveLoadStatus" class="small">未読込</span></div>
+<div class="row" style="align-items:end"><button type="button" id="leveReload" class="secondary">正式タイトルを再取得</button><span id="leveLoadStatus" class="small">未読込</span></div>
 </div>
 <div id="leveList"></div>
 <div class="row" style="margin-top:12px"><button type="button" id="levePrev" class="secondary">前へ</button><span id="levePageInfo" class="small"></span><button type="button" id="leveNext" class="secondary">次へ</button></div>
@@ -877,6 +946,15 @@ button{font-size:.86rem!important}
 </section>
 </section>
 
+<section id="bicolor" class="view"><section class="panel">
+<div class="section-kicker">SHARED FATE REWARD TRACKER</div>
+<h2>💎 バイカラージェム交換品</h2>
+<div class="small">漆黒・暁月・黄金の交換品をエリア別に管理。交換チェックは日付アーカイブにも残ります。</div>
+<div class="inline3" style="margin-top:10px"><div><label>拡張</label><select id="bicolorExpansion"><option value="">すべて</option><option>漆黒</option><option>暁月</option><option>黄金</option></select></div><div><label>エリア</label><select id="bicolorZone"><option value="">すべて</option></select></div><div><label>状態</label><select id="bicolorStatus"><option value="all">すべて</option><option value="missing">未交換</option><option value="owned">交換済み</option></select></div></div>
+<div class="inline3" style="margin-top:8px"><div><label>種類</label><select id="bicolorType"><option value="">すべて</option><option>オーケストリオン譜</option><option>カード</option><option>ミニオン</option><option>マウント速度</option><option>家具</option><option>ポートレート</option><option>交換券</option></select></div><div><label>検索</label><input id="bicolorSearch" placeholder="交換品名・NPC・エリア"></div><div><label>現在のジェム</label><input id="bicolorCurrentGem" type="number" min="0" max="1500"></div></div>
+<div id="bicolorSummary" class="small" style="margin-top:10px"></div><div id="bicolorList" style="margin-top:10px"></div>
+</section></section>
+
 <section id="ffcollect" class="view">
 <section class="panel" id="ffxivCollectHub">
  <div class="section-kicker">FFXIV COLLECT DATA HUB</div>
@@ -925,7 +1003,12 @@ button{font-size:.86rem!important}
   <div><label>取得状況</label><select id="fcExplorerStatus"><option value="all">すべて</option><option value="owned">取得済み</option><option value="missing">未取得</option></select></div>
  </div>
  <div class="inline2" style="margin-top:8px">
-  <div><label>入手方法</label><select id="fcExplorerSource"><option value="">すべて</option><option>ダンジョン</option><option>討伐・討滅戦</option><option>レイド</option><option>クエスト</option><option>製作</option><option>採集</option><option>交換</option><option>ショップ</option><option>ゴールドソーサー</option><option>シーズナルイベント</option><option>オンラインストア</option><option>宝の地図</option><option>F.A.T.E.</option><option>PvP</option></select></div>
+  <div><label id="fcExplorerSourceLabel">入手方法</label><select id="fcExplorerSource"><option value="">すべて</option><option>ダンジョン</option><option>討伐・討滅戦</option><option>レイド</option><option>クエスト</option><option>製作</option><option>採集</option><option>交換</option><option>ショップ</option><option>ゴールドソーサー</option><option>シーズナルイベント</option><option>オンラインストア</option><option>宝の地図</option><option>F.A.T.E.</option><option>PvP</option></select></div>
+  <div><label>並び順</label><select id="fcExplorerSort"><option value="default">図鑑順</option><option value="name">名前順</option><option value="acquiredDesc">入手日が新しい順</option><option value="acquiredAsc">入手日が古い順</option></select></div>
+ </div>
+ <div id="fcExplorerTagRow" class="inline2" style="margin-top:8px;display:none">
+  <div><label>タグで絞り込み</label><select id="fcExplorerTag"><option value="">すべて</option></select></div>
+  <div><label>タグ検索</label><input id="fcExplorerTagSearch" placeholder="例：黄金巡り、優先"></div>
  </div>
  <div id="fcExplorerSummary" class="small"></div>
  <div id="fcExplorerList"></div>
@@ -1138,22 +1221,57 @@ button{font-size:.86rem!important}
 </section>
 </section>
 
+
+<section id="activityLog" class="view">
+<section class="panel">
+ <div class="section-kicker">ACTIVITY HISTORY</div>
+ <div class="row">
+  <div><h2>⏱ 時間記録</h2><div class="small">ACTIVITY TIMERで保存した全ログを振り返ります。日付・カテゴリ・活動名で絞り込めます。</div></div>
+ </div>
+ <div class="inline3" style="margin-top:12px">
+  <div><label>開始日</label><input id="activityLogFrom" type="date"></div>
+  <div><label>終了日</label><input id="activityLogTo" type="date"></div>
+  <div><label>カテゴリ</label><select id="activityLogCategory"><option value="">すべて</option><option>TRPG</option><option>FF14</option><option>制作</option><option>家事</option><option>健康</option><option>勉強</option><option>外出</option><option>その他</option></select></div>
+ </div>
+ <div class="inline2" style="margin-top:8px">
+  <div><label>活動名・メモ検索</label><input id="activityLogSearch" placeholder="例：散歩、シリウス、Life Archive"></div>
+  <div><label>並び順</label><select id="activityLogSort"><option value="new">新しい順</option><option value="old">古い順</option><option value="long">長い順</option></select></div>
+ </div>
+ <div id="activityLogSummary" class="stats" style="margin-top:12px"></div>
+ <div id="activityLogList" style="margin-top:12px"></div>
+</section>
+</section>
+
 <section id="todayHub" class="view">
 <section class="panel">
 <div class="section-kicker">DAILY COMMAND CENTER</div>
-<h2>📅 今日</h2><p class="small">受信箱へ入れた記録を、その日の分類・タグから自動でまとめて表示します。</p>
+<h2>📅 今日</h2><p class="small">Life Archive全体から、その日に起きた記録をまとめて振り返ります。</p>
 <div class="inline2">
  <div><label>表示する日</label><input id="todayDate" type="date"></div>
  <div class="card"><b id="todayHeadline">今日の記録</b><div class="small" id="todaySummary"></div></div>
 </div>
-<div class="grid2" style="margin-top:14px">
- <div class="card"><h3>☐ タスク</h3><div id="todayTasks"></div></div>
- <div class="card"><h3>📝 記録・メモ</h3><div id="todayNotes"></div></div>
- <div class="card"><h3>🎮 FF14</h3><div id="todayFF14"></div></div>
- <div class="card"><h3>🎲 TRPG</h3><div id="todayTRPG"></div></div>
- <div class="card"><h3>🛒 買い物</h3><div id="todayShopping"></div></div>
- <div class="card"><h3>📷 思い出</h3><div id="todayMemories"></div></div>
+<div class="card" style="margin-top:14px;border-color:var(--gold)">
+ <div class="section-kicker">TO DO</div>
+ <h3>☐ これからやること</h3>
+ <div id="todayTodo"></div>
 </div>
+<div class="card" style="margin-top:14px">
+ <div class="section-kicker">DONE TODAY</div>
+ <h3>✓ 今日やったこと</h3>
+ <div id="todayDone"></div>
+</div>
+<details style="margin-top:14px">
+ <summary>カテゴリ別に見る</summary>
+ <div class="grid2" style="margin-top:10px">
+  <div class="card"><h3>📝 記録・メモ</h3><div id="todayNotes"></div></div>
+  <div class="card"><h3>🎮 FF14</h3><div id="todayFF14"></div></div>
+  <div class="card"><h3>🎲 TRPG</h3><div id="todayTRPG"></div></div>
+  <div class="card"><h3>🛒 買い物</h3><div id="todayShopping"></div></div>
+  <div class="card"><h3>📷 思い出</h3><div id="todayMemories"></div></div>
+  <div class="card"><h3>⏱ 時間記録</h3><div id="todayActivity"></div></div>
+  <div class="card"><h3>🏆 達成・収集</h3><div id="todayArchiveHighlights"></div></div>
+ </div>
+</details>
 </section>
 </section>
 
@@ -1874,8 +1992,68 @@ function migrate(){
  }}catch(e){}
  d.migrated=true;save(d);
 }
+const BICOLOR_VENDORS=[
+ ["漆黒","コルシア島","ズムット","X:11.8 Y:8.9"],["漆黒","アム・アレーン","ハルデン","X:10.6 Y:17.1"],["漆黒","レイクランド","スール＝メット","X:35.5 Y:20.6"],["漆黒","イル・メグ","スール＝ラド","X:16.0 Y:31.0"],["漆黒","ラケティカ大森林","ナシル","X:28.0 Y:18.0"],["漆黒","テンペスト","ゴウスィー・オーン","X:33.0 Y:18.0"],["漆黒","クリスタリウム","グラムソル","X:11.1 Y:13.6"],["漆黒","ユールモア","ペドロニール","X:11.0 Y:12.0"],
+ ["暁月","ラヴィリンソス","フェーズブロース","X:29.9 Y:12.9"],["暁月","サベネア島","マーヴェーダ","X:25.8 Y:34.6"],["暁月","ガレマルド","ザワワ","X:12.9 Y:30.0"],["暁月","嘆きの海","トレーディングウェイ","X:21.8 Y:12.2"],["暁月","エルピス","アイサラ","X:24.4 Y:23.4"],["暁月","ウルティマ・トゥーレ","N-1499","X:30.8 Y:28.0"],["暁月","オールド・シャーレアン","ガドフリッド","X:12.7 Y:10.4"],["暁月","ラザハン","サジャリーン","X:11.1 Y:10.2"],
+ ["黄金","オルコ・パチャ","テプリ","X:27.5 Y:11.7"],["黄金","コザマル・カ","クヌハリ","X:17.4 Y:11.0"],["黄金","ヤクテル樹海","ラル・ウルク","X:13.8 Y:12.7"],["黄金","シャーローニ荒野","ミテペ","X:28.6 Y:30.8"],["黄金","ヘリテージファウンド","トアシャナ","X:16.3 Y:9.6"],["黄金","リビング・メモリー","事務員PX-0029","X:22.0 Y:37.5"],["黄金","トライヨラ","カジェール・ジャ","X:12.8 Y:13.0"],["黄金","ソリューション・ナイン","ベリル","X:8.4 Y:14.0"]
+].map(x=>({exp:x[0],zone:x[1],npc:x[2],xy:x[3]}));
+const BICOLOR_ITEMS=[
+ ["漆黒","コルシア島","マウント速度","コルシア島詳細地図",70,1],["漆黒","コルシア島","オーケストリオン譜","クイックウェイ ～コルシア島：夜～",350,2],["漆黒","コルシア島","オーケストリオン譜","分かたれし世界",350,3],
+ ["漆黒","アム・アレーン","マウント速度","アム・アレーン詳細地図",70,1],["漆黒","アム・アレーン","オーケストリオン譜","鮮血の砂漠 ～アム・アレーン：夜～",350,2],["漆黒","アム・アレーン","ミニオン","ミクロ・ギガテンダー",400,3],["漆黒","アム・アレーン","オーケストリオン譜","琥珀の砂漠",350,3],
+ ["暁月","サベネア島","マウント速度","サベネア島詳細地図",70,2],["暁月","サベネア島","オーケストリオン譜","神々の訓え",350,3],["暁月","サベネア島","オーケストリオン譜","人々の祈り",350,3],
+ ["暁月","ラヴィリンソス","マウント速度","ラヴィリンソス詳細地図",70,2],["暁月","ラヴィリンソス","オーケストリオン譜","迷宮",350,3],["暁月","ラヴィリンソス","オーケストリオン譜","人の夢",350,3],
+ ["暁月","ウルティマ・トゥーレ","マウント速度","ウルティマ・トゥーレ詳細地図",70,2],["暁月","ウルティマ・トゥーレ","ミニオン","プチイーア",500,3],["暁月","ウルティマ・トゥーレ","オーケストリオン譜","Close in the Distance",350,3],
+ ["暁月","オールド・シャーレアン","交換券","バイカラージェム納品証",100,"全地域ランク3"],["暁月","オールド・シャーレアン","オーケストリオン譜","知恵の水瓶",350,"全地域ランク3"],["暁月","ラザハン","交換券","バイカラージェム納品証",100,"全地域ランク3"],["暁月","ラザハン","オーケストリオン譜","宵闇の露台",350,"全地域ランク3"],
+ ["黄金","シャーローニ荒野","マウント速度","シャーローニ荒野詳細地図",90,2],["黄金","リビング・メモリー","マウント速度","リビング・メモリー詳細地図",90,2],["黄金","リビング・メモリー","家具","ネオキングダム・ランプポスト",150,3],["黄金","リビング・メモリー","オーケストリオン譜","過ぎ去りし安寧",450,4],["黄金","リビング・メモリー","オーケストリオン譜","記憶の残響",450,4],
+ ["黄金","トライヨラ","交換券","トラルバイカラージェム納品証",100,"全地域ランク4"],["黄金","トライヨラ","オーケストリオン譜","金煌なる民",450,"全地域ランク4"],["黄金","トライヨラ","オーケストリオン譜","金煌なる魔法",450,"全地域ランク4"],["黄金","ソリューション・ナイン","交換券","トラルバイカラージェム納品証",100,"全地域ランク4"],["黄金","ソリューション・ナイン","家具","ヴェンディングマシン・ナイン",150,"全地域ランク4"],["黄金","ソリューション・ナイン","オーケストリオン譜","星なき摩天楼",450,"全地域ランク4"]
+].map((x,i)=>({id:`bg_${i+1}`,exp:x[0],zone:x[1],type:x[2],name:x[3],cost:x[4],rank:x[5]}));
+const BICOLOR_ORCHESTRION_SOURCE_NAMES={
+ "クイックウェイ ～コルシア島：夜～":"The Quick Way",
+ "分かたれし世界":"A World Divided",
+ "鮮血の砂漠 ～アム・アレーン：夜～":"Sands of Blood",
+ "琥珀の砂漠":"Sands of Amber",
+ "神々の訓え":"Divine Words",
+ "人々の祈り":"Prayers Repeated",
+ "迷宮":"The Labyrinth",
+ "人の夢":"Dreams of Man",
+ "知恵の水瓶":"The Ewer Brimmeth",
+ "宵闇の露台":"Twilit Terraces",
+ "過ぎ去りし安寧":"Bygone Serenity",
+ "記憶の残響":"Echoes of Memory",
+ "金煌なる民":"Morrow's Might",
+ "金煌なる魔法":"Morrow's Magic",
+ "星なき摩天楼":"Starless Skyline"
+};
+BICOLOR_ITEMS.push(
+ {id:"bg_zone_shb_lakeland_map",exp:"漆黒",zone:"レイクランド",type:"マウント速度",name:"レイクランド詳細地図",cost:70,rank:1},
+ {id:"bg_zone_shb_ilmeg_map",exp:"漆黒",zone:"イル・メグ",type:"マウント速度",name:"イル・メグ詳細地図",cost:70,rank:1},
+ {id:"bg_zone_shb_raktika_map",exp:"漆黒",zone:"ラケティカ大森林",type:"マウント速度",name:"ラケティカ大森林詳細地図",cost:70,rank:1},
+ {id:"bg_zone_shb_tempest_map",exp:"漆黒",zone:"テンペスト",type:"マウント速度",name:"テンペスト詳細地図",cost:70,rank:1},
+ {id:"bg_zone_ew_garlemald_map",exp:"暁月",zone:"ガレマルド",type:"マウント速度",name:"ガレマルド詳細地図",cost:70,rank:2},
+ {id:"bg_zone_ew_mare_map",exp:"暁月",zone:"嘆きの海",type:"マウント速度",name:"嘆きの海詳細地図",cost:70,rank:2},
+ {id:"bg_zone_ew_elpis_map",exp:"暁月",zone:"エルピス",type:"マウント速度",name:"エルピス詳細地図",cost:70,rank:2},
+ {id:"bg_zone_dt_urqopacha_map",exp:"黄金",zone:"オルコ・パチャ",type:"マウント速度",name:"オルコ・パチャ詳細地図",cost:90,rank:2},
+ {id:"bg_zone_dt_kozama_map",exp:"黄金",zone:"コザマル・カ",type:"マウント速度",name:"コザマル・カ詳細地図",cost:90,rank:2},
+ {id:"bg_zone_dt_yaktel_map",exp:"黄金",zone:"ヤクテル樹海",type:"マウント速度",name:"ヤクテル樹海詳細地図",cost:90,rank:2},
+ {id:"bg_zone_dt_heritage_map",exp:"黄金",zone:"ヘリテージファウンド",type:"マウント速度",name:"ヘリテージファウンド詳細地図",cost:90,rank:2}
+);
+function bicolorRoot(d){d.bicolor=d.bicolor||{owned:{},currentGem:0};d.bicolor.owned=d.bicolor.owned||{};return d.bicolor}
+function bicolorVendor(x){return BICOLOR_VENDORS.find(v=>v.exp===x.exp&&v.zone===x.zone)||{}}
+function renderBicolor(){
+ const box=$("bicolorList");if(!box)return;
+ const d=load(),root=bicolorRoot(d),exp=$("bicolorExpansion")?.value||"",status=$("bicolorStatus")?.value||"all",type=$("bicolorType")?.value||"",q=($("bicolorSearch")?.value||"").trim().toLowerCase();
+ const zones=[...new Set(BICOLOR_VENDORS.filter(x=>!exp||x.exp===exp).map(x=>x.zone))],zs=$("bicolorZone"),oldZone=zs?.value||"";
+ if(zs){zs.innerHTML='<option value="">すべて</option>'+zones.map(z=>`<option value="${esc(z)}">${esc(z)}</option>`).join("");if(zones.includes(oldZone))zs.value=oldZone}
+ const zone=zs?.value||"";if($("bicolorCurrentGem"))$("bicolorCurrentGem").value=root.currentGem||"";
+ const items=BICOLOR_ITEMS.filter(x=>{const owned=!!root.owned[x.id]?.done,v=bicolorVendor(x),hay=[x.name,x.sourceName,x.zone,x.type,v.npc].join(" ").toLowerCase();return(!exp||x.exp===exp)&&(!zone||x.zone===zone)&&(!type||x.type===type)&&(!q||hay.includes(q))&&(status==="all"||(status==="owned"&&owned)||(status==="missing"&&!owned))});
+ const missing=BICOLOR_ITEMS.filter(x=>!root.owned[x.id]?.done),need=missing.reduce((s,x)=>s+Number(x.cost),0),cur=Number(root.currentGem||0);
+ $("bicolorSummary").textContent=`収録 ${BICOLOR_ITEMS.length}件 ／ 未交換 ${missing.length}件 ／ 必要 ${need.toLocaleString("ja-JP")}ジェム ／ 現在 ${cur.toLocaleString("ja-JP")} ／ あと ${Math.max(0,need-cur).toLocaleString("ja-JP")}`;
+ box.innerHTML=items.length?items.map(x=>{const st=root.owned[x.id]||{},v=bicolorVendor(x);return `<div class="card ${st.done?"archived":""}"><div class="row"><div><label style="margin:0;color:var(--text)"><input type="checkbox" class="bicolorCheck" data-id="${x.id}" style="width:auto" ${st.done?"checked":""}> <b>${esc(x.name)}</b></label><div class="time">${esc(x.exp)} ／ ${esc(x.zone)} ／ ${esc(x.type)} ／ ${x.cost} 💎 ／ 解放 ${esc(x.rank)}${x.sourceName&&x.sourceName!==x.name?` ／ 原題：${esc(x.sourceName)}`:""}</div></div><span class="badge">${esc(v.npc||"")}</span></div><div class="small">📍 ${esc(x.zone)} ${esc(v.xy||"")} ／ ${esc(v.npc||"")}${st.doneAt?`<br>交換日：${new Date(st.doneAt).toLocaleDateString("ja-JP")}`:""}</div><input class="bicolorMemo" data-id="${x.id}" value="${esc(st.memo||"")}" placeholder="自分用メモ" style="margin-top:8px"></div>`}).join(""):'<div class="empty">このエリアの収録交換品はまだありません。交換NPC・エリア情報は登録済みです。</div>';
+ document.querySelectorAll(".bicolorCheck").forEach(el=>el.onchange=()=>{const d=load(),r=bicolorRoot(d),st=r.owned[el.dataset.id]||{};st.done=el.checked;st.doneAt=el.checked?Date.now():0;r.owned[el.dataset.id]=st;save(d);renderBicolor();renderDateArchive()});
+ document.querySelectorAll(".bicolorMemo").forEach(el=>el.onchange=()=>{const d=load(),r=bicolorRoot(d),st=r.owned[el.dataset.id]||{};st.memo=el.value;r.owned[el.dataset.id]=st;save(d)});
+}
 const UI_KEY="lifeArchive091_ui";
-const pageTitles={home:"今日",dateArchive:"日付アーカイブ",inbox:"受信箱",records:"記録庫",history:"履歴",shopping:"買い物・在庫",cooking:"料理図鑑",ff14:"エオルゼア",achievements:"アチーブメント",guildleves:"ギルドリーヴ",yokai:"妖怪ウォッチ",eventsHome:"イベント",crafting:"制作手帳",weapons:"武器制作",fishing:"釣り手帳",trpg:"TRPG・PL履歴",trpg_kp:"TRPG・KP履歴",peopleCodex:"人物・PC図鑑",scenarioLibrary:"所持シナリオ",todayHub:"今日",quickCapture:"クイック記録",diceTool:"ダイスログ抽出",checklistTool:"自由チェックメモ",settings:"設定",backup:"バックアップ",ffcollect:"収集図鑑"};
+const pageTitles={home:"ホーム",activityLog:"時間記録",dateArchive:"日付アーカイブ",inbox:"受信箱",records:"記録庫",history:"履歴",shopping:"買い物・在庫",cooking:"料理図鑑",ff14:"エオルゼア",achievements:"アチーブメント",guildleves:"ギルドリーヴ",yokai:"妖怪ウォッチ",eventsHome:"イベント",crafting:"制作手帳",weapons:"武器制作",fishing:"釣り手帳",trpg:"TRPG・PL履歴",trpg_kp:"TRPG・KP履歴",peopleCodex:"人物・PC図鑑",scenarioLibrary:"所持シナリオ",todayHub:"今日",quickCapture:"クイック記録",diceTool:"ダイスログ抽出",checklistTool:"自由チェックメモ",settings:"設定",backup:"バックアップ",ffcollect:"収集図鑑",bicolor:"バイカラージェム"};
 function loadUI(){try{return JSON.parse(localStorage.getItem(UI_KEY)||"{}")}catch{return {}}}
 function saveUI(patch){const ui={...loadUI(),...patch};localStorage.setItem(UI_KEY,JSON.stringify(ui));return ui}
 function closeSidebar(){document.getElementById("sidebar")?.classList.remove("open");document.getElementById("sidebarOverlay")?.classList.remove("open")}
@@ -2785,6 +2963,10 @@ function renderDateArchive(){
  $("dateArchivePicker").value=key;
  $("dateArchiveHeading").innerHTML=`<h2>${dateArchiveDate.toLocaleDateString("ja-JP",{year:"numeric",month:"long",day:"numeric",weekday:"short"})}</h2>`;
  const rows=[];
+ const addTimeline=(date,category,title,text="",status="記録",extra={})=>{
+  if(!date||archiveDateKey(date)!==key)return;
+  rows.push({kind:"timeline",id:extra.id||"",time:Number(date)||new Date(date).getTime()||date,category:category||"その他",title:title||"記録",text:text||"",status,source:extra.source||"",tags:extra.tags||[],url:extra.url||"",checklist:extra.checklist||[]});
+ };
  (d.records||[]).forEach(r=>{
   if(archiveDateKey(r.time||r.createdAt)!==key)return;
   rows.push({kind:"single",id:r.id,time:r.time||r.createdAt,category:getClassification(r,"その他"),title:r.title||"無題",text:r.text||"",status:r.status||"実施",tags:r.tags||[],url:r.url||"",checklist:r.checklist||[]});
@@ -2796,24 +2978,126 @@ function renderDateArchive(){
   const parent=(d.stackParents||[]).find(p=>p.id===resolvedParentId);
   rows.push({kind:"child",id:e.id,parentId:resolvedParentId,time:e.time||e.createdAt,category:parent?.category||"その他",title:e.title||e.entryType||"記録",parent:parent?.name||"親記録",dayLabel:dayObj?.label||"",text:e.text||"",status:e.status||"実施",tags:e.tags||[],url:e.url||"",checklist:e.checklist||[]});
  });
- rows.sort((a,b)=>(a.time||0)-(b.time||0));
+
+ // 今日ページで完了したタスク
+ (d.inbox||[]).forEach(x=>{if(x?.done&&x?.doneAt)addTimeline(x.doneAt,getClassification(x,"タスク"),`☑ ${x.text||x.title||"タスク"}`,"","完了",{source:"今日・タスク",tags:normalizeTags(x.tags)})});
+ (d.quickCaptures||[]).forEach(x=>{if(x?.kind==="タスク"&&x?.done&&x?.doneAt)addTimeline(x.doneAt,"タスク",`☑ ${x.text||x.title||"タスク"}`,"","完了",{source:"今日・タスク",tags:normalizeTags(x.tags)})});
+
+ // Life Archive全体から、日付を持つ主要データを横断収集する。
+ // 挑戦・実施履歴：historyEvents の実施日時を、その履歴項目名と分類付きで表示する。
+ (d.historyEvents||[]).forEach(e=>{
+  const item=(d.historyItems||[]).find(i=>i.id===e.itemId);
+  const title=item?.name||"履歴";
+  const category=item?.category||"履歴";
+  const mins=Number(e.minutes||0);
+  const metaText=[e.status||"実施",mins?`${mins}分`:""].filter(Boolean).join(" ／ ");
+  addTimeline(e.time,category,title,e.note||"",metaText,{source:"挑戦・実施履歴",tags:item?.tags||[]});
+ });
+ (d.memories||[]).forEach(x=>addTimeline(x.date||x.time||x.createdAt,"思い出",x.title||x.name||"思い出",x.text||x.note||x.memo||"","記録",{source:"思い出",url:x.url||x.image||""}));
+ (d.shoppingHistory||d.purchaseHistory||[]).forEach(x=>addTimeline(x.purchasedAt||x.date||x.time||x.createdAt,"買い物",x.title||x.name||"買い物",x.note||x.memo||"","購入",{source:"買い物"}));
+ (d.cookingHistory||d.mealHistory||[]).forEach(x=>addTimeline(x.cookedAt||x.date||x.time||x.createdAt,"料理・食事",x.title||x.name||"料理・食事",x.note||x.memo||"","実施",{source:"料理"}));
+ // FF14 Collectのユーザー情報：入手日を持つ収集品は日付アーカイブへ。
+ try{
+  const fc=ffProfileData(d)?.ffxivCollect||d?.ffxivCollect;
+  const userMeta=fc?.userMeta||{};
+  Object.entries(fc?.catalogs||{}).forEach(([kind,cat])=>{
+   (cat?.items||[]).forEach(item=>{
+    const meta=userMeta?.[kind]?.[String(item.id)]||{};
+    const acquired=meta.acquiredDate||meta.acquiredAt||item.acquiredAt||item.obtainedAt;
+    const labels={minions:"ミニオン",mounts:"マウント",achievements:"アチーブメント",hairstyles:"ヘアカタログ",emotes:"エモート",orchestrions:"オーケストリオン",frames:"ポートレート",spells:"青魔法",cards:"カード",facewear:"フェイスアクセ"};
+    const checkText=(meta.checks||[]).length?`チェック ${meta.checks.filter(x=>x.done).length}/${meta.checks.length}`:"";
+    const note=[meta.memo||"",checkText].filter(Boolean).join("\n");
+    const displayName=kind==="achievements"?(fcJapaneseTitle(item,kind)||item.name_ja||item.name||"名称未取得"):(item.name_ja||item.name||"名称未取得");
+    const ach=kind==="achievements"?fcAchievementLocalJP(item):null;
+    const achCategory=ach?[ach.kind,ach.category].filter(Boolean).join(" ＞ "):"";
+    const userTags=Array.isArray(meta.tags)?meta.tags:[];
+    const archiveNote=[achCategory,note].filter(Boolean).join("\n");
+    if(acquired)addTimeline(acquired,"FF14",kind==="achievements"?`🏆 アチーブメント「${displayName}」達成`:`${labels[kind]||kind}「${displayName}」入手`,archiveNote,kind==="achievements"?"達成":"入手",{source:kind==="achievements"?"アチーブ":"収集図鑑",tags:userTags});
+    // チェックメモの完了日も、その日の進捗として残す。
+    if(kind==="achievements"){
+     (meta.checks||[]).forEach(c=>{
+      if(!c?.doneAt)return;
+      addTimeline(c.doneAt,"FF14",`☑️ アチーブ進捗「${displayName}」`,c.text||"チェック項目完了","進捗",{source:"アチーブ",tags:userTags});
+     });
+    }
+   });
+  });
+ }catch(e){}
+
+ // アチーブ進捗チェック：チェックした日時を日付アーカイブへ。
+ Object.entries(d.achievementProgress||{}).forEach(([achId,st])=>{
+  const ach=(typeof ACHIEVEMENT_DB!=="undefined"?ACHIEVEMENT_DB:[]).find(a=>String(a.id)===String(achId));
+  const title=ach?.name||`#${achId}`;
+  if(st?.doneAt)addTimeline(st.doneAt,"FF14",`アチーブメント「${title}」達成チェック`,st.note||"","達成",{source:"アチーブ"});
+  (st?.checklist||[]).forEach(c=>{if(c.doneAt)addTimeline(c.doneAt,"FF14",`アチーブ進捗「${title}」`,c.name||c.text||"チェック項目完了","進捗",{source:"アチーブ"})});
+ });
+ const achRoots=[d.achievementFolders,d.achievementPlans,d.achievements].filter(Boolean);
+ const seenAch=new Set();
+ const walkAch=(node,parentTitle="アチーブメント")=>{
+  if(!node||typeof node!=="object")return;
+  if(Array.isArray(node)){node.forEach(x=>walkAch(x,parentTitle));return}
+  const title=node.title||node.name||parentTitle;
+  const checks=node.checks||node.checklist||node.items;
+  if(Array.isArray(checks)){
+   checks.forEach(c=>{
+    if(!c||typeof c!=="object")return;
+    const doneAt=c.doneAt||c.checkedAt||c.completedAt;
+    if(doneAt){
+     const sig=[title,c.id||"",doneAt].join("|");
+     if(!seenAch.has(sig)){
+      seenAch.add(sig);
+      addTimeline(doneAt,"FF14",`アチーブ進捗「${title}」`,c.text||c.title||c.name||"チェック項目完了","進捗",{source:"アチーブ"});
+     }
+    }
+   });
+  }
+  Object.entries(node).forEach(([k,v])=>{if(!["checks","checklist","items"].includes(k)&&v&&typeof v==="object")walkAch(v,title)});
+ };
+ achRoots.forEach(x=>walkAch(x));
+
+  // バイカラージェム交換品
+ if(typeof BICOLOR_ITEMS!=="undefined"){
+  const bg=d.bicolor?.owned||{};
+  BICOLOR_ITEMS.forEach(x=>{
+   const st=bg[x.id];if(!st?.doneAt)return;
+   const v=typeof bicolorVendor==="function"?bicolorVendor(x):{};
+   addTimeline(st.doneAt,"FF14",`💎 バイカラージェム交換「${x.name}」`,`${x.zone} ／ ${x.cost}ジェム${v?.npc?` ／ ${v.npc}`:""}${st.memo?`\n${st.memo}`:""}`,"交換",{source:"バイカラージェム"});
+  });
+ }
+
+  // 時間記録
+ (d.activityLogs||[]).forEach(x=>{const ms=Math.max(0,Number(x.activeMs)||0),mins=Math.round(ms/60000),h=Math.floor(mins/60),m=mins%60,duration=h?`${h}時間${m?m+"分":""}`:`${m}分`;addTimeline(x.startedAt||x.date,"時間記録",`${x.category||"その他"}：${x.name||"活動"}`,x.memo||"",duration,{source:"時間記録"});});
+ // ポモドーロは保存されている「今日」の実績を該当日に表示。
+ try{
+  const ps=JSON.parse(localStorage.getItem("life_archive_pomodoro_v1")||"{}");
+  if(ps?.day===key&&Number(ps.todayCount)>0)addTimeline(key+"T12:00:00","集中",`ポモドーロ ${Number(ps.todayCount)}セット`,"","完了",{source:"ポモドーロ"});
+ }catch(e){}
+
+  rows.sort((a,b)=>(a.time||0)-(b.time||0));
  const counts={};rows.forEach(r=>counts[r.category]=(counts[r.category]||0)+1);
  $("dateArchiveSummary").innerHTML=`<span class="badge">記録 ${rows.length}件</span>`+Object.entries(counts).map(([k,v])=>`<span class="badge ${k==="FF14"?"gold":k==="TRPG"?"purple":""}">${esc(k)} ${v}</span>`).join("");
  box.innerHTML=rows.length?rows.map(r=>`<details class="card ${statusClass(r.status)}">
   <summary style="cursor:pointer">
    <div class="row"><b>${r.kind==="child"?`🔗 ${esc(r.parent)} → ${esc(r.dayLabel)} → `:""}${esc(r.title)}</b><span><span class="badge ${r.category==="FF14"?"gold":r.category==="TRPG"?"purple":""}">${esc(r.category)}</span> <span class="badge">${esc(statusLabel(r.status))}</span></span></div>
-   <div class="small">${new Date(r.time).toLocaleTimeString("ja-JP",{hour:"2-digit",minute:"2-digit"})}${r.text?` ／ ${esc(r.text.slice(0,100))}${r.text.length>100?"…":""}`:""}</div>
+   <div class="small">${new Date(r.time).toLocaleTimeString("ja-JP",{hour:"2-digit",minute:"2-digit"})}${r.text?` ／ ${esc(r.text.slice(0,100))}${r.text.length>100?"…":""}`:""}${r.kind==="timeline"&&r.source?` ／ ${esc(r.source)}`:""}</div>
   </summary>
   <div class="card" style="margin-top:8px">
    ${r.text?`<div>${nl(r.text)}</div>`:'<div class="small">本文なし</div>'}
    ${(r.tags||[]).length?`<div style="margin-top:8px">${r.tags.map(t=>`<span class="badge">#${esc(t)}</span>`).join("")}</div>`:""}
    ${r.url?`<div style="margin-top:8px">${mediaPreview(r.url)}</div>`:""}
    ${(r.checklist||[]).length?`<div class="card" style="margin-top:8px"><b>チェック項目</b>${r.checklist.map(i=>`<div class="listitem">${i.done?"☑":"☐"} ${esc(checklistItemName(i))}</div>`).join("")}</div>`:""}
-   <div class="wrap" style="margin-top:8px">${r.kind==="single"?`<button class="secondary archiveOpenSingle" data-id="${r.id}">記録庫で開く</button>`:`<button class="secondary archiveOpenParent" data-id="${r.parentId}">親子記録で開く</button>`}</div>
+   <div class="wrap" style="margin-top:8px">${r.kind==="single"?`<button class="secondary archiveOpenSingle" data-id="${r.id}">記録庫で開く</button>`:r.kind==="child"?`<button class="secondary archiveOpenParent" data-id="${r.parentId}">親子記録で開く</button>`:r.source==="アチーブ"?`<button class="secondary archiveOpenAchievements">アチーブメントを開く</button><span class="badge">${esc(r.source)}</span>`:r.source?`<span class="badge">${esc(r.source)}</span>`:""}</div>
   </div>
  </details>`).join(""):'<div class="empty">この日の記録はありません。</div>';
  document.querySelectorAll(".archiveOpenSingle").forEach(b=>b.onclick=()=>{switchView("records");setTimeout(()=>openRecordDetail(b.dataset.id),0)});
  document.querySelectorAll(".archiveOpenParent").forEach(b=>b.onclick=()=>{switchView("records");setTimeout(()=>{const p=$("parentDetails_"+b.dataset.id);if(p){p.open=true;p.scrollIntoView({behavior:"smooth",block:"start"})}},0)});
+ document.querySelectorAll(".archiveOpenAchievements").forEach(b=>b.onclick=()=>{
+  switchView("ffxivCollect");
+  setTimeout(()=>{
+   const kind=$("fcExplorerKind");if(kind){kind.value="achievements";renderFCExplorer()}
+   $("fcExplorerList")?.scrollIntoView({behavior:"smooth",block:"start"});
+  },0);
+ });
 }
 
 function renderHome(){const d=load(),today=day(Date.now()),r=d.records.filter(x=>day(x.time)===today),i=d.inbox.filter(x=>!x.done);$("sToday").textContent=r.length;$("sInbox").textContent=i.length;$("sFF14").textContent=d.records.filter(x=>getClassification(x)==="FF14").length+(d.stackParents||[]).filter(p=>p.category==="FF14").length;$("sTRPG").textContent=d.records.filter(x=>getClassification(x)==="TRPG").length+(d.stackParents||[]).filter(p=>p.category==="TRPG").length;$("sLife").textContent=d.records.filter(x=>!["FF14","TRPG"].includes(x.type)).length;
@@ -3388,7 +3672,7 @@ function renderAchievements(){
  achPage=Math.min(Math.max(1,achPage),pages);const start=(achPage-1)*size,items=arr.slice(start,start+size);
  $("achTotal").textContent=visibleBase.length;$("achDone").textContent=visibleDone;$("achPoints").textContent=points.toLocaleString("ja-JP");$("achShown").textContent=arr.length;$("achRate").textContent=(visibleBase.length?visibleDone/visibleBase.length*100:0).toFixed(1)+"%";
  $("achList").innerHTML=items.length?items.map(a=>{const st=achievementState(d,a.id);return `<div class="card ${st.done?"archived":""}">
- <div class="row"><div><label style="margin:0;color:var(--text)"><input class="achCheck" data-id="${a.id}" type="checkbox" style="width:auto" ${st.done?"checked":""}> <b>${esc(a.name)}</b></label><div class="time">${esc(a.kind)} ＞ ${esc(a.category)}・${a.points}pt${a.hidden?"・非表示/過去":""}</div></div><div class="wrap">${a.rewardTitle?'<span class="badge purple">称号</span>':""}${a.rewardItem?'<span class="badge gold">アイテム</span>':""}</div></div>
+ <div class="row"><div><label style="margin:0;color:var(--text)"><input class="achCheck" data-id="${a.id}" type="checkbox" style="width:auto" ${st.done?"checked":""}> <b>${esc(a.name)}</b>${st.doneAt?` <span class="ach-check-date">達成チェック ${new Date(st.doneAt).toLocaleDateString("ja-JP")}</span>`:""}</label><div class="time">${esc(a.kind)} ＞ ${esc(a.category)}・${a.points}pt${a.hidden?"・非表示/過去":""}</div></div><div class="wrap">${a.rewardTitle?'<span class="badge purple">称号</span>':""}${a.rewardItem?'<span class="badge gold">アイテム</span>':""}</div></div>
  <p>${nl(a.description)}</p>
  <div class="inline2"><div><label>取得日 <span class="small muted">（任意・手入力）</span></label><input class="achDate" data-id="${a.id}" type="date" value="${esc(st.date||"")}"></div><div><label>自分用メモ</label><input class="achNote" data-id="${a.id}" value="${esc(st.note||"")}" placeholder="進捗、思い出など"></div></div>
  <label>ユーザータグ（カンマ区切り）</label><input class="achTags" data-id="${a.id}" value="${esc((st.tags||[]).join(", "))}" placeholder="例：事件屋, 黄金, 優先">
@@ -3397,7 +3681,7 @@ function renderAchievements(){
  <div class="card" style="margin-top:12px;background:#182638">
    <div class="row"><b>任意チェックリスト</b><span class="small">${(st.checklist||[]).filter(i=>i.done).length}/${(st.checklist||[]).length}</span></div>
    <div class="achChecklist" data-id="${a.id}">
-     ${(st.checklist||[]).length?(st.checklist||[]).map(i=>`<div class="listitem" style="padding:9px"><div class="row"><label style="margin:0;color:var(--text)"><input class="achSubCheck" data-ach="${a.id}" data-sub="${i.id}" type="checkbox" style="width:auto" ${i.done?"checked":""}> ${esc(i.name)}</label><button class="danger achSubDelete" data-ach="${a.id}" data-sub="${i.id}">削除</button></div></div>`).join(""):'<div class="small">項目はまだありません。</div>'}
+     ${(st.checklist||[]).length?(st.checklist||[]).map(i=>`<div class="listitem" style="padding:9px"><div class="row"><label style="margin:0;color:var(--text)"><input class="achSubCheck" data-ach="${a.id}" data-sub="${i.id}" type="checkbox" style="width:auto" ${i.done?"checked":""}> ${esc(i.name)}${i.doneAt?` <span class="ach-check-date">${new Date(i.doneAt).toLocaleDateString("ja-JP")}</span>`:""}</label><button class="danger achSubDelete" data-ach="${a.id}" data-sub="${i.id}">削除</button></div></div>`).join(""):'<div class="small">項目はまだありません。</div>'}
    </div>
    <div class="wrap" style="margin-top:9px"><input class="achSubInput" data-id="${a.id}" placeholder="例：ガンマ、サウガ、マヘス…" style="flex:1;min-width:210px"><button class="secondary achSubAdd" data-id="${a.id}">項目を追加</button></div>
  </div>
@@ -3405,7 +3689,7 @@ function renderAchievements(){
  </div>`}).join(""):'<div class="empty">条件に合うアチーブメントはありません。</div>';
  $("achPageInfo").textContent=`${arr.length?start+1:0}～${Math.min(start+size,arr.length)} / ${arr.length}件（${achPage}/${pages}ページ）`;
  $("achPrev").disabled=achPage<=1;$("achNext").disabled=achPage>=pages;
- document.querySelectorAll(".achCheck").forEach(c=>c.onchange=()=>{const d=load(),id=c.dataset.id;d.achievementProgress=d.achievementProgress||{};const st=d.achievementProgress[id]||{done:false,date:"",note:"",checklist:[],tags:[]};const visibleDate=document.querySelector(`.achDate[data-id="${id}"]`)?.value||"";st.done=c.checked;if(visibleDate)st.date=visibleDate;d.achievementProgress[id]=st;save(d);renderAchievements();renderFFSummary()});
+ document.querySelectorAll(".achCheck").forEach(c=>c.onchange=()=>{const d=load(),id=c.dataset.id;d.achievementProgress=d.achievementProgress||{};const st=d.achievementProgress[id]||{done:false,date:"",note:"",checklist:[],tags:[]};const visibleDate=document.querySelector(`.achDate[data-id="${id}"]`)?.value||"";st.done=c.checked;if(c.checked){if(!st.doneAt)st.doneAt=Date.now();if(!visibleDate&&!st.date)st.date=localDateValue(Date.now())}else st.doneAt=0;if(visibleDate)st.date=visibleDate;d.achievementProgress[id]=st;save(d);renderAchievements();renderFFSummary();if(typeof renderDateArchive==="function")renderDateArchive()});
  document.querySelectorAll(".achDate").forEach(input=>input.onchange=()=>{const d=load(),id=input.dataset.id;d.achievementProgress=d.achievementProgress||{};const st=d.achievementProgress[id]||{done:false,date:"",note:"",checklist:[],tags:[]};st.date=input.value;d.achievementProgress[id]=st;save(d)});
  document.querySelectorAll(".achSave").forEach(b=>b.onclick=()=>{const d=load(),id=b.dataset.id;d.achievementProgress=d.achievementProgress||{};const st=d.achievementProgress[id]||{done:false,date:"",note:"",checklist:[],tags:[]};st.date=document.querySelector(`.achDate[data-id="${id}"]`).value;st.note=document.querySelector(`.achNote[data-id="${id}"]`).value;st.tags=document.querySelector(`.achTags[data-id="${id}"]`).value.split(/[,、]/).map(v=>v.trim()).filter(Boolean);st.refUrl=document.querySelector(`.achRefUrl[data-id="${id}"]`).value.trim();d.achievementProgress[id]=st;save(d);renderAchievements();setTimeout(()=>b.textContent="日付・メモを保存",900)});
 
@@ -3423,8 +3707,8 @@ function renderAchievements(){
  });
  document.querySelectorAll(".achSubCheck").forEach(c=>c.onchange=()=>{
    const d=load(),st=d.achievementProgress?.[c.dataset.ach];if(!st)return;
-   const item=(st.checklist||[]).find(i=>i.id===c.dataset.sub);if(item)item.done=c.checked;
-   save(d);renderAchievements();
+   const item=(st.checklist||[]).find(i=>i.id===c.dataset.sub);if(item){item.done=c.checked;if(c.checked){if(!item.doneAt)item.doneAt=Date.now()}else item.doneAt=0}
+   save(d);renderAchievements();if(typeof renderDateArchive==="function")renderDateArchive();
  });
  document.querySelectorAll(".achSubDelete").forEach(b=>b.onclick=()=>{
    if(!confirm("この項目を削除しますか？"))return;
@@ -3587,55 +3871,80 @@ try{craftMaterialCache=JSON.parse(localStorage.getItem(CRAFT_MATERIAL_CACHE_KEY)
 function saveCraftMaterialCache(){try{localStorage.setItem(CRAFT_MATERIAL_CACHE_KEY,JSON.stringify(craftMaterialCache))}catch(e){}}
 
 const CRAFT_REVERSE_INDEX_KEY="life_archive_craft_reverse_v1";
-let craftReverseIndex=null,craftReverseMode="now";
+let craftReverseIndex=null,craftReverseMode="uses";
 try{craftReverseIndex=JSON.parse(localStorage.getItem(CRAFT_REVERSE_INDEX_KEY)||"null")}catch(e){craftReverseIndex=null}
 function saveCraftReverseIndex(){
  try{localStorage.setItem(CRAFT_REVERSE_INDEX_KEY,JSON.stringify(craftReverseIndex))}catch(e){console.warn("craft reverse cache save failed",e)}
 }
 function craftIndexReady(){return !!craftReverseIndex&&craftReverseIndex.recipes&&craftReverseIndex.items}
-function parseRecipeSheetRows(payload){
+function parseRecipeSheetRows(payload,base={recipes:{},items:{},builtAt:0}){
  const rows=payload?.rows||payload?.results||[];
- const recipes={},items={};
+ const recipes=base.recipes||{},items=base.items||{};
  for(const row of rows){
   const f=row.fields||row,id=Number(row.row_id??row.id??f["#"]??0);
   if(!id)continue;
-  const ingredients=f.Ingredient||f.Ingredients||[],amounts=f.AmountIngredient||f.AmountIngredients||[];
+  const ingredients=f.Ingredient||f.Ingredients||[];
+  const ingredientRaw=f["Ingredient@as(raw)"]||f["Ingredients@as(raw)"]||[];
+  const amounts=f.AmountIngredient||f.AmountIngredients||[];
   const list=[];
-  for(let i=0;i<Math.max(ingredients.length,amounts.length);i++){
-   const ing=ingredients[i],qty=Number(amounts[i]||0),itemId=Number(ing?.row_id??ing?.value??ing?.id??ing??0);
+  const len=Math.max(ingredients.length||0,ingredientRaw.length||0,amounts.length||0);
+  for(let i=0;i<len;i++){
+   const ing=ingredients[i],raw=ingredientRaw[i],qty=Number(amounts[i]||0);
+   const itemId=Number(raw??ing?.row_id??ing?.value??ing?.id??ing??0);
    if(itemId>0&&qty>0){
     let name=String(ing?.fields?.Name||ing?.name||"").trim();
     if(!name){const known=CRAFT_RECIPE_DATA.find(r=>Number(r.itemId)===itemId);if(known)name=known.name}
     name=name||`Item #${itemId}`;
     list.push({itemId,name,amount:qty});
-    if(!items[itemId])items[itemId]=name;
+    if(!items[itemId]||String(items[itemId]).startsWith("Item #"))items[itemId]=name;
    }
   }
   recipes[id]=list;
-  // also seed existing on-demand cache
-  if(list.length&&!Array.isArray(craftMaterialCache[String(id)]))craftMaterialCache[String(id)]=list;
+  if(list.length)craftMaterialCache[String(id)]=list;
  }
  return {recipes,items,builtAt:Date.now()};
 }
 async function buildCraftReverseIndex(force=false){
  const st=$("craftIndexStatus");
- if(craftIndexReady()&&!force){if(st)st.textContent=`準備済み ${Object.keys(craftReverseIndex.recipes).length.toLocaleString("ja-JP")}レシピ`;fillCraftIngredientCatalog();return true}
+ if(craftIndexReady()&&!force){
+  if(st)st.textContent=`準備済み ${Object.keys(craftReverseIndex.recipes).length.toLocaleString("ja-JP")}レシピ`;
+  fillCraftIngredientCatalog();return true;
+ }
  if(st)st.textContent="必要素材データを取得中…";
  try{
-  const urls=[
-   "https://v2.xivapi.com/api/sheet/Recipe?language=ja&fields=Ingredient,AmountIngredient&limit=20000",
-   "https://v2.xivapi.com/api/sheet/Recipe?language=ja&limit=20000"
-  ];
-  let payload=null,last=null;
-  for(const u of urls){try{const r=await fetch(u);if(!r.ok)throw new Error(`HTTP ${r.status}`);payload=await r.json();if(payload)break}catch(e){last=e}}
-  if(!payload)throw last||new Error("Recipe sheet error");
-  craftReverseIndex=parseRecipeSheetRows(payload);
+  let merged={recipes:{},items:{},builtAt:Date.now()},after=-1,totalRows=0,page=0;
+  const limit=500;
+  while(true){
+   const qs=new URLSearchParams({
+    language:"ja",
+    fields:"Ingredient[].Name,Ingredient@as(raw),AmountIngredient",
+    limit:String(limit)
+   });
+   if(after>=0)qs.set("after",String(after));
+   const url=`https://v2.xivapi.com/api/sheet/Recipe?${qs.toString()}`;
+   const r=await fetch(url,{headers:{Accept:"application/json"},cache:"no-store"});
+   if(!r.ok)throw new Error(`XIVAPI HTTP ${r.status}`);
+   const payload=await r.json();
+   const rows=payload?.rows||payload?.results||[];
+   if(!rows.length)break;
+   merged=parseRecipeSheetRows(payload,merged);
+   totalRows+=rows.length;page++;
+   const lastId=Number(rows[rows.length-1]?.row_id??rows[rows.length-1]?.id??-1);
+   if(st)st.textContent=`必要素材データを取得中… ${totalRows.toLocaleString("ja-JP")}件`;
+   if(!Number.isFinite(lastId)||lastId<=after)break;
+   after=lastId;
+   if(rows.length<limit)break;
+   // Safety valve; Recipe sheet should finish well before this.
+   if(page>100)throw new Error("Recipe sheet pagination exceeded safety limit");
+  }
+  craftReverseIndex=merged;
   saveCraftReverseIndex();saveCraftMaterialCache();fillCraftIngredientCatalog();
-  if(st)st.textContent=`準備完了 ${Object.keys(craftReverseIndex.recipes).length.toLocaleString("ja-JP")}レシピ`;
-  return true;
+  const usable=Object.values(craftReverseIndex.recipes||{}).filter(x=>Array.isArray(x)&&x.length).length;
+  if(st)st.textContent=`準備完了 ${Object.keys(craftReverseIndex.recipes).length.toLocaleString("ja-JP")}レシピ（素材あり ${usable.toLocaleString("ja-JP")}）`;
+  return usable>0;
  }catch(e){
   console.error("craft reverse index build failed",e);
-  if(st)st.textContent="準備に失敗しました";
+  if(st)st.textContent=`準備に失敗しました：${String(e?.message||e)}`;
   return false;
  }
 }
@@ -3645,36 +3954,72 @@ function fillCraftIngredientCatalog(){
  dl.innerHTML=entries.map(([id,name])=>`<option value="${esc(name)}" data-id="${id}"></option>`).join("");
 }
 function craftInventoryData(d=load()){d.craftInventory=d.craftInventory||{};return d.craftInventory}
+function craftInventoryQtyFor(stock,itemId,name){
+ const direct=Number(stock?.[String(itemId)]?.qty||0);
+ if(direct>0)return direct;
+ const q=normalizeCollectionName(String(name||""));
+ if(!q)return 0;
+ for(const x of Object.values(stock||{})){
+  if(Number(x?.qty||0)<=0)continue;
+  if(normalizeCollectionName(String(x?.name||""))===q)return Number(x.qty)||0;
+ }
+ return 0;
+}
+function craftInventoryEntryFor(stock,itemId,name){
+ const direct=stock?.[String(itemId)];
+ if(direct)return {key:String(itemId),entry:direct};
+ const q=normalizeCollectionName(String(name||""));
+ if(!q)return null;
+ for(const [key,x] of Object.entries(stock||{})){
+  if(normalizeCollectionName(String(x?.name||""))===q)return {key,entry:x};
+ }
+ return null;
+}
 function findCraftIngredientByName(name){
- const q=String(name||"").trim();if(!q||!craftIndexReady())return null;
- const hit=Object.entries(craftReverseIndex.items||{}).find(([,n])=>String(n)===q);
- return hit?{itemId:Number(hit[0]),name:String(hit[1])}:null;
+ const q=String(name||"").trim();if(!q)return null;
+ if(craftIndexReady()){
+  const exact=Object.entries(craftReverseIndex.items||{}).find(([,n])=>String(n).trim()===q);
+  if(exact)return {itemId:Number(exact[0]),name:String(exact[1]),catalog:true};
+  const loose=Object.entries(craftReverseIndex.items||{}).find(([,n])=>normalizeCollectionName(String(n))===normalizeCollectionName(q));
+  if(loose)return {itemId:Number(loose[0]),name:String(loose[1]),catalog:true};
+ }
+ return {itemId:"custom:"+q.toLowerCase().replace(/\s+/g," ").trim(),name:q,catalog:false};
 }
 function renderCraftInventory(){
  const box=$("craftInventoryList");if(!box)return;
- const d=load(),inv=craftInventoryData(d),rows=Object.entries(inv).map(([id,x])=>({itemId:Number(id),name:x.name||craftReverseIndex?.items?.[id]||`Item #${id}`,qty:Number(x.qty)||0})).filter(x=>x.qty>0).sort((a,b)=>a.name.localeCompare(b.name,"ja"));
+ const d=load(),inv=craftInventoryData(d),rows=Object.entries(inv).map(([id,x])=>({itemId:id,name:x.name||craftReverseIndex?.items?.[id]||String(id).replace(/^custom:/,""),qty:Number(x.qty)||0})).filter(x=>x.qty>0).sort((a,b)=>a.name.localeCompare(b.name,"ja"));
  box.innerHTML=rows.length?`<div class="grid3">${rows.map(x=>`<div class="listitem"><div class="row"><b>${esc(x.name)}</b><div class="wrap"><input type="number" min="0" class="craftInventoryEdit" data-item="${x.itemId}" value="${x.qty}" style="width:80px"><button class="danger craftInventoryRemove" data-item="${x.itemId}">×</button></div></div></div>`).join("")}</div>`:'<div class="empty">素材在庫はまだ登録されていません。</div>';
  document.querySelectorAll(".craftInventoryEdit").forEach(i=>i.onchange=()=>{const d=load(),inv=craftInventoryData(d),q=Math.max(0,Math.floor(Number(i.value)||0));if(q)inv[i.dataset.item].qty=q;else delete inv[i.dataset.item];save(d);renderCraftInventory()});
  document.querySelectorAll(".craftInventoryRemove").forEach(b=>b.onclick=()=>{const d=load(),inv=craftInventoryData(d);delete inv[b.dataset.item];save(d);renderCraftInventory()});
 }
 function reverseRecipeRows(recipe){return craftReverseIndex?.recipes?.[String(recipe.id)]||[]}
+function usesOwnedMaterialAnalysis(recipe,stock){
+ const need=reverseRecipeRows(recipe);if(!need.length)return {possible:false,matched:0,missing:Infinity,details:[]};
+ const details=need.map(x=>{
+  const have=craftInventoryQtyFor(stock,x.itemId,x.name);
+  return {name:x.name,need:x.amount,have,matched:have>0,missing:Math.max(0,x.amount-have)};
+ });
+ const matched=details.filter(x=>x.matched).length;
+ return {possible:matched>0,matched,missing:details.reduce((n,x)=>n+x.missing,0),details};
+}
 function directRecipeAnalysis(recipe,stock){
  const need=reverseRecipeRows(recipe);if(!need.length)return {possible:false,missing:Infinity,details:[]};
- const details=need.map(x=>({name:x.name,need:x.amount,have:Number(stock[String(x.itemId)]?.qty||0),missing:Math.max(0,x.amount-Number(stock[String(x.itemId)]?.qty||0))}));
+ const details=need.map(x=>{const have=craftInventoryQtyFor(stock,x.itemId,x.name);return {name:x.name,need:x.amount,have,missing:Math.max(0,x.amount-have)}});
  const missing=details.reduce((n,x)=>n+x.missing,0);
  return {possible:missing===0,missing,details};
 }
-function consumeCraftItem(itemId,qty,stock,trail=[],depth=0){
- const have=Number(stock[String(itemId)]?.qty||0);
- if(have>=qty){stock[String(itemId)].qty=have-qty;return {ok:true,missing:0}}
- let remaining=qty-have;if(have>0)stock[String(itemId)].qty=0;
+function consumeCraftItem(itemId,qty,stock,trail=[],depth=0,name=""){
+ const match=craftInventoryEntryFor(stock,itemId,name);
+ const have=Number(match?.entry?.qty||0);
+ if(have>=qty){match.entry.qty=have-qty;return {ok:true,missing:0}}
+ let remaining=qty-have;if(have>0&&match)match.entry.qty=0;
  const sub=craftRecipeByItem(itemId);
  if(!sub||depth>=12||trail.includes(Number(itemId)))return {ok:false,missing:remaining};
  const mats=reverseRecipeRows(sub);if(!mats.length)return {ok:false,missing:remaining};
  const output=Math.max(1,Number(sub.amount)||1),crafts=Math.ceil(remaining/output);
  let missing=0;
  for(const m of mats){
-  const r=consumeCraftItem(m.itemId,m.amount*crafts,stock,[...trail,Number(itemId)],depth+1);
+  const r=consumeCraftItem(m.itemId,m.amount*crafts,stock,[...trail,Number(itemId)],depth+1,m.name);
   missing+=r.missing;
  }
  return {ok:missing===0,missing};
@@ -3682,24 +4027,31 @@ function consumeCraftItem(itemId,qty,stock,trail=[],depth=0){
 function recursiveRecipeAnalysis(recipe,inventory){
  const stock=structuredClone(inventory),mats=reverseRecipeRows(recipe);if(!mats.length)return {possible:false,missing:Infinity};
  let missing=0;
- for(const m of mats)missing+=consumeCraftItem(m.itemId,m.amount,stock,[Number(recipe.itemId)],0).missing;
+ for(const m of mats)missing+=consumeCraftItem(m.itemId,m.amount,stock,[Number(recipe.itemId)],0,m.name).missing;
  return {possible:missing===0,missing};
 }
 function renderCraftReverseResults(rows,mode){
  const box=$("craftReverseResults");if(!box)return;
- box.innerHTML=rows.length?rows.slice(0,250).map(({r,a})=>`<div class="listitem"><div class="row"><span><b>${esc(r.name)}</b> <span class="small">${esc(r.craft)} Lv.${r.level}</span></span><div class="wrap">${mode==="near"?`<span class="badge gold">あと ${a.missing}</span>`:`<span class="badge green">${mode==="now"?"今すぐ":"加工OK"}</span>`}<button class="secondary craftReversePlan" data-id="${r.id}">制作計画へ</button></div></div>${mode==="near"&&a.details?`<div class="small">${a.details.filter(x=>x.missing>0).map(x=>`${esc(x.name)} あと${x.missing}`).join(" ／ ")}</div>`:""}</div>`).join("")+(rows.length>250?`<div class="small">上位250件を表示（該当 ${rows.length.toLocaleString("ja-JP")}件）</div>`:""):'<div class="empty">該当する未制作レシピはありません。</div>';
+ box.innerHTML=rows.length?rows.slice(0,250).map(({r,a})=>`<div class="listitem"><div class="row"><span><b>${esc(r.name)}</b> <span class="small">${esc(r.craft)} Lv.${r.level}</span></span><div class="wrap">${mode==="uses"?`<span class="badge green">所持素材 ${a.matched}種</span>`:mode==="near"?`<span class="badge gold">あと ${a.missing}</span>`:`<span class="badge green">${mode==="now"?"今すぐ":"加工OK"}</span>`}<button class="secondary craftReversePlan" data-id="${r.id}">制作計画へ</button></div></div>${(mode==="uses"||mode==="near")&&a.details?`<div class="small" style="margin-top:5px">${a.details.map(x=>`${x.have>0?"✓":"・"} ${esc(x.name)} ${x.have>0?`所持${x.have} / 必要${x.need}`:`不足${x.need}`}`).join(" ／ ")}</div>`:""}</div>`).join("")+(rows.length>250?`<div class="small">上位250件を表示（該当 ${rows.length.toLocaleString("ja-JP")}件）</div>`:""):'<div class="empty">${mode==="uses"?"登録した素材を使う未制作レシピはありません。":"該当する未制作レシピはありません。"}</div>';
  document.querySelectorAll(".craftReversePlan").forEach(b=>b.onclick=()=>{const d=load(),p=craftPlanData(d);p.items[b.dataset.id]=p.items[b.dataset.id]||1;save(d);renderCrafting()});
 }
 async function runCraftReverse(){
- const status=$("craftReverseStatus");if(!craftIndexReady()){if(status)status.textContent="必要素材データを準備しています…";if(!await buildCraftReverseIndex())return}
- const d=load(),inv=craftInventoryData(d),owned=Object.keys(inv).filter(id=>Number(inv[id]?.qty)>0);
+ const status=$("craftReverseStatus");
+ const recipeCount=craftIndexReady()?Object.keys(craftReverseIndex.recipes||{}).length:0;
+ if(!craftIndexReady()||recipeCount<1000){
+  if(status)status.textContent="必要素材データを全件準備しています…";
+  if(!await buildCraftReverseIndex(true))return;
+ }
+ const d=load(),inv=craftInventoryData(d),owned=Object.entries(inv).filter(([,x])=>Number(x?.qty)>0);
  if(!owned.length){if(status)status.textContent="先に素材在庫を登録してください。";return}
  if(status)status.textContent="未制作レシピを判定中…";
  await new Promise(r=>setTimeout(r,0));
  const todo=CRAFT_RECIPE_DATA.filter(r=>!craftRecipeState(d,r.id).done&&reverseRecipeRows(r).length);
  const limit=Math.max(1,Number($("craftNearLimit")?.value||3)),out=[];
  for(const r of todo){
-  if(craftReverseMode==="now"){
+  if(craftReverseMode==="uses"){
+   const a=usesOwnedMaterialAnalysis(r,inv);if(a.possible)out.push({r,a});
+  }else if(craftReverseMode==="now"){
    const a=directRecipeAnalysis(r,inv);if(a.possible)out.push({r,a});
   }else if(craftReverseMode==="process"){
    const direct=directRecipeAnalysis(r,inv);if(!direct.possible){const a=recursiveRecipeAnalysis(r,inv);if(a.possible)out.push({r,a})}
@@ -3707,8 +4059,12 @@ async function runCraftReverse(){
    const a=directRecipeAnalysis(r,inv);if(!a.possible&&a.missing>0&&a.missing<=limit)out.push({r,a});
   }
  }
- out.sort((x,y)=>craftReverseMode==="near"?x.a.missing-y.a.missing:x.r.level-y.r.level||x.r.name.localeCompare(y.r.name,"ja"));
- if(status)status.textContent=`判定完了：${out.length.toLocaleString("ja-JP")}件`;
+ out.sort((x,y)=>craftReverseMode==="uses"?(y.a.matched-x.a.matched||x.a.missing-y.a.missing||x.r.level-y.r.level):craftReverseMode==="near"?x.a.missing-y.a.missing:x.r.level-y.r.level||x.r.name.localeCompare(y.r.name,"ja"));
+ if(status){
+  const indexed=Object.keys(craftReverseIndex?.recipes||{}).length;
+  const usable=Object.values(craftReverseIndex?.recipes||{}).filter(x=>Array.isArray(x)&&x.length).length;
+  status.textContent=`判定完了：${out.length.toLocaleString("ja-JP")}件 ／ 索引 ${indexed.toLocaleString("ja-JP")}件（素材あり ${usable.toLocaleString("ja-JP")}）`;
+ }
  renderCraftReverseResults(out,craftReverseMode);
 }
 
@@ -4109,6 +4465,8 @@ async function syncFFXIVCollectCatalogs(){
   }
  }
 
+ const achCat=fc.catalogs?.achievements;
+ if(achCat)fcApplyLocalAchievementJapanese(achCat);
  fc.lastCatalogSyncAt=Date.now();
  save(d);
  renderFFXIVCollectHub();
@@ -4130,7 +4488,8 @@ function fcCatalogMap(kind){
 const XIVAPI_V2_SHEET="https://v2.xivapi.com/api/sheet";
 const FC_JA_DESCRIPTION_SHEETS={
  minions:{sheet:"Companion",label:"ミニオン"},
- mounts:{sheet:"Mount",label:"マウント"}
+ mounts:{sheet:"Mount",label:"マウント"},
+ achievements:{sheet:"Achievement",label:"アチーブメント",localAchievement:true}
 };
 function fcPlainXivapiText(v){
  return String(v??"").replace(/\r/g,"").replace(/\n{3,}/g,"\n\n").trim();
@@ -4184,6 +4543,14 @@ async function syncFFXIVCollectJapaneseDescriptions(){
    const cat=fc.catalogs[kind];
    const items=Array.isArray(cat?.items)?cat.items:[];
    if(!items.length){result.push(`${cfg.label}：図鑑未取得`);continue}
+   if(cfg.localAchievement){
+    const applied=fcApplyLocalAchievementJapanese(cat);
+    cat.jpDescriptionUpdatedAt=Date.now();
+    cat.jpDescriptionSource="Life Archive Achievement DB / Japanese game data";
+    total+=applied;
+    result.push(`${cfg.label}：${applied}件`);
+    continue;
+   }
    const rows=await fcFetchXivapiJaSheet(cfg.sheet);
    const byId=new Map(rows.map(r=>[String(r.row_id),r]));
    const byEnglishName=new Map(rows.map(r=>[normalizeCollectionName(fcXivapiEnglishName(r)),r]).filter(([k])=>k));
@@ -4216,8 +4583,12 @@ async function syncFFXIVCollectJapaneseDescriptions(){
 }
 
 
-function fcJapaneseDescription(item){
+function fcJapaneseDescription(item,kind=""){
  if(!item)return "";
+ if(kind==="achievements"){
+  const a=fcAchievementLocalJP(item);
+  if(a?.description)return a.description;
+ }
  // APIに日本語説明フィールドが含まれる場合は必ずそちらを優先。
  const direct=[
   item.description_ja,item.descriptionJa,item.japanese_description,
@@ -4234,8 +4605,8 @@ function fcJapaneseDescription(item){
  if(/[ぁ-んァ-ヶ一-龯々〆〤]/.test(raw))return raw;
  return "";
 }
-function fcDescriptionHTML(item){
- const ja=fcJapaneseDescription(item);
+function fcDescriptionHTML(item,kind=""){
+ const ja=fcJapaneseDescription(item,kind);
  if(ja)return `<details style="margin-top:4px"><summary class="small">説明</summary><div class="small" style="margin-top:3px">${esc(ja)}</div></details>`;
  const raw=String(item?.description||"").trim();
  if(raw)return `<details style="margin-top:4px"><summary class="small">説明</summary><div class="small muted" style="margin-top:3px">日本語説明は未取得</div></details>`;
@@ -4277,12 +4648,130 @@ function fcAcquisitionHTML(item){
  }).join("")}</div>`;
 }
 
+
+function fcUserMetaRoot(d){
+ const p=ffProfileData(d);
+ p.ffxivCollect=p.ffxivCollect||{lastCatalogSyncAt:0,catalogs:{},sources:{}};
+ p.ffxivCollect.userMeta=p.ffxivCollect.userMeta||{};
+ return p.ffxivCollect.userMeta;
+}
+function fcUserMeta(d,kind,id){
+ const root=fcUserMetaRoot(d);
+ root[kind]=root[kind]||{};
+ const key=String(id);
+ const m=root[kind][key]||{acquiredDate:"",memo:"",checks:[],tags:[]};
+ m.acquiredDate=String(m.acquiredDate||"");
+ m.memo=String(m.memo||"");
+ m.checks=Array.isArray(m.checks)?m.checks:[];
+ m.tags=Array.isArray(m.tags)?m.tags:[];
+ root[kind][key]=m;
+ return m;
+}
+function fcDisplayDateInput(v){
+ if(!v)return "";
+ const d=new Date(v);
+ if(Number.isNaN(d.getTime()))return String(v).slice(0,10);
+ return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+}
+
+function fcAllAchievementTags(d){
+ const root=fcUserMetaRoot(d)?.achievements||{};
+ const tags=[];
+ for(const m of Object.values(root)){
+  for(const tag of (m?.tags||[]))if(tag&& !tags.includes(tag))tags.push(tag);
+ }
+ return tags.sort((a,b)=>a.localeCompare(b,"ja"));
+}
+function fcNormalizeTags(v){
+ return [...new Set(String(v||"").split(/[,、\n]/).map(x=>x.trim()).filter(Boolean))];
+}
+function fcAchievementTagHTML(d,kind,item){
+ if(kind!=="achievements")return "";
+ const m=fcUserMeta(d,kind,item.id);
+ m.tags=Array.isArray(m.tags)?m.tags:[];
+ const all=fcAllAchievementTags(d);
+ return `<div class="fc-journal-grid" style="margin-top:8px">
+  <div style="grid-column:1/-1">
+   <label>自分用タグ</label>
+   <input class="fcTagsInput" data-kind="${esc(kind)}" data-id="${esc(item.id)}" value="${esc(m.tags.join(", "))}" list="fcTagSuggestions_${esc(item.id)}" placeholder="例：黄金巡り, 優先, マウント関連">
+   <datalist id="fcTagSuggestions_${esc(item.id)}">${all.map(x=>`<option value="${esc(x)}"></option>`).join("")}</datalist>
+   <div style="margin-top:5px">${m.tags.map(x=>`<span class="badge">#${esc(x)}</span>`).join("")}</div>
+  </div>
+ </div>`;
+}
+function refreshFCExplorerTagOptions(d,kind){
+ const row=$("fcExplorerTagRow"),sel=$("fcExplorerTag"),search=$("fcExplorerTagSearch");
+ if(row)row.style.display=kind==="achievements"?"grid":"none";
+ if(!sel)return;
+ if(kind!=="achievements"){sel.innerHTML='<option value="">すべて</option>';if(search)search.value="";return}
+ const prev=sel.value||"",tags=fcAllAchievementTags(d);
+ sel.innerHTML='<option value="">すべて</option>'+tags.map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join("");
+ if(tags.includes(prev))sel.value=prev;
+}
+function fcJournalHTML(d,kind,item){
+ const m=fcUserMeta(d,kind,item.id);
+ const checks=m.checks||[];
+ return `<details class="fc-journal">
+  <summary>📝 入手記録・メモ${m.acquiredDate?` <span class="badge green">入手 ${esc(fcDisplayDateInput(m.acquiredDate))}</span>`:""}${checks.length?` <span class="badge">${checks.filter(x=>x.done).length}/${checks.length}</span>`:""}</summary>
+  <div class="fc-journal-grid">
+   <div><label>${kind==="achievements"?"達成日":"入手日"}</label><input type="date" class="fcAcquiredDate" data-kind="${esc(kind)}" data-id="${esc(item.id)}" value="${esc(fcDisplayDateInput(m.acquiredDate))}"></div>
+   <div><label>メモ</label><textarea class="fcMemo" data-kind="${esc(kind)}" data-id="${esc(item.id)}" placeholder="例：なかなか出なくて苦戦。最後は直接ドロップ。">${esc(m.memo||"")}</textarea></div>
+  </div>
+  ${fcAchievementTagHTML(d,kind,item)}
+  <div class="small" style="margin-top:6px">チェックメモ</div>
+  <div class="fc-check-list">${checks.length?checks.map(c=>`<div class="fc-check-row ${c.done?"done":""}"><input type="checkbox" class="fcCheckToggle" data-kind="${esc(kind)}" data-id="${esc(item.id)}" data-check="${esc(c.id)}" ${c.done?"checked":""}><div class="fc-check-text">${esc(c.text||"")}</div><button type="button" class="danger fcCheckDelete" data-kind="${esc(kind)}" data-id="${esc(item.id)}" data-check="${esc(c.id)}">×</button></div>`).join(""):'<div class="small">チェック項目はまだありません。</div>'}</div>
+  <div class="fc-check-add"><input class="fcCheckNew" data-kind="${esc(kind)}" data-id="${esc(item.id)}" placeholder="例：極○○を50周した"><button type="button" class="secondary fcCheckAdd" data-kind="${esc(kind)}" data-id="${esc(item.id)}">＋</button></div>
+ </details>`;
+}
+function bindFCJournalEvents(){
+ document.querySelectorAll(".fcAcquiredDate").forEach(el=>el.onchange=()=>{
+  const d=load(),m=fcUserMeta(d,el.dataset.kind,el.dataset.id);m.acquiredDate=el.value||"";save(d);renderFCExplorer();if(typeof renderDateArchive==="function")renderDateArchive();
+ });
+ document.querySelectorAll(".fcMemo").forEach(el=>el.onchange=()=>{
+  const d=load(),m=fcUserMeta(d,el.dataset.kind,el.dataset.id);m.memo=el.value;save(d);
+ });
+ document.querySelectorAll(".fcTagsInput").forEach(el=>el.onchange=()=>{
+  const d=load(),m=fcUserMeta(d,el.dataset.kind,el.dataset.id);m.tags=fcNormalizeTags(el.value);save(d);renderFCExplorer();if(typeof renderDateArchive==="function")renderDateArchive();
+ });
+ document.querySelectorAll(".fcCheckToggle").forEach(el=>el.onchange=()=>{
+  const d=load(),m=fcUserMeta(d,el.dataset.kind,el.dataset.id),c=m.checks.find(x=>String(x.id)===String(el.dataset.check));if(!c)return;c.done=el.checked;c.doneAt=el.checked?Date.now():0;save(d);renderFCExplorer();if(typeof renderDateArchive==="function")renderDateArchive();
+ });
+ document.querySelectorAll(".fcCheckDelete").forEach(b=>b.onclick=()=>{
+  const d=load(),m=fcUserMeta(d,b.dataset.kind,b.dataset.id);m.checks=m.checks.filter(x=>String(x.id)!==String(b.dataset.check));save(d);renderFCExplorer();
+ });
+ document.querySelectorAll(".fcCheckAdd").forEach(b=>b.onclick=()=>{
+  const input=document.querySelector(`.fcCheckNew[data-kind="${CSS.escape(b.dataset.kind)}"][data-id="${CSS.escape(b.dataset.id)}"]`);
+  const text=(input?.value||"").trim();if(!text)return;
+  const d=load(),m=fcUserMeta(d,b.dataset.kind,b.dataset.id);m.checks.push({id:uid(),text,done:false,createdAt:Date.now(),doneAt:0});save(d);renderFCExplorer();
+ });
+}
+function refreshFCExplorerSourceOptions(kind){
+ const sel=$("fcExplorerSource"),label=$("fcExplorerSourceLabel");if(!sel)return;
+ const previous=sel.value||"";
+ const collection=["ダンジョン","討伐・討滅戦","レイド","クエスト","製作","採集","交換","ショップ","ゴールドソーサー","シーズナルイベント","オンラインストア","宝の地図","F.A.T.E.","PvP"];
+ const achievementBase=["キャラクター","バトル","クエスト","製作・採集","PvP","探検","グランドカンパニー","アイテム","その他"];
+ const achievementDetail=["ダンジョン","討伐・討滅戦","レイド"];
+ const achievementKinds=(typeof ACHIEVEMENT_DB!=="undefined"?[...new Set(ACHIEVEMENT_DB.filter(a=>a.kind&&a.kind!=="レガシー").map(a=>a.kind))]:[]);
+ const achievement=[...new Set([...achievementBase,...achievementKinds,...achievementDetail])];
+ const rows=kind==="achievements"?achievement:collection;
+ if(label)label.textContent=kind==="achievements"?"カテゴリ":"入手方法";
+ const current=[...sel.options].slice(1).map(o=>o.value||o.textContent);
+ if(current.join("\n")!==rows.join("\n")){
+  sel.innerHTML='<option value="">すべて</option>'+rows.map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join("");
+  if(rows.includes(previous))sel.value=previous;
+ }
+}
 function renderFCExplorer(){
  const kind=$("fcExplorerKind")?.value||"minions";
+ refreshFCExplorerSourceOptions(kind);
  const q=($("fcExplorerSearch")?.value||"").trim().toLowerCase();
  const status=$("fcExplorerStatus")?.value||"all";
  const sourceFilter=$("fcExplorerSource")?.value||"";
+ const sort=$("fcExplorerSort")?.value||"default";
+ const tagFilter=$("fcExplorerTag")?.value||"";
+ const tagSearch=($("fcExplorerTagSearch")?.value||"").trim().toLowerCase();
  const d=load(),p=ffProfileData(d),c=p.ffxivCollect?.catalogs?.[kind],box=$("fcExplorerList"),sum=$("fcExplorerSummary");
+ refreshFCExplorerTagOptions(d,kind);
  if(!box)return;
  const progress=kind==="minions"?(d.minionProgress||{}):kind==="mounts"?(d.mountProgress||{}):null;
  const isOwned=x=>{
@@ -4295,21 +4784,58 @@ function renderFCExplorer(){
  };
  let source=(c?.items||[]);
  let filtered=source.filter(x=>{
-  const src=fcSourceText(x),acq=fcAcquisitionInfo(x).map(r=>[r.kind,r.detail,...(r.extra||[])].join(" ")).join(" "),hay=[x.name,x.description,x.category,x.type,src,acq].join(" ").toLowerCase();
+  const src=fcSourceText(x);
+  const acqRows=fcAcquisitionInfo(x);
+  const acq=acqRows.map(r=>[r.kind,r.detail,...(r.extra||[])].join(" ")).join(" ");
+  const hay=[x.name,x.name_ja,x.description,x.description_ja,x.category,x.category_ja,x.type,x.subcategory_ja,src,acq].join(" ").toLowerCase();
   const owned=isOwned(x);
-  return (!q||hay.includes(q))&&(!sourceFilter||acq.includes(sourceFilter))&&(status==="all"||(status==="owned"&&owned)||(status==="missing"&&!owned));
+  const sourceHit=!sourceFilter||(()=>{
+   // アチーブメントにはFFXIV Collectの「入手方法 sources」が無い。
+   // 代わりに公式Achievement DBの大分類・小分類を同じフィルターで判定する。
+   if(kind==="achievements"){
+    const a=fcAchievementLocalJP(x);
+    const fields=[
+     a?.kind,a?.category,x.category_ja,x.subcategory_ja,
+     x.category,x.type
+    ].filter(Boolean);
+    const target=normalizeCollectionName(sourceFilter);
+    return fields.some(v=>{
+     const n=normalizeCollectionName(fcJapaneseText(v));
+     return n===target||n.includes(target)||target.includes(n);
+    });
+   }
+   return acqRows.some(r=>{
+    const parts=[r.kind,r.detail,...(r.extra||[])].filter(Boolean);
+    return parts.some(v=>normalizeCollectionName(v)===normalizeCollectionName(sourceFilter)||String(v).includes(sourceFilter));
+   });
+  })();
+  const meta=kind==="achievements"?fcUserMeta(d,kind,x.id):null;
+  const tags=meta?.tags||[];
+  const tagHit=!tagFilter||tags.includes(tagFilter);
+  const tagSearchHit=!tagSearch||tags.some(v=>v.toLowerCase().includes(tagSearch));
+  return (!q||hay.includes(q))&&sourceHit&&tagHit&&tagSearchHit&&(status==="all"||(status==="owned"&&owned)||(status==="missing"&&!owned));
  });
+ if(sort==="name")filtered.sort((a,b)=>(fcJapaneseTitle(a,kind)||a.name||"").localeCompare(fcJapaneseTitle(b,kind)||b.name||"","ja"));
+ if(sort==="acquiredDesc"||sort==="acquiredAsc"){
+  filtered.sort((a,b)=>{
+   const da=fcUserMeta(d,kind,a.id).acquiredDate||"",db=fcUserMeta(d,kind,b.id).acquiredDate||"";
+   if(!da&&!db)return 0;if(!da)return 1;if(!db)return -1;
+   return sort==="acquiredDesc"?db.localeCompare(da):da.localeCompare(db);
+  });
+ }
  const totalFiltered=filtered.length,rows=filtered.slice(0,200);
  if(sum)sum.textContent=c?`${c.count}件中 ${totalFiltered}件${totalFiltered>200?"（200件まで表示）":""}`:"このカテゴリはまだ取得されていません。";
  box.innerHTML=rows.length?rows.map(x=>{
   const owned=isOwned(x);
   const name=fcJapaneseTitle(x,kind)||fcJapaneseProperName(x.name||"")||x.name||`#${x.id}`;
-  const meta=[x.patch?`Patch ${x.patch}`:"",x.points!=null?`${x.points}pt`:"",x.category?fcJapaneseText(x.category):"",x.type?fcJapaneseText(x.type):""].filter(Boolean).join(" ／ ");
+  const achLocal=kind==="achievements"?fcAchievementLocalJP(x):null;
+  const meta=[x.patch?`Patch ${x.patch}`:"",x.points!=null?`${x.points}pt`:"",achLocal?.kind||x.category_ja||(x.category?fcJapaneseText(x.category):""),achLocal?.category||x.subcategory_ja||(x.type?fcJapaneseText(x.type):"")].filter(Boolean).filter((v,i,a)=>a.indexOf(v)===i).join(" ／ ");
   const ownedBadge=progress?`<span class="badge ${owned?"green":""}">${owned?"✓ 取得済み":"未取得"}</span>`:"";
-  return `<div class="listitem"><div class="row"><div><b>${esc(name)}</b> ${ownedBadge}</div><span class="small">${esc(meta)}</span></div>${fcAcquisitionHTML(x)}${fcDescriptionHTML(x)}</div>`;
+  const userTags=kind==="achievements"?(fcUserMeta(d,kind,x.id).tags||[]):[];
+  return `<div class="listitem"><div class="row"><div><b>${esc(name)}</b> ${ownedBadge}</div><span class="small">${esc(meta)}</span></div>${userTags.length?`<div style="margin-top:4px">${userTags.map(t=>`<span class="badge">#${esc(t)}</span>`).join("")}</div>`:""}${fcAcquisitionHTML(x)}${fcDescriptionHTML(x,kind)}${fcJournalHTML(d,kind,x)}</div>`;
  }).join(""):'<div class="empty">該当データはありません。</div>';
+ bindFCJournalEvents();
 }
-
 const FC_JA_TERMS=[
  ["Achievement","アチーブメント"],["Achievements","アチーブメント"],
  ["Dungeon","ダンジョン"],["Dungeons","ダンジョン"],
@@ -4412,8 +4938,39 @@ const FC_JA_TITLE_MAP={
  "Wind-up Ryne":"マメット・リーン",
  "Wind-up Gaia":"マメット・ガイア"
 };
+
+function fcAchievementLocalJP(item){
+ if(!item||typeof ACHIEVEMENT_DB==="undefined")return null;
+ const id=Number(item.id);
+ let a=Number.isFinite(id)?ACHIEVEMENT_DB.find(x=>Number(x.id)===id):null;
+ if(!a&&item.name){
+  const q=normalizeCollectionName(item.name);
+  a=ACHIEVEMENT_DB.find(x=>normalizeCollectionName(x.name)===q)||null;
+ }
+ return a||null;
+}
+function fcApplyLocalAchievementJapanese(cat){
+ if(!cat||!Array.isArray(cat.items))return 0;
+ let applied=0;
+ for(const item of cat.items){
+  const a=fcAchievementLocalJP(item);
+  if(!a)continue;
+  if(a.name)item.name_ja=a.name;
+  if(a.description)item.description_ja=a.description;
+  if(a.kind)item.category_ja=a.kind;
+  if(a.category)item.subcategory_ja=a.category;
+  applied++;
+ }
+ return applied;
+}
 function fcJapaneseTitle(item,kind){
  if(!item)return "";
+ // 0) アチーブメントはLife Archive内蔵の公式日本語データを最優先
+ if(kind==="achievements"){
+  const a=fcAchievementLocalJP(item);
+  if(a?.name)return a.name;
+  if(item.name_ja)return item.name_ja;
+ }
  // 1) Life Archiveが既に持つ日本語マスターを最優先
  const local=fcOfficialNameBase(item,kind);
  if(local&&local!==item.name)return local;
@@ -4425,7 +4982,7 @@ function fcJapaneseTitle(item,kind){
 }
 function fcOfficialNameBase(item,kind){
  if(!item)return "";
- const data=kind==="minions"?MINION_DATA:kind==="mounts"?MOUNT_DATA:null;
+ const data=kind==="minions"?MINION_DATA:kind==="mounts"?MOUNT_DATA:kind==="achievements"?ACHIEVEMENT_DB:null;
  if(data){
   const byId=data.find(x=>Number(x.id)===Number(item.id));
   if(byId)return byId.name;
@@ -4476,6 +5033,13 @@ const FC_ACQ_JA_RULES=[
 function fcJapaneseAcquisitionType(v){
  const raw=String(v||"").trim();
  if(!raw)return "";
+ const normalized=raw.replace(/\s+/g," ");
+ const exact={
+  "Raid":"レイド","Raids":"レイド","Alliance Raid":"アライアンスレイド",
+  "Dungeon":"ダンジョン","Trial":"討伐・討滅戦","Quest":"クエスト",
+  "FATE":"F.A.T.E.","PvP":"PvP","Achievement":"アチーブメント"
+ };
+ if(exact[normalized])return exact[normalized];
  for(const [re,ja] of FC_ACQ_JA_RULES)if(re.test(raw))return ja;
  return fcJapaneseText(raw);
 }
@@ -4903,49 +5467,347 @@ function renderWeapons(){
  });
 }
 
-const GUILDLEVE_CACHE_KEY="life_archive_guildleves_v1";
+const GUILDLEVE_CACHE_KEY="life_archive_guildleves_v8";
 let guildleveData=[],levePage=1,leveLoading=false;
 function leveState(d,id){return d.guildleveProgress?.[id]||{done:false,note:""};}
 function readLeveCache(){try{const x=JSON.parse(localStorage.getItem(GUILDLEVE_CACHE_KEY)||"null");return Array.isArray(x?.results)?x.results:[]}catch(e){return []}}
 function pickField(f,names){for(const n of names){if(f&&f[n]!=null)return f[n]}return null}
 function fieldText(v){return String(v?.fields?.Name??v?.fields?.Singular??v?.value??v?.name??v??"").trim()}
+function leveTitleText(v){
+ if(v==null)return "";
+ if(typeof v==="string")return v.trim();
+ if(typeof v==="object"){
+  const candidates=[v?.fields?.Name,v?.fields?.Title,v?.fields?.Text,v?.name,v?.title,v?.text];
+  for(const x of candidates)if(typeof x==="string"&&x.trim())return x.trim();
+ }
+ return "";
+}
+function isPlaceholderLeveTitle(v){
+ const s=String(v||"").trim();
+ return !s||/^リーヴ\s*#?\s*(?:[1-9]|1\d|20)$/u.test(s)||/^Leve\s*#?\s*\d+$/i.test(s)||/^\d+$/.test(s);
+}
+const LEVE_JOB_MAP={
+ "Carpenter":"木工師","Blacksmith":"鍛冶師","Armorer":"甲冑師","Goldsmith":"彫金師",
+ "Leatherworker":"革細工師","Weaver":"裁縫師","Alchemist":"錬金術師","Culinarian":"調理師",
+ "Miner":"採掘師","Botanist":"園芸師","Fisher":"漁師",
+ "木工師":"木工師","鍛冶師":"鍛冶師","甲冑師":"甲冑師","彫金師":"彫金師",
+ "革細工師":"革細工師","裁縫師":"裁縫師","錬金術師":"錬金術師","調理師":"調理師",
+ "採掘師":"採掘師","園芸師":"園芸師","漁師":"漁師"
+};
+const LEVE_ASSIGNMENT_TYPE_JA={
+ 1:"傭兵稼業",
+ 2:"採掘師",3:"園芸師",4:"漁師",
+ 5:"木工師",6:"鍛冶師",7:"甲冑師",8:"彫金師",
+ 9:"革細工師",10:"裁縫師",11:"錬金術師",12:"調理師",
+ 13:"黒渦団",14:"双蛇党",15:"不滅隊"
+};
+function leveAssignmentTypeId(v){
+ if(v==null)return 0;
+ if(typeof v==="number")return Number(v)||0;
+ if(typeof v==="string"&&/^\d+$/.test(v.trim()))return Number(v)||0;
+ if(typeof v==="object"){
+  const raw=v.value??v.row_id??v.id??v["#"];
+  if(Number.isFinite(Number(raw)))return Number(raw)||0;
+ }
+ return 0;
+}
+function leveAssignmentCategory(f){
+ const v=f?.LeveAssignmentType;
+ const id=leveAssignmentTypeId(v);
+ if(LEVE_ASSIGNMENT_TYPE_JA[id])return LEVE_ASSIGNMENT_TYPE_JA[id];
+ const text=fieldText(v);
+ if(text&&text!=="0"&&!/^\d+$/.test(text))return text;
+ return "";
+}
+function leveJobFromText(v){
+ const s=String(v||"").trim();if(!s)return "";
+ for(const [en,ja] of Object.entries(LEVE_JOB_MAP)){
+  if(s===en||s===ja||s.includes(en)||s.includes(ja))return ja;
+ }
+ return "";
+}
+function leveJobFromFields(f){
+ const candidates=[
+  fieldText(f?.ClassJobCategory),fieldText(f?.ClassJob),fieldText(f?.CraftLeve),fieldText(f?.GatheringLeve),
+  leveTitleText(f?.ClassJobCategory),leveTitleText(f?.ClassJob),leveTitleText(f?.CraftLeve),leveTitleText(f?.GatheringLeve)
+ ].filter(Boolean);
+ for(const c of candidates){const j=leveJobFromText(c);if(j)return j}
+ const flat=JSON.stringify({
+  ClassJobCategory:f?.ClassJobCategory,ClassJob:f?.ClassJob,CraftLeve:f?.CraftLeve,GatheringLeve:f?.GatheringLeve
+ });
+ return leveJobFromText(flat);
+}
+function leveClientNameFromFields(f){
+ const v=f?.LeveClient;
+ if(!v)return "";
+ return leveTitleText(v?.fields?.Name)||leveTitleText(v?.fields?.Singular)||leveTitleText(v?.Name)||leveTitleText(v?.Singular)||leveTitleText(v);
+}
+function leveDeliveryPlaceFromFields(f){
+ const v=f?.LeveClient;
+ const candidates=[
+  v?.fields?.PlaceName?.fields?.Name,
+  v?.fields?.PlaceName?.Name,
+  v?.fields?.TerritoryType?.fields?.PlaceName?.fields?.Name,
+  v?.fields?.TerritoryType?.fields?.Name,
+  v?.fields?.Location?.fields?.PlaceName?.fields?.Name,
+  v?.fields?.Location?.fields?.Name
+ ];
+ for(const c of candidates){const s=leveTitleText(c)||fieldText(c);if(s&&s!=="[object Object]")return s}
+ return "";
+}
+function leveDeliveryCoordsFromFields(f){
+ const v=f?.LeveClient;
+ const candidates=[v?.fields?.Level,v?.fields?.Location,v?.fields?.LevelLevemete];
+ for(const c of candidates){
+  const x=Number(c?.fields?.X??c?.X??NaN),y=Number(c?.fields?.Y??c?.Y??NaN);
+  if(Number.isFinite(x)&&Number.isFinite(y))return [x,y];
+ }
+ return [];
+}
+
+function rawRelId(v){
+ if(v==null)return 0;
+ if(typeof v==="number")return Number(v)||0;
+ if(typeof v==="string"&&/^\d+$/.test(v.trim()))return Number(v)||0;
+ if(typeof v==="object")return Number(v.row_id??v.id??v.value??v["#"]??0)||0;
+ return 0;
+}
+function relName(v){
+ if(!v)return "";
+ const vals=[
+  v?.fields?.Name,v?.fields?.Singular,v?.fields?.Title,v?.fields?.PlaceName?.fields?.Name,
+  v?.Name,v?.Singular,v?.Title,v?.name
+ ];
+ for(const x of vals)if(typeof x==="string"&&x.trim())return x.trim();
+ return "";
+}
 async function loadGuildleves(force=false){
  if(leveLoading)return;leveLoading=true;
  const status=$("leveLoadStatus");if(status)status.textContent="読込中…";
  try{
-  if(!force){const c=readLeveCache();if(c.length){guildleveData=c;if(status)status.textContent=`キャッシュ ${c.length}件`;fillLeveFilters();renderGuildleves();leveLoading=false;return}}
-  const urls=[
-   "https://v2.xivapi.com/api/sheet/Leve?language=ja&limit=5000",
-   "https://v2.xivapi.com/api/sheet/Leve?language=ja"
-  ];
-  let payload=null,last=null;
-  for(const u of urls){try{const r=await fetch(u);if(!r.ok)throw new Error(`HTTP ${r.status}`);payload=await r.json();if(payload)break}catch(e){last=e}}
-  if(!payload)throw last||new Error("Leve API");
-  const rows=payload.rows||payload.results||[];
-  guildleveData=rows.map(row=>{
+  if(!force){
+   const c=readLeveCache();
+   if(c.length){
+    guildleveData=c.filter(x=>!isPlaceholderLeveTitle(x.name));
+    if(status)status.textContent=`キャッシュ ${guildleveData.length}件`;
+    fillLeveFilters();renderGuildleves();leveLoading=false;return;
+   }
+  }
+
+  async function fetchPaged(makeUrl,onRows){
+   let after=-1,page=0,total=0;
+   const limit=500;
+   while(true){
+    const url=makeUrl(after,limit);
+    const r=await fetch(url,{headers:{Accept:"application/json"},cache:"no-store"});
+    if(!r.ok)throw new Error(`XIVAPI HTTP ${r.status}`);
+    const payload=await r.json();
+    const rows=payload?.rows||payload?.results||[];
+    if(!rows.length)break;
+    onRows(rows);total+=rows.length;
+    if(status)status.textContent=`読込中… ${total.toLocaleString("ja-JP")}件`;
+    const lastId=Number(rows.at(-1)?.row_id??rows.at(-1)?.id??-1);
+    if(!Number.isFinite(lastId)||lastId<=after||rows.length<limit)break;
+    after=lastId;
+    if(++page>100)throw new Error("Leve pagination exceeded safety limit");
+   }
+  }
+
+  const allRows=[];
+  await fetchPaged((after,limit)=>{
+   const qs=new URLSearchParams({language:"ja",limit:String(limit)});
+   if(after>=0)qs.set("after",String(after));
+   return `https://v2.xivapi.com/api/sheet/Leve?${qs.toString()}`;
+  },rows=>allRows.push(...rows));
+
+  // Relationship展開形式に依存しないよう、LeveAssignmentTypeの元IDを別取得する。
+  const assignmentByLeveId=new Map();
+  await fetchPaged((after,limit)=>{
+   const qs=new URLSearchParams({
+    language:"ja",
+    fields:"LeveAssignmentType@as(raw)",
+    limit:String(limit)
+   });
+   if(after>=0)qs.set("after",String(after));
+   return `https://v2.xivapi.com/api/sheet/Leve?${qs.toString()}`;
+  },rows=>{
+   for(const row of rows){
+    const id=Number(row.row_id??row.id??0);
+    const raw=row?.fields?.["LeveAssignmentType@as(raw)"];
+    const typeId=Number(raw??0)||0;
+    if(id)assignmentByLeveId.set(id,typeId);
+   }
+  });
+
+
+  // 場所/NPC系はRelationship展開に依存せず raw ID も取得する。
+  const leveRawMeta=new Map();
+  await fetchPaged((after,limit)=>{
+   const qs=new URLSearchParams({
+    language:"ja",
+    fields:"PlaceName@as(raw),LeveClient@as(raw),LevelLevemete@as(raw),Levemete@as(raw)",
+    limit:String(limit)
+   });
+   if(after>=0)qs.set("after",String(after));
+   return `https://v2.xivapi.com/api/sheet/Leve?${qs.toString()}`;
+  },rows=>{
+   for(const row of rows){
+    const id=Number(row.row_id??row.id??0);if(!id)continue;
+    const f=row.fields||{};
+    leveRawMeta.set(id,{
+     placeId:Number(f["PlaceName@as(raw)"]??0)||0,
+     clientId:Number(f["LeveClient@as(raw)"]??0)||0,
+     levelLevemeteId:Number(f["LevelLevemete@as(raw)"]??0)||0,
+     levemeteId:Number(f["Levemete@as(raw)"]??0)||0
+    });
+   }
+  });
+
+
+  // LevelLevemete をLeve側からもネスト指定で取得。スキーマ差による取りこぼしの補助。
+  const nestedAcceptByLeveId=new Map();
+  try{
+   await fetchPaged((after,limit)=>{
+    const qs=new URLSearchParams({
+     language:"ja",
+     fields:"LevelLevemete.X,LevelLevemete.Y,LevelLevemete.Territory.PlaceName.Name,LevelLevemete.Map.PlaceName.Name,LevelLevemete.Object.ENpcResident.Singular",
+     limit:String(limit)
+    });
+    if(after>=0)qs.set("after",String(after));
+    return `https://v2.xivapi.com/api/sheet/Leve?${qs.toString()}`;
+   },rows=>{
+    for(const row of rows){
+     const id=Number(row.row_id??row.id??0);if(!id)continue;
+     const lv=row?.fields?.LevelLevemete;
+     if(lv)nestedAcceptByLeveId.set(id,lv?.fields||lv);
+    }
+   });
+  }catch(e){console.warn("nested LevelLevemete fetch skipped",e)}
+
+  // Relationshipの実体名をまとめて引く。存在しないシート/行は静かに無視する。
+  async function fetchRowsByIds(sheet,ids,fields="Name"){
+   const out=new Map(),unique=[...new Set(ids.filter(x=>Number(x)>0))];
+   for(let i=0;i<unique.length;i+=80){
+    const batch=unique.slice(i,i+80);
+    await Promise.all(batch.map(async id=>{
+     try{
+      const qs=new URLSearchParams({language:"ja",fields});
+      const r=await fetch(`https://v2.xivapi.com/api/sheet/${sheet}/${id}?${qs.toString()}`,{headers:{Accept:"application/json"},cache:"no-store"});
+      if(!r.ok)return;
+      const j=await r.json();out.set(id,j?.fields||j);
+     }catch(e){}
+    }));
+   }
+   return out;
+  }
+  const metas=[...leveRawMeta.values()];
+  const placeRows=await fetchRowsByIds("PlaceName",metas.map(x=>x.placeId),"Name");
+  const clientRows=await fetchRowsByIds("LeveClient",metas.map(x=>x.clientId),"Name,PlaceName,TerritoryType,Level");
+  const levelRows=await fetchRowsByIds(
+   "Level",
+   metas.map(x=>x.levelLevemeteId),
+   "X,Y,Territory,Territory.PlaceName.Name,Territory.PlaceName,Map,Map.PlaceName.Name,Object,Object.ENpcResident.Singular"
+  );
+  const levemeteRows=await fetchRowsByIds("ENpcResident",metas.map(x=>x.levemeteId),"Singular");
+
+
+  function levelAcceptPlace(levelRow){
+   if(!levelRow)return "";
+   const candidates=[
+    levelRow?.Territory?.fields?.PlaceName?.fields?.Name,
+    levelRow?.Territory?.fields?.PlaceName?.Name,
+    levelRow?.Territory?.PlaceName?.fields?.Name,
+    levelRow?.Territory?.PlaceName?.Name,
+    levelRow?.Map?.fields?.PlaceName?.fields?.Name,
+    levelRow?.Map?.fields?.PlaceName?.Name,
+    levelRow?.Territory?.fields?.Name,
+    levelRow?.Territory?.Name
+   ];
+   for(const c of candidates){
+    const s=leveTitleText(c)||fieldText(c);
+    if(s&&s!=="[object Object]"&&!/^\d+$/.test(s))return s;
+   }
+   return "";
+  }
+  function levelAcceptNpc(levelRow){
+   const candidates=[
+    levelRow?.Object?.fields?.ENpcResident?.fields?.Singular,
+    levelRow?.Object?.fields?.ENpcResident?.Singular,
+    levelRow?.Object?.ENpcResident?.fields?.Singular,
+    levelRow?.Object?.ENpcResident?.Singular
+   ];
+   for(const c of candidates){
+    const s=leveTitleText(c)||fieldText(c);
+    if(s&&s!=="[object Object]")return s;
+   }
+   return "";
+  }
+
+  guildleveData=allRows.map(row=>{
    const f=row.fields||row;
    const id=Number(row.row_id??row.id??f["#"]??0);
-   const name=fieldText(pickField(f,["Name","LeveAssignmentType","Title"]))||`リーヴ #${id}`;
-   const classJob=fieldText(pickField(f,["ClassJobCategory","ClassJob","CraftLeve","GatheringLeve"]));
-   const leveType=fieldText(pickField(f,["LeveAssignmentType","LeveType","Category"]));
+   const name=
+     leveTitleText(f.Name)||
+     leveTitleText(f.Title)||
+     leveTitleText(f.LeveString)||
+     leveTitleText(f.LeveString?.fields)||
+     "";
+
+   const rawTypeId=assignmentByLeveId.get(id)||0;
+   const assignmentCategory=LEVE_ASSIGNMENT_TYPE_JA[rawTypeId]||leveAssignmentCategory(f);
+   const inferredJob=leveJobFromFields(f);
+   const resolvedJob=leveJobFromText(assignmentCategory)||inferredJob||leveJobFromText(fieldText(pickField(f,["ClassJobCategory","ClassJob","CraftLeve","GatheringLeve"])));
+   const classJob=resolvedJob||assignmentCategory||"";
+   const leveType=assignmentCategory||fieldText(pickField(f,["LeveType","Category"]));
    const level=Number(pickField(f,["ClassJobLevel","Level","LevelLevemete"])?.value??pickField(f,["ClassJobLevel","Level","LevelLevemete"])??0)||0;
-   const place=fieldText(pickField(f,["PlaceName","LevelLevemete","Levemete","TerritoryType"]));
-   const desc=fieldText(pickField(f,["Description","Objective","DataId"]));
-   return {id,name,classJob,category:leveType||classJob||"その他",level,place,description:desc};
-  }).filter(x=>x.id>0&&x.name);
+   const rawMeta=leveRawMeta.get(id)||{};
+   const placeRow=placeRows.get(rawMeta.placeId)||{};
+   const clientRow=clientRows.get(rawMeta.clientId)||{};
+   const levelRow=nestedAcceptByLeveId.get(id)||levelRows.get(rawMeta.levelLevemeteId)||{};
+   const levemeteRow=levemeteRows.get(rawMeta.levemeteId)||{};
+   const place=
+    levelAcceptPlace(levelRow)||
+    relName(placeRow)||
+    fieldText(pickField(f,["PlaceName","TerritoryType"]))||
+    "";
+   const acceptNpc=
+    levelAcceptNpc(levelRow)||
+    relName(levemeteRow)||
+    relName(f?.Levemete)||
+    "";
+   const clientName=relName(clientRow)||leveClientNameFromFields(f);
+   const deliveryPlace=relName(clientRow?.PlaceName)||relName(clientRow?.TerritoryType?.fields?.PlaceName)||leveDeliveryPlaceFromFields(f);
+   let deliveryCoords=leveDeliveryCoordsFromFields(f);
+   const acceptX=Number(levelRow?.X??levelRow?.fields?.X??NaN);
+   const acceptY=Number(levelRow?.Y??levelRow?.fields?.Y??NaN);
+   const acceptCoords=Number.isFinite(acceptX)&&Number.isFinite(acceptY)?[acceptX,acceptY]:[];
+   const desc=leveTitleText(pickField(f,["Description","Objective","DataId"]));
+   const category=leveType||resolvedJob||"その他";
+   return {id,name,classJob:resolvedJob||classJob,category,level,place,acceptPlace:place,acceptNpc,acceptCoords,clientName,deliveryPlace,deliveryCoords,description:desc,assignmentTypeId:rawTypeId};
+  }).filter(x=>x.id>0&&!isPlaceholderLeveTitle(x.name));
+
   try{localStorage.setItem(GUILDLEVE_CACHE_KEY,JSON.stringify({savedAt:Date.now(),results:guildleveData}))}catch(e){}
-  if(status)status.textContent=`取得済み ${guildleveData.length}件`;
+  const classified=guildleveData.filter(x=>x.category&&x.category!=="その他").length;
+  const withAcceptPlace=guildleveData.filter(x=>x.acceptPlace).length;
+  const withAcceptNpc=guildleveData.filter(x=>x.acceptNpc).length;
+  const withClient=guildleveData.filter(x=>x.clientName||x.deliveryPlace).length;
+  if(status)status.textContent=`取得済み ${guildleveData.length}件 ／ 分類済み ${classified}件 ／ 受注場所 ${withAcceptPlace}件 ／ 受注NPC ${withAcceptNpc}件 ／ 納品 ${withClient}件`;
   fillLeveFilters();renderGuildleves();
  }catch(e){
-  console.error("guildleve load failed",e);const c=readLeveCache();
-  if(c.length){guildleveData=c;if(status)status.textContent=`通信失敗・キャッシュ ${c.length}件`;fillLeveFilters();renderGuildleves()}
-  else if(status)status.textContent="データ取得に失敗しました";
+  console.error("guildleve load failed",e);
+  const c=readLeveCache().filter(x=>!isPlaceholderLeveTitle(x.name));
+  if(c.length){
+   guildleveData=c;
+   if(status)status.textContent=`通信失敗・キャッシュ ${c.length}件`;
+   fillLeveFilters();renderGuildleves();
+  }else if(status)status.textContent=`データ取得に失敗しました：${String(e?.message||e)}`;
  }finally{leveLoading=false}
 }
 function fillLeveFilters(){
  const c=$("leveCategory"),l=$("leveLevel");if(!c||!l)return;
  const cv=c.value,lv=l.value;
- const cats=[...new Set(guildleveData.map(x=>x.category).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"ja"));
+ const order=["木工師","鍛冶師","甲冑師","彫金師","革細工師","裁縫師","錬金術師","調理師","採掘師","園芸師","漁師","傭兵稼業","黒渦団","双蛇党","不滅隊","その他"];
+ const cats=[...new Set(guildleveData.map(x=>x.category).filter(Boolean))].sort((a,b)=>{const ai=order.indexOf(a),bi=order.indexOf(b);return (ai<0?999:ai)-(bi<0?999:bi)||a.localeCompare(b,"ja")});
  const levels=[...new Set(guildleveData.map(x=>x.level).filter(x=>x>0))].sort((a,b)=>a-b);
  c.innerHTML='<option value="">すべて</option>'+cats.map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join("");
  l.innerHTML='<option value="">すべて</option>'+levels.map(x=>`<option value="${x}">Lv.${x}</option>`).join("");
@@ -4960,7 +5822,9 @@ function renderGuildleves(){
  const d=load(),arr=filteredLeves(),size=Number($("levePageSize")?.value||100),pages=Math.max(1,Math.ceil(arr.length/size));levePage=Math.min(Math.max(1,levePage),pages);
  const items=arr.slice((levePage-1)*size,levePage*size),done=guildleveData.filter(x=>leveState(d,x.id).done).length;
  $("leveTotal").textContent=guildleveData.length.toLocaleString("ja-JP");$("leveDone").textContent=done.toLocaleString("ja-JP");$("leveTodo").textContent=(guildleveData.length-done).toLocaleString("ja-JP");$("leveShown").textContent=arr.length.toLocaleString("ja-JP");$("levePageInfo").textContent=`${levePage} / ${pages}ページ`;$("levePrev").disabled=levePage<=1;$("leveNext").disabled=levePage>=pages;
- $("leveList").innerHTML=items.length?items.map(x=>{const st=leveState(d,x.id);return `<div class="card ${st.done?"archived":""}"><div class="row"><div><label style="margin:0;color:var(--text)"><input type="checkbox" class="leveCheck" data-id="${x.id}" style="width:auto" ${st.done?"checked":""}> <b>${esc(x.name)}</b></label><div class="time">${x.level?`Lv.${x.level}`:""}${x.category?` ／ ${esc(x.category)}`:""}${x.classJob?` ／ ${esc(x.classJob)}`:""}</div></div>${x.place?`<span class="badge">${esc(x.place)}</span>`:""}</div>${x.description?`<div class="small" style="margin-top:6px">${esc(x.description)}</div>`:""}<input class="leveNote" data-id="${x.id}" value="${esc(st.note||"")}" placeholder="自分用メモ" style="margin-top:8px"></div>`}).join(""):'<div class="empty">該当するギルドリーヴはありません。</div>';
+ $("leveList").innerHTML=items.length?items.map(x=>{const st=leveState(d,x.id);return `<div class="card ${st.done?"archived":""}"><div class="row"><div><label style="margin:0;color:var(--text)"><input type="checkbox" class="leveCheck" data-id="${x.id}" style="width:auto" ${st.done?"checked":""}> <b>${esc(x.name)}</b></label><div class="time">${x.level?`Lv.${x.level}`:""}${x.category?` ／ ${esc(x.category)}`:""}${x.classJob&&x.classJob!==x.category?` ／ ${esc(x.classJob)}`:""}</div></div></div>
+ <div class="small" style="margin-top:6px">${x.acceptPlace||x.acceptNpc?`📥 受注：${x.acceptPlace?esc(x.acceptPlace):""}${x.acceptPlace&&x.acceptNpc?" ／ ":""}${x.acceptNpc?esc(x.acceptNpc):""}${Array.isArray(x.acceptCoords)&&x.acceptCoords.length===2?`（X:${Number(x.acceptCoords[0]).toFixed(1)} Y:${Number(x.acceptCoords[1]).toFixed(1)}）`:""}`:"📥 受注場所：未取得"}${x.clientName||x.deliveryPlace?`<br>📦 納品：${x.deliveryPlace?esc(x.deliveryPlace)+" ／ ":""}${x.clientName?esc(x.clientName):""}${Array.isArray(x.deliveryCoords)&&x.deliveryCoords.length===2?`（X:${Number(x.deliveryCoords[0]).toFixed(1)} Y:${Number(x.deliveryCoords[1]).toFixed(1)}）`:""}`:"<br>📦 納品先：未取得"}</div>
+ ${x.description?`<div class="small" style="margin-top:6px">${esc(x.description)}</div>`:""}<input class="leveNote" data-id="${x.id}" value="${esc(st.note||"")}" placeholder="自分用メモ" style="margin-top:8px"></div>`}).join(""):'<div class="empty">該当するギルドリーヴはありません。</div>';
  document.querySelectorAll(".leveCheck").forEach(c=>c.onchange=()=>{const d=load();d.guildleveProgress=d.guildleveProgress||{};const st=d.guildleveProgress[c.dataset.id]||{done:false,note:""};st.done=c.checked;d.guildleveProgress[c.dataset.id]=st;save(d);renderGuildleves()});
  document.querySelectorAll(".leveNote").forEach(i=>i.onchange=()=>{const d=load();d.guildleveProgress=d.guildleveProgress||{};const st=d.guildleveProgress[i.dataset.id]||{done:false,note:""};st.note=i.value;d.guildleveProgress[i.dataset.id]=st;save(d)});
 }
@@ -5352,25 +6216,82 @@ function todayUnifiedRows(d,a,b){
 function renderTodayBucket(id,rows,task=false){
  const box=$(id);if(!box)return;
  box.innerHTML=rows.length?rows.map(x=>`<div class="listitem">
-  ${task&&x.source==="legacy"?`<label><input type="checkbox" class="todayTaskDone" data-id="${x.id}" ${x.done?"checked":""}> ${nl(x.text||x.title||"")}</label>`:`${nl(x.text||x.title||"")}`}
+  ${task?`<label><input type="checkbox" class="todayTaskDone" data-source="${x.source}" data-id="${x.id}" ${x.done?"checked":""}> ${nl(x.text||x.title||"")}</label>`:`${nl(x.text||x.title||"")}`}
   <div class="small">${x.source==="inbox"?"受信箱":""} ${(x.tags||[]).map(t=>`#${esc(t)}`).join(" ")}</div>
  </div>`).join(""):'<div class="empty">なし</div>';
+}
+
+function activityDurationText(ms){
+ const mins=Math.round(Math.max(0,Number(ms)||0)/60000),h=Math.floor(mins/60),m=mins%60;
+ return h?`${h}時間${m?m+"分":""}`:`${m}分`;
+}
+function activityDayKey(v){
+ const d=new Date(v);if(Number.isNaN(d.getTime()))return "";
+ return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+}
+function renderActivityLog(){
+ const box=$("activityLogList");if(!box)return;
+ const d=load(),from=$("activityLogFrom")?.value||"",to=$("activityLogTo")?.value||"",cat=$("activityLogCategory")?.value||"",q=($("activityLogSearch")?.value||"").trim().toLowerCase(),sort=$("activityLogSort")?.value||"new";
+ let rows=[...(d.activityLogs||[])].filter(x=>{
+  const key=activityDayKey(x.startedAt||x.date);
+  const hay=[x.name,x.memo,x.category].join(" ").toLowerCase();
+  return (!from||key>=from)&&(!to||key<=to)&&(!cat||x.category===cat)&&(!q||hay.includes(q));
+ });
+ if(sort==="old")rows.sort((a,b)=>Number(a.startedAt)-Number(b.startedAt));
+ else if(sort==="long")rows.sort((a,b)=>Number(b.activeMs)-Number(a.activeMs));
+ else rows.sort((a,b)=>Number(b.startedAt)-Number(a.startedAt));
+ const total=rows.reduce((n,x)=>n+Number(x.activeMs||0),0);
+ const cats={};rows.forEach(x=>cats[x.category||"その他"]=(cats[x.category||"その他"]||0)+Number(x.activeMs||0));
+ if($("activityLogSummary"))$("activityLogSummary").innerHTML=`<div class="stat">記録数<b>${rows.length}</b></div><div class="stat">合計時間<b>${activityDurationText(total)}</b></div>`+Object.entries(cats).sort((a,b)=>b[1]-a[1]).slice(0,4).map(([k,v])=>`<div class="stat">${esc(k)}<b>${activityDurationText(v)}</b></div>`).join("");
+ box.innerHTML=rows.length?rows.map(x=>`<details class="card"><summary><div class="row"><b>${esc(x.category||"その他")}：${esc(x.name||"活動")}</b><span class="badge">${activityDurationText(x.activeMs)}</span></div><div class="small">${new Date(x.startedAt).toLocaleString("ja-JP")}</div></summary><div style="margin-top:8px">${x.memo?`<div>${nl(x.memo)}</div>`:""}${(x.laps||[]).length?`<div class="card" style="margin-top:8px"><b>ラップ ${(x.laps||[]).length}回</b>${x.laps.map((l,i)=>`<div class="listitem"><div class="row"><span>Lap ${i+1}</span><span>${activityDurationText(l.lapMs)} ／ 合計 ${activityDurationText(l.totalMs)}</span></div></div>`).join("")}</div>`:""}<div class="small">開始 ${new Date(x.startedAt).toLocaleTimeString("ja-JP")} ／ 終了 ${x.endedAt?new Date(x.endedAt).toLocaleTimeString("ja-JP"):"—"}${(x.pauses||[]).length?` ／ 休憩 ${(x.pauses||[]).length}回`:""}</div><div class="wrap" style="margin-top:8px"><button class="danger activityLogDelete" data-id="${esc(x.id)}">削除</button></div></div></details>`).join(""):'<div class="empty">条件に合う時間記録はありません。</div>';
+ document.querySelectorAll(".activityLogDelete").forEach(b=>b.onclick=()=>{if(!confirm("この時間記録を削除しますか？"))return;const d=load();d.activityLogs=(d.activityLogs||[]).filter(x=>String(x.id)!==String(b.dataset.id));save(d);renderActivityLog();renderDateArchive();renderTodayHub()});
+}
+function todayActivityRows(d,value){
+ return (d.activityLogs||[]).filter(x=>activityDayKey(x.startedAt||x.date)===value).sort((a,b)=>Number(a.startedAt)-Number(b.startedAt));
 }
 function renderTodayHub(){
  if(!$("todayDate"))return;
  const d=load(),value=$("todayDate").value||localDateValue(),[a,b]=dayBounds(value),rows=todayUnifiedRows(d,a,b);
- $("todayHeadline").textContent=value===localDateValue()?"今日の記録":`${value} の記録`;
- const tasks=rows.filter(x=>x.kind==="タスク");
- $("todaySummary").textContent=`${rows.length}件 ／ タスク完了 ${tasks.filter(x=>x.done).length}/${tasks.length}`;
- renderTodayBucket("todayTasks",todayItemsByKind(rows,["タスク"]),true);
+ $("todayHeadline").textContent=value===localDateValue()?"今日":"表示中の日";
+ const tasks=rows.filter(x=>x.kind==="タスク"),todo=tasks.filter(x=>!x.done),doneTasks=tasks.filter(x=>x.done);
+ const acts=todayActivityRows(d,value);
+ const highlights=[];
+ Object.entries(d.achievementProgress||{}).forEach(([id,st])=>{if(st?.doneAt&&activityDayKey(st.doneAt)===value){const a=(typeof ACHIEVEMENT_DB!=="undefined"?ACHIEVEMENT_DB:[]).find(x=>String(x.id)===String(id));highlights.push({icon:"🏆",title:a?.name||"#"+id,detail:"アチーブメント達成"})}});
+ try{
+  const fc=ffProfileData(d)?.ffxivCollect||d?.ffxivCollect,userMeta=fc?.userMeta||{};
+  Object.entries(fc?.catalogs||{}).forEach(([kind,cat])=>(cat?.items||[]).forEach(item=>{const m=userMeta?.[kind]?.[String(item.id)]||{},dt=m.acquiredDate||m.acquiredAt;if(dt&&activityDayKey(dt)===value)highlights.push({icon:"✨",title:item.name_ja||item.name||"収集品",detail:"収集品入手"})}));
+ }catch(e){}
+ const bicolorDone=[];
+ if(typeof BICOLOR_ITEMS!=="undefined"){const bg=d.bicolor?.owned||{};BICOLOR_ITEMS.forEach(x=>{const st=bg[x.id];if(st?.doneAt&&activityDayKey(st.doneAt)===value)bicolorDone.push({icon:"💎",title:x.name,detail:`${x.zone} ／ ${x.cost}ジェム`})})}
+ const ordinary=rows.filter(x=>x.kind!=="タスク");
+ const doneItems=[
+  ...doneTasks.map(x=>({icon:"☑",title:x.text||x.title||"タスク",detail:"タスク完了"})),
+  ...acts.map(x=>({icon:"⏱",title:`${x.category||"その他"}：${x.name||"活動"}`,detail:activityDurationText(x.activeMs)})),
+  ...ordinary.map(x=>({icon:x.kind==="FF14"?"🎮":x.kind==="TRPG"?"🎲":x.kind==="買い物"?"🛒":x.kind==="思い出"?"📷":"📝",title:x.text||x.title||x.kind,detail:x.kind})),
+  ...highlights,...bicolorDone
+ ];
+ $("todaySummary").textContent=`やること ${todo.length}件 ／ やったこと ${doneItems.length}件`;
+ renderTodayBucket("todayTodo",todo,true);
+ if($("todayDone"))$("todayDone").innerHTML=doneItems.length?doneItems.map(x=>`<div class="listitem"><div><b>${x.icon} ${nl(x.title)}</b></div><div class="small">${esc(x.detail||"")}</div></div>`).join(""):'<div class="empty">まだ記録はありません。</div>';
+
  renderTodayBucket("todayNotes",todayItemsByKind(rows,["記録","メモ"]));
  renderTodayBucket("todayFF14",todayItemsByKind(rows,["FF14"]));
  renderTodayBucket("todayTRPG",todayItemsByKind(rows,["TRPG"]));
  renderTodayBucket("todayShopping",todayItemsByKind(rows,["買い物"]));
  renderTodayBucket("todayMemories",todayItemsByKind(rows,["思い出"]));
+ if($("todayActivity"))$("todayActivity").innerHTML=acts.length?acts.map(x=>`<div class="listitem"><b>${esc(x.category||"その他")}：${esc(x.name||"活動")}</b><div class="small">${activityDurationText(x.activeMs)}${(x.laps||[]).length?` ／ ラップ ${(x.laps||[]).length}回`:""}</div></div>`).join(""):'<div class="empty">なし</div>';
+ if($("todayArchiveHighlights"))$("todayArchiveHighlights").innerHTML=[...highlights,...bicolorDone].length?[...highlights,...bicolorDone].map(x=>`<div class="listitem">${x.icon} ${esc(x.title)}<div class="small">${esc(x.detail||"")}</div></div>`).join(""):'<div class="empty">なし</div>';
+
  document.querySelectorAll(".todayTaskDone").forEach(el=>el.onchange=()=>{
-  const d=load(),x=d.quickCaptures.find(q=>q.id===el.dataset.id);if(!x)return;
-  x.done=el.checked;x.updatedAt=Date.now();save(d);renderTodayHub();
+  const d=load(),now=Date.now();
+  if(el.dataset.source==="legacy"){
+   const x=(d.quickCaptures||[]).find(q=>String(q.id)===String(el.dataset.id));if(!x)return;
+   x.done=el.checked;x.doneAt=el.checked?now:0;x.updatedAt=now;
+  }else{
+   const x=(d.inbox||[]).find(q=>String(q.id)===String(el.dataset.id));if(!x)return;
+   x.done=el.checked;x.doneAt=el.checked?now:0;x.updatedAt=now;
+  }
+  save(d);renderTodayHub();if(typeof renderDateArchive==="function")renderDateArchive();
  });
 }
 function scenarioAssetLabels(a={}){
@@ -5815,6 +6736,7 @@ function render(){
  safeRender("料理図鑑",renderCooking);
  safeRender("FF14",renderFF14);
  safeRender("収集図鑑",renderFFXIVCollectHub);
+ safeRender("バイカラージェム",renderBicolor);
  safeRender("データ引き継ぎ確認",renderPersistenceTest);
  safeRender("ギルドリーヴ",renderGuildleves);
  safeRender("妖怪ウォッチ",renderYokai);
@@ -5824,6 +6746,7 @@ function render(){
  safeRender("人物・PC図鑑",renderPeopleCodex);
  safeRender("所持シナリオ",renderScenarioLibrary);
  safeRender("今日",renderTodayHub);
+ safeRender("時間記録",renderActivityLog);
  safeRender("ダイス解析",renderSavedDiceAnalyses);
  safeRender("チェックメモ",renderToolChecklists);
  safeRender("設定",renderSettings);
@@ -6164,12 +7087,12 @@ if($("craftIndexBuild"))$("craftIndexBuild").onclick=()=>buildCraftReverseIndex(
 document.querySelectorAll(".craftReverseMode").forEach(b=>b.onclick=()=>{
  craftReverseMode=b.dataset.mode;document.querySelectorAll(".craftReverseMode").forEach(x=>x.classList.toggle("primary",x===b));document.querySelectorAll(".craftReverseMode").forEach(x=>x.classList.toggle("secondary",x!==b));
 });
-if(document.querySelector('.craftReverseMode[data-mode="now"]'))document.querySelector('.craftReverseMode[data-mode="now"]').classList.add("primary");
+if(document.querySelector('.craftReverseMode[data-mode="uses"]'))document.querySelector('.craftReverseMode[data-mode="uses"]').classList.add("primary");
 if($("craftInventoryAdd"))$("craftInventoryAdd").onclick=async()=>{
- if(!craftIndexReady()&&!await buildCraftReverseIndex())return;
- const hit=findCraftIngredientByName($("craftInventoryName").value);if(!hit)return alert("素材名を候補から選択してください");
+ const raw=$("craftInventoryName").value.trim();if(!raw)return alert("素材名を入力してください");
+ const hit=findCraftIngredientByName(raw);
  const q=Math.max(0,Math.floor(Number($("craftInventoryQty").value)||0)),d=load(),inv=craftInventoryData(d);
- if(q)inv[String(hit.itemId)]={name:hit.name,qty:q};else delete inv[String(hit.itemId)];
+ if(q)inv[String(hit.itemId)]={name:hit.name,qty:q,catalog:!!hit.catalog};else delete inv[String(hit.itemId)];
  save(d);$("craftInventoryName").value="";$("craftInventoryQty").value="1";renderCraftInventory();
 };
 if($("craftReverseRun"))$("craftReverseRun").onclick=runCraftReverse;
@@ -6224,7 +7147,7 @@ if($("minionCollectOpen"))$("minionCollectOpen").onclick=()=>{
 if($("ffxivCollectCatalogSync"))$("ffxivCollectCatalogSync").onclick=syncFFXIVCollectCatalogs;
 if($("ffxivCollectJapaneseSync"))$("ffxivCollectJapaneseSync").onclick=syncFFXIVCollectJapaneseDescriptions;
 if($("ffxivCollectOwnershipSync"))$("ffxivCollectOwnershipSync").onclick=syncFFXIVCollectOwnership;
-if($("fcExplorerKind"))$("fcExplorerKind").onchange=renderFCExplorer;
+if($("fcExplorerKind"))$("fcExplorerKind").onchange=renderFCExplorer;$("fcExplorerSort").onchange=renderFCExplorer;
 if($("fcExplorerSearch"))$("fcExplorerSearch").oninput=renderFCExplorer;
 if($("fcExplorerStatus"))$("fcExplorerStatus").onchange=renderFCExplorer;
 
@@ -6298,7 +7221,15 @@ function renderPersistenceTest(){
  el.innerHTML=`図鑑：<b>${catCount?`${catCount}カテゴリ・${count}件`:"未取得"}</b> ／ ミニオン進捗：<b>${minions}</b> ／ マウント進捗：<b>${mounts}</b>`;
 }
 
+["activityLogFrom","activityLogTo","activityLogCategory","activityLogSort"].forEach(id=>{if($(id))$(id).onchange=renderActivityLog});
+if($("activityLogSearch"))$("activityLogSearch").oninput=renderActivityLog;
+if($("todayDate"))$("todayDate").onchange=renderTodayHub;
 if($("fcExplorerSource"))$("fcExplorerSource").onchange=renderFCExplorer;
+if($("fcExplorerTag"))$("fcExplorerTag").onchange=renderFCExplorer;
+if($("fcExplorerTagSearch"))$("fcExplorerTagSearch").oninput=renderFCExplorer;
+["bicolorExpansion","bicolorZone","bicolorStatus","bicolorType"].forEach(id=>{if($(id))$(id).onchange=renderBicolor});
+if($("bicolorSearch"))$("bicolorSearch").oninput=renderBicolor;
+if($("bicolorCurrentGem"))$("bicolorCurrentGem").onchange=()=>{const d=load(),r=bicolorRoot(d);r.currentGem=Math.max(0,Number($("bicolorCurrentGem").value||0));save(d);renderBicolor()};
 initializePersistentData().then(()=>{renderPersistenceTest();
  initializeWarRelicDefaults();
  refreshPeopleSelectors();
@@ -6316,6 +7247,331 @@ initializePersistentData().then(()=>{renderPersistenceTest();
  const initialView=loadUI().activeView||"home";
  switchView(document.getElementById(initialView)?initialView:"home");
 });
+</script>
+
+<div id="pomodoroAlert" role="status" aria-live="assertive"></div>
+<aside id="pomodoroMini" aria-label="ポモドーロタイマー">
+ <div class="pomo-head">
+  <span class="pomo-dot"></span><span class="pomo-title" id="pomoTitle" data-mini="25:00">FOCUS TIMER</span>
+  <button type="button" id="pomoCollapse" class="pomo-collapse" title="最小化">－</button>
+ </div>
+ <div class="eorzea-clock" aria-label="エオルゼア時計">
+  <div class="et-clock-row">
+   <div class="et-clock-box"><div class="et-clock-label">EORZEA TIME</div><div class="et-clock-value et" id="etClock">ET --:--</div></div>
+   <div class="et-clock-box"><div class="et-clock-label">LOCAL TIME</div><div class="et-clock-value" id="ltClock">LT --:--</div></div>
+  </div>
+  <div class="et-next" id="etNextAlarm">次のETアラーム：なし</div>
+ </div>
+ <div class="pomo-body">
+  <div class="pomo-mode" id="pomoMode">作業時間</div>
+  <div class="pomo-time" id="pomoTime">25:00</div>
+  <div class="pomo-actions">
+   <button type="button" id="pomoStart" class="primary">開始</button>
+   <button type="button" id="pomoReset" class="secondary">リセット</button>
+   <button type="button" id="pomoSkip" class="ghost">切替</button>
+  </div>
+  <details style="margin-top:7px"><summary class="small">時間設定</summary>
+   <div class="pomo-settings"><label>作業（分）<input id="pomoWorkMin" type="number" min="1" max="180" value="25"></label><label>休憩（分）<input id="pomoBreakMin" type="number" min="1" max="60" value="5"></label></div>
+  </details>
+  <div class="pomo-count" id="pomoCount">今日 0セット</div>
+ </div>
+ <details class="et-alarm-details" id="etAlarmDetails">
+  <summary>⏰ ETアラーム</summary>
+  <div class="et-alarm-form">
+   <input id="etAlarmName" placeholder="例：園芸・未知の採集">
+   <input id="etAlarmTime" type="time" value="02:00" step="60">
+   <textarea id="etAlarmMemo" placeholder="場所・採集物・釣り条件など（任意）"></textarea>
+   <button type="button" id="etAlarmAdd" class="primary">アラームを保存</button>
+  </div>
+  <div class="et-alarm-tools">
+   <button type="button" id="etNotifyPermission" class="secondary">デスクトップ通知</button>
+   <span id="etNotifyStatus" class="small">画面通知＋音</span>
+  </div>
+  <div class="et-alarm-list" id="etAlarmList"></div>
+ </details>
+ <div class="activity-mini"><div class="activity-head"><div><div class="et-clock-label">ACTIVITY TIMER</div><div class="activity-name" id="activityNowName">未計測</div></div><div class="activity-clock" id="activityClock">00:00:00</div></div>
+ <div class="activity-form"><input id="activityName" placeholder="活動名：例 シリウスの篝火"><select id="activityCategory"><option>TRPG</option><option>FF14</option><option>制作</option><option>家事</option><option>健康</option><option>勉強</option><option>外出</option><option>その他</option></select><textarea id="activityMemo" placeholder="メモ（任意）"></textarea></div>
+ <div class="activity-controls"><button id="activityStart" class="primary">▶ 開始</button><button id="activityLap" class="secondary" disabled>⏱ ラップ</button><button id="activityPause" class="secondary" disabled>⏸ 休憩</button><button id="activityStop" class="danger" disabled>■ 終了</button></div>
+ <div id="activityLaps" class="activity-history" style="max-height:110px;display:none"></div>
+ <details><summary class="small" style="cursor:pointer;margin-top:6px">時間記録・手入力</summary><div class="activity-form"><input id="activityManualName" placeholder="活動名"><select id="activityManualCategory"><option>TRPG</option><option>FF14</option><option>制作</option><option>家事</option><option>健康</option><option>勉強</option><option>外出</option><option>その他</option></select><div class="inline2"><div><label>開始</label><input id="activityManualStart" type="datetime-local"></div><div><label>終了</label><input id="activityManualEnd" type="datetime-local"></div></div><input id="activityManualBreak" type="number" min="0" value="0" placeholder="休憩（分）"><textarea id="activityManualMemo" placeholder="メモ（任意）"></textarea><button id="activityManualSave" class="secondary">時間記録を保存</button></div></details>
+ <details><summary class="small" style="cursor:pointer;margin-top:6px">最近の記録</summary><div class="activity-history" id="activityHistory"></div></details></div>
+</aside>
+<div id="etAlarmAlert" role="status" aria-live="assertive"></div>
+
+
+<script id="pomodoroMiniScript">
+(()=>{
+ "use strict";
+ const KEY="life_archive_pomodoro_v1";
+ const $p=id=>document.getElementById(id);
+ const defaults=()=>({mode:"work",running:false,endAt:0,remainingMs:25*60*1000,workMin:25,breakMin:5,today:"",setsToday:0,collapsed:false});
+ let state=defaults(),tickHandle=0,alertHandle=0;
+ function dayKey(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`}
+ function loadPomo(){try{const raw=localStorage.getItem(KEY);if(raw)state={...defaults(),...JSON.parse(raw)}}catch(e){} if(state.today!==dayKey()){state.today=dayKey();state.setsToday=0} normalizeState();}
+ function savePomo(){try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){}}
+ function durationMs(mode=state.mode){return (mode==="work"?state.workMin:state.breakMin)*60*1000}
+ function normalizeState(){state.workMin=Math.min(180,Math.max(1,Number(state.workMin)||25));state.breakMin=Math.min(60,Math.max(1,Number(state.breakMin)||5));if(!Number.isFinite(state.remainingMs)||state.remainingMs<0)state.remainingMs=durationMs();}
+ function remaining(){return state.running?Math.max(0,state.endAt-Date.now()):Math.max(0,state.remainingMs)}
+ function fmt(ms){const s=Math.ceil(ms/1000),m=Math.floor(s/60),r=s%60;return `${String(m).padStart(2,"0")}:${String(r).padStart(2,"0")}`}
+ function beep(){try{const A=window.AudioContext||window.webkitAudioContext;if(!A)return;const c=new A(),o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.frequency.value=740;g.gain.setValueAtTime(.0001,c.currentTime);g.gain.exponentialRampToValueAtTime(.15,c.currentTime+.02);g.gain.exponentialRampToValueAtTime(.0001,c.currentTime+.5);o.start();o.stop(c.currentTime+.52);setTimeout(()=>c.close(),700)}catch(e){}}
+ function alertPomo(text){const el=$p("pomodoroAlert");if(!el)return;el.textContent=text;el.classList.add("pomo-alert-show");clearTimeout(alertHandle);alertHandle=setTimeout(()=>el.classList.remove("pomo-alert-show"),9000);beep();}
+ function switchMode(auto=false){const was=state.mode;if(was==="work"&&auto)state.setsToday=(Number(state.setsToday)||0)+1;state.mode=was==="work"?"break":"work";state.running=false;state.remainingMs=durationMs(state.mode);state.endAt=0;savePomo();renderPomo();if(auto)alertPomo(state.mode==="break"?"休憩です。いったん画面から目を離しましょう。":"休憩終了。次の作業を始められます。");}
+ function complete(){switchMode(true);}
+ function renderPomo(){const box=$p("pomodoroMini");if(!box)return;const ms=remaining();if(state.running&&ms<=0){complete();return}const text=fmt(ms);$p("pomoTime").textContent=text;$p("pomoMode").textContent=state.mode==="work"?(state.running?"作業中":"作業時間"):(state.running?"休憩中":"休憩時間");$p("pomoStart").textContent=state.running?"一時停止":"開始";$p("pomoCount").textContent=`今日 ${Number(state.setsToday)||0}セット`;$p("pomoTitle").dataset.mini=text;box.classList.toggle("pomo-break",state.mode==="break");box.classList.toggle("pomo-paused",!state.running);box.classList.toggle("collapsed",!!state.collapsed);$p("pomoCollapse").textContent=state.collapsed?"＋":"－";if(document.activeElement!==$p("pomoWorkMin"))$p("pomoWorkMin").value=state.workMin;if(document.activeElement!==$p("pomoBreakMin"))$p("pomoBreakMin").value=state.breakMin;}
+ function startPause(){if(state.running){state.remainingMs=remaining();state.running=false;state.endAt=0}else{if(remaining()<=0)state.remainingMs=durationMs();state.running=true;state.endAt=Date.now()+state.remainingMs}savePomo();renderPomo();}
+ function reset(){state.running=false;state.endAt=0;state.remainingMs=durationMs();savePomo();renderPomo();}
+ function updateDurations(){const oldWork=state.workMin,oldBreak=state.breakMin;state.workMin=Math.min(180,Math.max(1,Number($p("pomoWorkMin").value)||25));state.breakMin=Math.min(60,Math.max(1,Number($p("pomoBreakMin").value)||5));if(!state.running && ((state.mode==="work"&&oldWork!==state.workMin)||(state.mode==="break"&&oldBreak!==state.breakMin)))state.remainingMs=durationMs();savePomo();renderPomo();}
+ function init(){loadPomo();const box=$p("pomodoroMini");if(!box)return;$p("pomoStart").onclick=startPause;$p("pomoReset").onclick=reset;$p("pomoSkip").onclick=()=>switchMode(false);$p("pomoCollapse").onclick=()=>{state.collapsed=!state.collapsed;savePomo();renderPomo()};$p("pomoWorkMin").onchange=updateDurations;$p("pomoBreakMin").onchange=updateDurations;renderPomo();tickHandle=setInterval(renderPomo,500);document.addEventListener("visibilitychange",renderPomo);window.addEventListener("focus",renderPomo);}
+ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init,{once:true});else init();
+})();
+</script>
+
+
+<script id="eorzeaClockAlarmScript">
+(()=>{
+ "use strict";
+ const KEY="life_archive_et_alarms_v1";
+ const RATIO=144/7; // 70 real minutes = 24 Eorzea hours.
+ const ET_DAY=24*60*60*1000;
+ const $e=id=>document.getElementById(id);
+ let state={alarms:[]};
+ let lastEtTotal=Date.now()*RATIO;
+ let alertHandle=0;
+
+ function uid(){return (crypto&&crypto.randomUUID)?crypto.randomUUID():"eta_"+Date.now().toString(36)+Math.random().toString(36).slice(2)}
+ function pad(n){return String(n).padStart(2,"0")}
+ function etTotal(){return Date.now()*RATIO}
+ function etParts(total=etTotal()){
+   const dayMs=((total%ET_DAY)+ET_DAY)%ET_DAY;
+   const mins=Math.floor(dayMs/60000);
+   return {hour:Math.floor(mins/60),minute:mins%60,minuteOfDay:mins,day:Math.floor(total/ET_DAY)};
+ }
+ function load(){
+   try{
+     const raw=localStorage.getItem(KEY);
+     if(raw){
+       const parsed=JSON.parse(raw);
+       state={alarms:Array.isArray(parsed?.alarms)?parsed.alarms:[]};
+     }
+   }catch(e){}
+   state.alarms=state.alarms.map(a=>({
+     id:a.id||uid(),
+     name:String(a.name||"ETアラーム"),
+     minuteOfDay:Math.max(0,Math.min(1439,Number(a.minuteOfDay)||0)),
+     memo:String(a.memo||""),
+     enabled:a.enabled!==false,
+     lastTriggeredEtDay:Number.isFinite(Number(a.lastTriggeredEtDay))?Number(a.lastTriggeredEtDay):-1
+   }));
+ }
+ function save(){try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){}}
+
+ function beep(){
+   try{
+     const A=window.AudioContext||window.webkitAudioContext;if(!A)return;
+     const c=new A(),g=c.createGain();g.connect(c.destination);
+     const notes=[880,1175,880];
+     notes.forEach((f,i)=>{
+       const o=c.createOscillator();o.connect(g);o.frequency.value=f;
+       const st=c.currentTime+i*.19;
+       g.gain.setValueAtTime(.0001,st);
+       g.gain.exponentialRampToValueAtTime(.16,st+.02);
+       g.gain.exponentialRampToValueAtTime(.0001,st+.14);
+       o.start(st);o.stop(st+.16);
+     });
+     setTimeout(()=>c.close(),900);
+   }catch(e){}
+ }
+ function notifyAlarm(a){
+   const hh=Math.floor(a.minuteOfDay/60),mm=a.minuteOfDay%60;
+   const title=`ET ${pad(hh)}:${pad(mm)}　${a.name}`;
+   const body=a.memo||"登録したエオルゼアアラームの時刻です。";
+   const el=$e("etAlarmAlert");
+   if(el){
+     el.innerHTML=`<div>${escapeHtml(title)}</div>${a.memo?`<div class="small" style="margin-top:4px">${escapeHtml(a.memo)}</div>`:""}`;
+     el.classList.add("show");
+     clearTimeout(alertHandle);
+     alertHandle=setTimeout(()=>el.classList.remove("show"),12000);
+   }
+   beep();
+   try{
+     if("Notification" in window && Notification.permission==="granted"){
+       new Notification(title,{body,tag:"life-archive-et-"+a.id});
+     }
+   }catch(e){}
+ }
+ function escapeHtml(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]))}
+
+ function timeToMinute(v){
+   const m=String(v||"").match(/^(\d{1,2}):(\d{2})$/);
+   if(!m)return null;
+   const h=Number(m[1]),mi=Number(m[2]);
+   if(h<0||h>23||mi<0||mi>59)return null;
+   return h*60+mi;
+ }
+ function nextOccurrence(a,nowTotal=etTotal()){
+   const p=etParts(nowTotal);
+   const todayTarget=p.day*ET_DAY+a.minuteOfDay*60000;
+   return todayTarget>nowTotal?todayTarget:todayTarget+ET_DAY;
+ }
+ function realUntil(etMs){return Math.max(0,etMs/RATIO)}
+ function fmtUntil(realMs){
+   const s=Math.ceil(realMs/1000);
+   if(s<60)return `${s}秒後`;
+   const m=Math.floor(s/60);
+   const r=s%60;
+   if(m<60)return `${m}分${r?String(r)+"秒":""}後`;
+   const h=Math.floor(m/60),rm=m%60;
+   return `${h}時間${rm?String(rm)+"分":""}後`;
+ }
+ function updateClocks(){
+   const now=new Date(),p=etParts();
+   if($e("etClock"))$e("etClock").textContent=`ET ${pad(p.hour)}:${pad(p.minute)}`;
+   if($e("ltClock"))$e("ltClock").textContent=`LT ${pad(now.getHours())}:${pad(now.getMinutes())}`;
+
+   const enabled=state.alarms.filter(a=>a.enabled);
+   if($e("etNextAlarm")){
+     if(!enabled.length){
+       $e("etNextAlarm").textContent="次のETアラーム：なし";
+     }else{
+       const next=enabled.map(a=>({a,target:nextOccurrence(a)})).sort((x,y)=>x.target-y.target)[0];
+       const hh=Math.floor(next.a.minuteOfDay/60),mm=next.a.minuteOfDay%60;
+       $e("etNextAlarm").textContent=`次：ET ${pad(hh)}:${pad(mm)} ${next.a.name}（${fmtUntil(realUntil(next.target-etTotal()))}）`;
+       $e("etNextAlarm").title=$e("etNextAlarm").textContent;
+     }
+   }
+ }
+
+ function checkAlarms(){
+   const nowTotal=etTotal();
+   if(nowTotal<lastEtTotal){lastEtTotal=nowTotal;return}
+   // Avoid replaying a huge backlog after the computer/browser was closed for a long time.
+   const span=Math.min(nowTotal-lastEtTotal,ET_DAY*2);
+   const from=nowTotal-span;
+   for(const a of state.alarms){
+     if(!a.enabled)continue;
+     const firstDay=Math.floor(from/ET_DAY);
+     const lastDay=Math.floor(nowTotal/ET_DAY);
+     let hitDay=-1;
+     for(let d=firstDay;d<=lastDay;d++){
+       const target=d*ET_DAY+a.minuteOfDay*60000;
+       if(target>from && target<=nowTotal)hitDay=d;
+     }
+     if(hitDay>=0 && a.lastTriggeredEtDay!==hitDay){
+       a.lastTriggeredEtDay=hitDay;
+       save();
+       notifyAlarm(a);
+     }
+   }
+   lastEtTotal=nowTotal;
+ }
+
+ function renderList(){
+   const box=$e("etAlarmList");if(!box)return;
+   const rows=[...state.alarms].sort((a,b)=>a.minuteOfDay-b.minuteOfDay||a.name.localeCompare(b.name,"ja"));
+   box.innerHTML=rows.length?rows.map(a=>{
+     const hh=Math.floor(a.minuteOfDay/60),mm=a.minuteOfDay%60;
+     return `<div class="et-alarm-item">
+       <div class="et-alarm-main">
+        <input type="checkbox" class="etAlarmToggle" data-id="${a.id}" ${a.enabled?"checked":""} title="ON/OFF">
+        <span class="et-alarm-time">ET ${pad(hh)}:${pad(mm)}</span>
+        <button type="button" class="danger et-alarm-delete etAlarmDelete" data-id="${a.id}">×</button>
+       </div>
+       <div class="et-alarm-name" style="margin-left:23px">${escapeHtml(a.name)}</div>
+       ${a.memo?`<div class="et-alarm-memo">${escapeHtml(a.memo)}</div>`:""}
+      </div>`;
+   }).join(""):'<div class="small" style="padding:7px 0">保存済みアラームはありません。</div>';
+
+   box.querySelectorAll(".etAlarmToggle").forEach(c=>c.onchange=()=>{
+     const a=state.alarms.find(x=>x.id===c.dataset.id);if(!a)return;
+     a.enabled=c.checked;save();renderList();updateClocks();
+   });
+   box.querySelectorAll(".etAlarmDelete").forEach(b=>b.onclick=()=>{
+     state.alarms=state.alarms.filter(x=>x.id!==b.dataset.id);
+     save();renderList();updateClocks();
+   });
+ }
+
+ function addAlarm(){
+   const name=($e("etAlarmName")?.value||"").trim();
+   const minuteOfDay=timeToMinute($e("etAlarmTime")?.value);
+   const memo=($e("etAlarmMemo")?.value||"").trim();
+   if(minuteOfDay==null){
+     const el=$e("etAlarmAlert");if(el){el.textContent="ET時刻を入力してください。";el.classList.add("show");setTimeout(()=>el.classList.remove("show"),5000)}
+     return;
+   }
+   state.alarms.push({id:uid(),name:name||"ETアラーム",minuteOfDay,memo,enabled:true,lastTriggeredEtDay:-1});
+   save();
+   if($e("etAlarmName"))$e("etAlarmName").value="";
+   if($e("etAlarmMemo"))$e("etAlarmMemo").value="";
+   renderList();updateClocks();
+ }
+
+ async function requestNotification(){
+   const status=$e("etNotifyStatus");
+   if(!("Notification" in window)){if(status)status.textContent="このブラウザは通知非対応";return}
+   try{
+     const result=await Notification.requestPermission();
+     if(status)status.textContent=result==="granted"?"デスクトップ通知：ON":result==="denied"?"デスクトップ通知：拒否":"画面通知＋音";
+   }catch(e){if(status)status.textContent="画面通知＋音";}
+ }
+
+ function renderNotifyStatus(){
+   const status=$e("etNotifyStatus");if(!status)return;
+   if(!("Notification" in window)){status.textContent="画面通知＋音";return}
+   status.textContent=Notification.permission==="granted"?"デスクトップ通知：ON":Notification.permission==="denied"?"デスクトップ通知：拒否":"画面通知＋音";
+ }
+
+ function init(){
+   load();
+   if($e("etAlarmAdd"))$e("etAlarmAdd").onclick=addAlarm;
+   if($e("etNotifyPermission"))$e("etNotifyPermission").onclick=requestNotification;
+   renderNotifyStatus();renderList();updateClocks();
+   lastEtTotal=etTotal();
+   setInterval(()=>{checkAlarms();updateClocks()},500);
+   document.addEventListener("visibilitychange",()=>{checkAlarms();updateClocks()});
+   window.addEventListener("focus",()=>{checkAlarms();updateClocks()});
+ }
+ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init,{once:true});else init();
+})();
+</script>
+
+
+<script id="achievementTimestampSupportV09630">
+(()=>{
+ "use strict";
+ window.lifeArchiveMarkAchievementCheck=function(check,done){
+   if(!check||typeof check!=="object")return check;
+   check.done=!!done;
+   if(done){
+     if(!check.doneAt)check.doneAt=Date.now();
+   }else{
+     check.doneAt=0;
+   }
+   return check;
+ };
+ window.lifeArchiveAchievementCheckDate=function(check){
+   if(!check?.doneAt)return "";
+   try{return new Date(check.doneAt).toLocaleDateString("ja-JP")}catch(e){return ""}
+ };
+})();
+</script>
+
+<script id="activityTimerScriptV09640">
+(()=>{"use strict";const KEY="life_archive_activity_timer_v1",$a=id=>document.getElementById(id);
+const fmt=ms=>{let s=Math.max(0,Math.floor(ms/1000)),h=Math.floor(s/3600);s%=3600;let m=Math.floor(s/60),r=s%60;return `${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}:${String(r).padStart(2,"0")}`};
+const get=()=>{try{return JSON.parse(localStorage.getItem(KEY)||"null")}catch(e){return null}},put=v=>{try{v?localStorage.setItem(KEY,JSON.stringify(v)):localStorage.removeItem(KEY)}catch(e){}};
+const active=(s,n=Date.now())=>s?Number(s.accumulatedMs||0)+(s.running?Math.max(0,n-Number(s.segmentStartedAt||n)):0):0;
+function renderLaps(s){const b=$a("activityLaps");if(!b)return;const laps=s?.laps||[];b.style.display=laps.length?"block":"none";b.innerHTML=laps.map((x,i)=>`<div class="activity-lap-row"><span>Lap ${i+1}</span><span class="activity-history-time">${fmt(x.lapMs)}</span><span class="small">合計 ${fmt(x.totalMs)}</span></div>`).join("")}
+function sync(){const s=get();if($a("activityClock"))$a("activityClock").textContent=fmt(active(s));if($a("activityNowName"))$a("activityNowName").textContent=s?s.name:"未計測";if($a("activityStart")){$a("activityStart").disabled=!!s;$a("activityLap").disabled=!s||!s.running;$a("activityPause").disabled=!s;$a("activityStop").disabled=!s;$a("activityPause").textContent=s?.running?"⏸ 休憩":"▶ 再開"}renderLaps(s)}
+function saveLog(x){const d=load();d.activityLogs=d.activityLogs||[];d.activityLogs.push(x);save(d);renderHistory();if(typeof renderActivityLog==="function")renderActivityLog();if(typeof renderTodayHub==="function")renderTodayHub();if(typeof renderDateArchive==="function")renderDateArchive()}
+function start(){const name=($a("activityName")?.value||"").trim();if(!name){alert("活動名を入力してください。");return}const n=Date.now();put({name,category:$a("activityCategory")?.value||"その他",memo:($a("activityMemo")?.value||"").trim(),startedAt:n,segmentStartedAt:n,accumulatedMs:0,running:true,pauses:[],laps:[],lastLapTotalMs:0});sync()}
+function pause(){const s=get();if(!s)return;const n=Date.now();if(s.running){s.accumulatedMs=active(s,n);s.running=false;s.pauses.push({startedAt:n,endedAt:0})}else{s.running=true;s.segmentStartedAt=n;const x=s.pauses.at(-1);if(x&&!x.endedAt)x.endedAt=n}put(s);sync()} 
+function lap(){const s=get();if(!s||!s.running)return;const n=Date.now(),total=active(s,n),prev=Number(s.lastLapTotalMs||0),lapMs=Math.max(0,total-prev);s.laps=s.laps||[];s.laps.push({at:n,totalMs:total,lapMs});s.lastLapTotalMs=total;put(s);sync()}
+function stop(){const s=get();if(!s)return;const n=Date.now();saveLog({id:uid(),name:s.name,category:s.category,memo:s.memo,startedAt:s.startedAt,endedAt:n,activeMs:active(s,n),pauses:s.pauses||[],laps:s.laps||[],createdAt:n});put(null);sync()}
+function manual(){const name=($a("activityManualName")?.value||"").trim(),sv=$a("activityManualStart")?.value,ev=$a("activityManualEnd")?.value,st=new Date(sv).getTime(),en=new Date(ev).getTime(),br=Math.max(0,Number($a("activityManualBreak")?.value||0))*60000;if(!name||!sv||!ev||en<=st){alert("活動名・開始・終了を確認してください。");return}saveLog({id:uid(),name,category:$a("activityManualCategory")?.value||"その他",memo:($a("activityManualMemo")?.value||"").trim(),startedAt:st,endedAt:en,activeMs:Math.max(0,en-st-br),manualBreakMs:br,pauses:[],createdAt:Date.now()})}
+function renderHistory(){const b=$a("activityHistory");if(!b)return;const rows=[...(load().activityLogs||[])].sort((a,c)=>c.startedAt-a.startedAt).slice(0,12);b.innerHTML=rows.length?rows.map(x=>`<div class="activity-history-item"><b>${esc(x.category||"その他")}：${esc(x.name||"活動")}</b><div><span class="activity-history-time">${fmt(x.activeMs)}</span> ／ ${new Date(x.startedAt).toLocaleString("ja-JP",{month:"numeric",day:"numeric",hour:"2-digit",minute:"2-digit"})}</div>${x.memo?`<div class="small">${esc(x.memo)}</div>`:""}${(x.laps||[]).length?`<div class="small">ラップ ${(x.laps||[]).length}回：${x.laps.map((l,i)=>`L${i+1} ${fmt(l.lapMs)}`).join(" ／ ")}</div>`:""}<button class="danger activityDelete" data-id="${esc(x.id)}" style="padding:2px 5px;margin-top:3px">削除</button></div>`).join(""):'<div class="small">時間記録はまだありません。</div>';b.querySelectorAll(".activityDelete").forEach(x=>x.onclick=()=>{if(!confirm("この時間記録を削除しますか？"))return;const d=load();d.activityLogs=(d.activityLogs||[]).filter(v=>String(v.id)!==String(x.dataset.id));save(d);renderHistory();if(typeof renderActivityLog==="function")renderActivityLog();if(typeof renderTodayHub==="function")renderTodayHub();if(typeof renderDateArchive==="function")renderDateArchive()})}
+function init(){if($a("activityStart"))$a("activityStart").onclick=start;if($a("activityLap"))$a("activityLap").onclick=lap;if($a("activityPause"))$a("activityPause").onclick=pause;if($a("activityStop"))$a("activityStop").onclick=stop;if($a("activityManualSave"))$a("activityManualSave").onclick=manual;sync();renderHistory();setInterval(sync,500)}
+document.readyState==="loading"?document.addEventListener("DOMContentLoaded",init,{once:true}):init()})();
 </script>
 </body>
 </html>
