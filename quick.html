@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Life Archive QUICK v0.02</title>
+<title>Life Archive QUICK v0.03</title>
 <style>
 :root{color-scheme:dark;--bg:#071017;--panel:#0d1922;--line:#24404f;--text:#e9f6fb;--muted:#93a9b5;--accent:#62dcff;--gold:#e6c56e}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:"Segoe UI","Noto Sans JP",sans-serif}
@@ -40,6 +40,13 @@ textarea{min-height:110px;resize:vertical}button{cursor:pointer;background:#102a
  <div id="list"></div>
 </div>
 <div class="card">
+ <div class="row"><div><b>今日やること</b><div class="muted" id="todayTaskCount">PCから未読込</div></div><div><button id="todayImportBtn">↑ 今日を読み込む</button></div></div>
+ <input id="todayImportFile" type="file" accept=".json,application/json" style="margin-top:10px">
+ <div id="todayTaskStatus" class="muted" style="margin-top:8px"></div>
+ <div id="todayTaskList"></div>
+</div>
+
+<div class="card">
  <b>この版について</b>
  <div class="muted" style="margin-top:6px">現在はこの端末内に保存します。「Life Archiveへ渡す」はスマホの共有機能を優先し、使えない端末ではダウンロードまたはコピーへ切り替わります。</div>
 </div>
@@ -57,7 +64,8 @@ function render(){const a=load().sort((x,y)=>y.createdAt-x.createdAt);$("count")
 $("date").value=localDate();
 $("save").onclick=()=>{const text=$("text").value.trim();if(!text)return alert("内容を入力してください。");const a=load();a.push({id:"q_"+Date.now()+"_"+Math.random().toString(36).slice(2,7),kind:$("kind").value,date:$("date").value||localDate(),text,tags:$("tags").value.split(",").map(x=>x.trim()).filter(Boolean),createdAt:Date.now(),source:"Life Archive QUICK"});save(a);$("text").value="";$("tags").value="";render()};
 function transferPayload(){
- return {format:"life-archive-quick",version:1,exportedAt:Date.now(),items:load()};
+ const today=loadToday();
+ return {format:"life-archive-quick",version:2,exportedAt:Date.now(),items:load(),today:{date:today.date||"",items:Array.isArray(today.items)?today.items:[]}};
 }
 function showTransferFallback(text,msg="ファイル保存が使えないため、転送データを表示しました。"){
  $("transferFallback").style.display="block";$("transferText").value=text;$("transferStatus").textContent=msg;
@@ -65,6 +73,27 @@ function showTransferFallback(text,msg="ファイル保存が使えないため�
 $("copyTransfer").onclick=async()=>{
  const text=$("transferText").value;
  try{await navigator.clipboard.writeText(text);$("transferStatus").textContent="転送データをコピーしました。"}catch(e){$("transferText").focus();$("transferText").select();$("transferStatus").textContent="コピーできない場合は、表示された文字列を長押ししてコピーしてください。"}
+};
+
+const TODAY_KEY="life_archive_quick_today_v1";
+const loadToday=()=>{try{return JSON.parse(localStorage.getItem(TODAY_KEY)||'{"date":"","items":[]}')}catch{return{date:"",items":[]}}};
+const saveToday=v=>localStorage.setItem(TODAY_KEY,JSON.stringify(v));
+function renderTodayTasks(){
+ const data=loadToday(),items=Array.isArray(data.items)?data.items:[];
+ $("todayTaskCount").textContent=data.date?`${data.date} ／ ${items.filter(x=>!x.done).length}件未完了`:"PCから未読込";
+ $("todayTaskList").innerHTML=items.length?items.map(x=>`<div class="item"><label style="margin:0;color:var(--text)"><input type="checkbox" data-today-id="${esc(x.id)}" ${x.done?"checked":""} style="width:auto"> ${esc(x.text||x.title||"タスク")}</label>${(x.tags||[]).length?`<div class="muted">#${x.tags.map(esc).join(" #")}</div>`:""}</div>`).join(""):'<div class="empty">今日やることはありません。</div>';
+ document.querySelectorAll("[data-today-id]").forEach(el=>el.onchange=()=>{const d=loadToday(),x=(d.items||[]).find(v=>String(v.id)===String(el.dataset.todayId));if(!x)return;x.done=el.checked;x.doneAt=el.checked?Date.now():0;saveToday(d);renderTodayTasks()});
+}
+$("todayImportBtn").onclick=()=>$("todayImportFile").click();
+$("todayImportFile").onchange=async()=>{
+ const f=$("todayImportFile").files?.[0];if(!f)return;
+ try{
+  const payload=JSON.parse(await f.text());
+  if(payload?.format!=="life-archive-today"||!Array.isArray(payload.items))throw new Error("Life Archiveの「今日」転送ファイルではありません。");
+  saveToday({date:payload.date||"",items:payload.items,importedAt:Date.now()});
+  $("todayTaskStatus").textContent=`${payload.items.length}件読み込みました。`;
+  renderTodayTasks();
+ }catch(e){$("todayTaskStatus").textContent="読み込みに失敗しました。";alert(e?.message||e)}
 };
 $("export").onclick=async()=>{
  const payload=transferPayload(),text=JSON.stringify(payload,null,2),name=`LifeArchive_QUICK_${localDate()}.json`,blob=new Blob([text],{type:"application/json"});
@@ -89,5 +118,5 @@ $("export").onclick=async()=>{
   showTransferFallback(text);
  }
 };
-render();
+render();renderTodayTasks();
 </script></body></html>
