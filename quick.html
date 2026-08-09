@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Life Archive QUICK</title>
+<style>
+:root{color-scheme:dark;--bg:#071017;--panel:#0d1922;--line:#24404f;--text:#e9f6fb;--muted:#93a9b5;--accent:#62dcff;--gold:#e6c56e}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:"Segoe UI","Noto Sans JP",sans-serif}
+main{max-width:680px;margin:auto;padding:18px}.brand{font-size:12px;letter-spacing:.2em;color:var(--accent)}
+h1{margin:5px 0 3px;font-size:25px}.muted{color:var(--muted);font-size:13px}.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;margin-top:14px}
+label{display:block;font-size:12px;color:var(--muted);margin:10px 0 5px}input,select,textarea,button{width:100%;font:inherit;border-radius:10px;border:1px solid var(--line);padding:11px;background:#09141c;color:var(--text)}
+textarea{min-height:110px;resize:vertical}button{cursor:pointer;background:#102a38}.primary{background:#0d4256;border-color:#3fcaf0;font-weight:700}.row{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.item{border-top:1px solid var(--line);padding:10px 0}.badge{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:2px 7px;font-size:11px;color:var(--accent)}
+.actions{display:flex;gap:8px;margin-top:9px}.actions button{padding:8px}.empty{text-align:center;color:var(--muted);padding:20px}
+@media(max-width:520px){.row{grid-template-columns:1fr}}
+</style>
+</head>
+<body><main>
+<div class="brand">LIFE ARCHIVE</div><h1>QUICK</h1>
+<div class="muted">外出先で「忘れないうちに入れる」ための軽量受信箱。</div>
+
+<div class="card">
+ <div class="row">
+  <div><label>分類</label><select id="kind"><option>記録</option><option>タスク</option><option>買い物</option><option>FF14</option><option>TRPG</option><option>健康</option><option>思い出</option><option>メモ</option></select></div>
+  <div><label>日付</label><input id="date" type="date"></div>
+ </div>
+ <label>内容</label><textarea id="text" placeholder="例：牛乳を買う / 極○○でマウント取得 / 30分歩いた"></textarea>
+ <label>タグ</label><input id="tags" placeholder="カンマ区切り">
+ <button id="save" class="primary" style="margin-top:12px">📥 QUICK受信箱へ保存</button>
+</div>
+
+<div class="card">
+ <div class="row"><div><b>今日</b><div class="muted" id="count"></div></div><div><button id="export">⇩ Life Archiveへ渡す</button></div></div>
+ <div id="list"></div>
+</div>
+<div class="card">
+ <b>この版について</b>
+ <div class="muted" style="margin-top:6px">現在はこの端末内に保存します。「Life Archiveへ渡す」でQUICK転送ファイルを書き出せます。クラウド受信箱接続用の土台はこの形式をそのまま使えます。</div>
+</div>
+</main>
+<script>
+const KEY="life_archive_quick_v1", $=id=>document.getElementById(id);
+const localDate=()=>{const d=new Date(),z=new Date(d.getTime()-d.getTimezoneOffset()*60000);return z.toISOString().slice(0,10)};
+const load=()=>{try{return JSON.parse(localStorage.getItem(KEY)||"[]")}catch{return[]}};
+const save=a=>localStorage.setItem(KEY,JSON.stringify(a));
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+function render(){const a=load().sort((x,y)=>y.createdAt-x.createdAt);$("count").textContent=`QUICK受信箱 ${a.length}件`;
+ $("list").innerHTML=a.length?a.map(x=>`<div class="item"><span class="badge">${esc(x.kind)}</span> <small>${esc(x.date)}</small><div style="margin-top:5px">${esc(x.text).replace(/\n/g,"<br>")}</div>${x.tags.length?`<div class="muted">#${x.tags.map(esc).join(" #")}</div>`:""}<div class="actions"><button data-del="${x.id}">削除</button></div></div>`).join(""):'<div class="empty">まだありません。</div>';
+ document.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{save(load().filter(x=>x.id!==b.dataset.del));render()});
+}
+$("date").value=localDate();
+$("save").onclick=()=>{const text=$("text").value.trim();if(!text)return alert("内容を入力してください。");const a=load();a.push({id:"q_"+Date.now()+"_"+Math.random().toString(36).slice(2,7),kind:$("kind").value,date:$("date").value||localDate(),text,tags:$("tags").value.split(",").map(x=>x.trim()).filter(Boolean),createdAt:Date.now(),source:"Life Archive QUICK"});save(a);$("text").value="";$("tags").value="";render()};
+$("export").onclick=()=>{const payload={format:"life-archive-quick",version:1,exportedAt:Date.now(),items:load()};const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=`LifeArchive_QUICK_${localDate()}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)};
+render();
+</script></body></html>
