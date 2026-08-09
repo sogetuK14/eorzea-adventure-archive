@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Life Archive QUICK v0.04</title>
+<title>Life Archive QUICK v0.05</title>
 <style>
 :root{color-scheme:dark;--bg:#071017;--panel:#0d1922;--line:#24404f;--text:#e9f6fb;--muted:#93a9b5;--accent:#62dcff;--gold:#e6c56e}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:"Segoe UI","Noto Sans JP",sans-serif}
@@ -80,7 +80,14 @@ $("copyTransfer").onclick=async()=>{
 };
 
 const TODAY_KEY="life_archive_quick_today_v1";
-const loadToday=()=>{try{return JSON.parse(localStorage.getItem(TODAY_KEY)||'{"date":"","items":[]}')}catch{return{date:"",items":[]}}};
+function loadToday(){
+ try{
+  const raw=localStorage.getItem(TODAY_KEY);
+  return raw?JSON.parse(raw):{date:"",items:[]};
+ }catch(e){
+  return {date:"",items:[]};
+ }
+}
 const saveToday=v=>localStorage.setItem(TODAY_KEY,JSON.stringify(v));
 function renderTodayTasks(){
  const data=loadToday(),items=Array.isArray(data.items)?data.items:[];
