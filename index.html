@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Life Archive v0.9707</title>
+<title>Life Archive v0.9708</title>
 <style>
 :root{--bg:#0b1118;--panel:#172331;--panel2:#223247;--text:#f5f7fa;--muted:#aeb9c8;--gold:#d7b55b;--line:#3a4d64;--green:#8fd0a2;--red:#ed9191;--blue:#8fc5ff;--purple:#c8adff}
 *{box-sizing:border-box}body{margin:0;font-family:"Segoe UI","Yu Gothic UI",sans-serif;color:var(--text);background:radial-gradient(circle at 85% 0,rgba(215,181,91,.13),transparent 30%),linear-gradient(#101925,var(--bg));min-height:100vh}
@@ -353,7 +353,7 @@ button{font-size:.86rem!important}
 <aside class="sidebar" id="sidebar">
   <div class="brand">
     <h1>Life Archive</h1>
-    <div class="sub">v0.9707 “日本語説明 同期”<br>ヒカセン、PL、そして日常。すべてを一つの記録庫へ。</div>
+    <div class="sub">v0.9708 “日本語説明 同期”<br>ヒカセン、PL、そして日常。すべてを一つの記録庫へ。</div>
   </div>
   <nav class="sidebar-nav">
     <button class="tab active" data-view="home">⌂ ホーム</button>
@@ -473,7 +473,10 @@ button{font-size:.86rem!important}
 <label>チェック項目（1行に1つ）</label><textarea id="captureChecklistItems" placeholder="前半安定&#10;塔ギミック&#10;後半練習"></textarea>
 </div>
 </details>
-<button id="captureSave" class="primary" style="width:100%;margin-top:12px">受信箱へ保存</button></section>
+<div class="inline2" style="margin-top:12px">
+ <button id="captureSave" class="primary">受信箱へ保存</button>
+ <button id="captureTaskSave" class="secondary">＋ タスク</button>
+</div></section>
 <section class="panel"><div class="row"><h2>未整理</h2><select id="inboxFilter" style="width:auto"><option value="pending">未整理</option><option value="all">すべて</option><option value="done">整理済み</option></select></div><div id="inboxList"></div></section>
 </div>
 </section>
@@ -2369,6 +2372,45 @@ function addInbox(text,type="",time=Date.now(),url="",options={}){
  const combined=(title+" "+raw).trim(),d=load(),c=type||classify(combined).type;
  d.inbox.push({id:uid(),text:raw,title:title||"無題",time,classification:c,candidate:c,status:options.status||"実施",destination:options.destination||"record",recordMode:options.recordMode||"single",tags:options.tags||[],checklist:options.checklist||[],url,done:false});
  save(d);render();
+}
+
+function addTaskFromCapture(){
+ const title=($("captureTitle")?.value||"").trim();
+ const text=($("captureText")?.value||"").trim();
+ const tags=($("captureTags")?.value||"").split(/[,、]/).map(v=>v.trim()).filter(Boolean);
+ const when=new Date($("captureTime")?.value||"").getTime()||Date.now();
+ const taskText=text||title;
+ if(!taskText){alert("タスク内容を入力してください。");return}
+ const d=load();
+ d.inbox=d.inbox||[];
+ d.inbox.push({
+  id:uid(),
+  title:title||taskText.split("\n")[0].slice(0,50),
+  text:taskText,
+  time:when,
+  classification:"タスク",
+  candidate:"タスク",
+  status:"実施",
+  destination:"record",
+  recordMode:"single",
+  tags:[...new Set([...tags,"タスク"])],
+  checklist:[],
+  url:"",
+  done:false,
+  doneAt:0,
+  createdAt:Date.now(),
+  updatedAt:Date.now()
+ });
+ save(d);
+ clearInboxDraft();
+ $("captureTitle").value="";
+ $("captureText").value="";
+ $("captureTags").value="";
+ if($("captureChecklistItems"))$("captureChecklistItems").value="";
+ if($("captureHasChecklist"))$("captureHasChecklist").checked=false;
+ if($("captureChecklistArea"))$("captureChecklistArea").style.display="none";
+ render();
+ if(typeof renderTodayHub==="function")renderTodayHub();
 }
 function renderInbox(){const d=load(),f=$("inboxFilter").value;let a=d.inbox.slice().sort((a,b)=>b.time-a.time);if(f==="pending")a=a.filter(x=>!x.done);if(f==="done")a=a.filter(x=>x.done);
  $("inboxList").innerHTML=a.length?a.map(x=>`<div class="card ${x.done?"archived":"candidate"}"><div class="row"><b>${esc(x.title)}</b><span class="time">${fmt(x.time)}</span></div><p>${nl(x.text)}</p><span class="badge gold">分類：${esc(getClassification(x,"メモ"))}</span>${x.status?`<span class="badge">${esc(statusLabel(x.status))}</span>`:""}${x.destination?`<span class="badge">${x.destination==="stack"?"積み重ねる記録":x.destination==="history"?"挑戦履歴":"記録庫"}</span>`:""}<div class="row" style="margin-top:8px"><div>${(x.tags||[]).length?x.tags.map(t=>`<span class="badge">#${esc(t)}</span>`).join(""):'<span class="small">タグなし</span>'}</div><button class="ghost editInboxTags" data-id="${x.id}">タグ編集</button></div>${(x.checklist||[]).length?`<div class="card"><b>チェック項目</b>${x.checklist.map(i=>`<div class="listitem">□ ${esc(checklistItemName(i))}</div>`).join("")}</div>`:""}${x.url?`<div>${mediaPreview(x.url)}</div><p><a class="link" target="_blank" href="${esc(x.url)}">${esc(x.url)}</a></p>`:""}<div class="wrap" style="margin-top:10px">${x.done?`<span class="badge green">整理済み</span>${linkedRecordForInbox(d,x.id)?'<span class="badge">→ 記録庫へ整理済み</span>':""}<button type="button" class="secondary organizeInbox" data-id="${x.id}">振り分け変更</button>`:`<button type="button" class="secondary organizeInbox" data-id="${x.id}">確認して整理</button>`}<button class="secondary editInbox" data-id="${x.id}">編集</button><button class="danger delInbox" data-id="${x.id}">削除</button></div></div>`).join(""):'<div class="empty">受信箱は空です。</div>';
@@ -6215,6 +6257,7 @@ function renderQuickCaptures(){
 function todayItemsByKind(rows,kinds){return rows.filter(x=>kinds.includes(x.kind))}
 function inboxKind(item){
  const cls=getClassification(item,"");
+ if(cls==="タスク")return "タスク";
  if(cls==="FF14")return "FF14";
  if(cls==="TRPG")return "TRPG";
  if(cls==="買い物"||cls==="生活")return item.tags?.some(t=>/買い物/.test(t))?"買い物":"記録";
@@ -6811,6 +6854,7 @@ $("captureSave").onclick=()=>{
  addInbox($("captureText").value,$("captureType").value,t,$("captureUrl").value.trim(),{title:$("captureTitle").value,status:$("captureStatus").value,destination:$("captureDestination").value,recordMode:$("captureRecordMode").value,tags:$("captureTags").value.split(/[,、]/).map(v=>v.trim()).filter(Boolean),checklist:$("captureHasChecklist").checked?items:[]});clearInboxDraft();
  $("captureTitle").value="";$("captureText").value="";$("captureUrl").value="";$("captureTags").value="";$("captureChecklistItems").value="";$("captureHasChecklist").checked=false;$("captureChecklistArea").style.display="none";
 };
+if($("captureTaskSave"))$("captureTaskSave").onclick=addTaskFromCapture;
 
 $("stackDetailBack").onclick=()=>switchView("stacks");
 $("stackDetailAddDay").onclick=()=>{if(CURRENT_STACK_PARENT_ID)addNewStackDay(CURRENT_STACK_PARENT_ID)};
