@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Life Archive QUICK v0.06</title>
+<title>Life Archive QUICK v0.07</title>
 <style>
 :root{color-scheme:dark;--bg:#071017;--panel:#0d1922;--line:#24404f;--text:#e9f6fb;--muted:#93a9b5;--accent:#62dcff;--gold:#e6c56e}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:"Segoe UI","Noto Sans JP",sans-serif}
@@ -27,6 +27,21 @@ textarea{min-height:110px;resize:vertical}button{cursor:pointer;background:#102a
  <label>内容</label><textarea id="text" placeholder="例：牛乳を買う / 極○○でマウント取得 / 30分歩いた"></textarea>
  <label>タグ</label><input id="tags" placeholder="カンマ区切り">
  <button id="save" class="primary" style="margin-top:12px">📥 QUICK受信箱へ保存</button>
+</div>
+
+<div class="card">
+ <div><b>⏱ Activity Time</b><div class="muted">外出先でも開始・ラップ・休憩・終了を記録。終了したログは「Life Archiveへ渡す」に含まれます。</div></div>
+ <label>活動名</label><input id="activityName" placeholder="例：買い物 / 散歩 / TRPG">
+ <div class="row">
+  <div><label>カテゴリー</label><select id="activityCategory"><option>TRPG</option><option>FF14</option><option>制作</option><option>家事</option><option>健康</option><option>勉強</option><option>外出</option><option>その他</option></select></div>
+  <div><label>経過時間</label><div id="activityClock" style="font-size:28px;font-weight:700;padding:7px 0">00:00:00</div></div>
+ </div>
+ <label>メモ</label><input id="activityMemo" placeholder="任意">
+ <div id="activityNow" class="muted" style="margin:8px 0">未計測</div>
+ <div class="row"><button id="activityStart" class="primary">▶ 開始</button><button id="activityLap">🏁 ラップ</button></div>
+ <div class="row" style="margin-top:8px"><button id="activityPause">⏸ 休憩</button><button id="activityStop">■ 終了</button></div>
+ <div id="activityLaps" class="muted" style="margin-top:8px"></div>
+ <details style="margin-top:10px"><summary class="muted">この端末の時間記録</summary><div id="activityHistory"></div></details>
 </div>
 
 <div class="card">
@@ -72,7 +87,7 @@ $("date").value=localDate();
 $("save").onclick=()=>{const text=$("text").value.trim();if(!text)return alert("内容を入力してください。");const a=load();a.push({id:"q_"+Date.now()+"_"+Math.random().toString(36).slice(2,7),kind:$("kind").value,date:$("date").value||localDate(),text,tags:$("tags").value.split(",").map(x=>x.trim()).filter(Boolean),createdAt:Date.now(),source:"Life Archive QUICK"});save(a);$("text").value="";$("tags").value="";render()};
 function transferPayload(){
  const today=loadToday();
- return {format:"life-archive-quick",version:2,exportedAt:Date.now(),items:load(),today:{date:today.date||"",items:Array.isArray(today.items)?today.items:[]}};
+ return {format:"life-archive-quick",version:3,exportedAt:Date.now(),items:load(),today:{date:today.date||"",items:Array.isArray(today.items)?today.items:[]},activityLogs:loadActivityLogs()};
 }
 function showTransferFallback(text,msg="ファイル保存が使えないため、転送データを表示しました。"){
  $("transferFallback").style.display="block";$("transferText").value=text;$("transferStatus").textContent=msg;
@@ -81,6 +96,28 @@ $("copyTransfer").onclick=async()=>{
  const text=$("transferText").value;
  try{await navigator.clipboard.writeText(text);$("transferStatus").textContent="転送データをコピーしました。"}catch(e){$("transferText").focus();$("transferText").select();$("transferStatus").textContent="コピーできない場合は、表示された文字列を長押ししてコピーしてください。"}
 };
+
+
+const ACTIVITY_KEY="life_archive_quick_activity_logs_v1",ACTIVITY_TIMER_KEY="life_archive_quick_activity_timer_v1";
+const loadActivityLogs=()=>{try{return JSON.parse(localStorage.getItem(ACTIVITY_KEY)||"[]")}catch{return[]}};
+const saveActivityLogs=a=>localStorage.setItem(ACTIVITY_KEY,JSON.stringify(a));
+const getActivityTimer=()=>{try{return JSON.parse(localStorage.getItem(ACTIVITY_TIMER_KEY)||"null")}catch{return null}};
+const putActivityTimer=v=>v?localStorage.setItem(ACTIVITY_TIMER_KEY,JSON.stringify(v)):localStorage.removeItem(ACTIVITY_TIMER_KEY);
+const fmtActivity=ms=>{let s=Math.max(0,Math.floor(ms/1000)),h=Math.floor(s/3600);s%=3600;let m=Math.floor(s/60),r=s%60;return `${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}:${String(r).padStart(2,"0")}`};
+const activityActive=(s,n=Date.now())=>s?Number(s.accumulatedMs||0)+(s.running?Math.max(0,n-Number(s.segmentStartedAt||n)):0):0;
+function renderActivity(){
+ const s=getActivityTimer(),ms=activityActive(s);
+ $("activityClock").textContent=fmtActivity(ms);$("activityNow").textContent=s?`${s.category}：${s.name}${s.running?"":"（休憩中）"}`:"未計測";
+ $("activityStart").disabled=!!s;$("activityLap").disabled=!s||!s.running;$("activityPause").disabled=!s;$("activityStop").disabled=!s;$("activityPause").textContent=s?.running?"⏸ 休憩":"▶ 再開";
+ const laps=s?.laps||[];$("activityLaps").innerHTML=laps.length?laps.map((x,i)=>`Lap ${i+1}：${fmtActivity(x.lapMs)} <span class="muted">（合計 ${fmtActivity(x.totalMs)}）</span>`).join("<br>"):"";
+ const logs=[...loadActivityLogs()].sort((a,b)=>b.startedAt-a.startedAt);
+ $("activityHistory").innerHTML=logs.length?logs.map(x=>`<div class="item"><b>${esc(x.category)}：${esc(x.name)}</b><div>${fmtActivity(x.activeMs)} ／ ${new Date(x.startedAt).toLocaleString("ja-JP")}</div>${(x.laps||[]).length?`<div class="muted">ラップ：${x.laps.map((l,i)=>`L${i+1} ${fmtActivity(l.lapMs)}`).join(" ／ ")}</div>`:""}<div class="actions"><button data-activity-del="${x.id}">削除</button></div></div>`).join(""):'<div class="empty">まだありません。</div>';
+ document.querySelectorAll("[data-activity-del]").forEach(b=>b.onclick=()=>{saveActivityLogs(loadActivityLogs().filter(x=>x.id!==b.dataset.activityDel));renderActivity()});
+}
+$("activityStart").onclick=()=>{const name=$("activityName").value.trim();if(!name)return alert("活動名を入力してください。");const n=Date.now();putActivityTimer({name,category:$("activityCategory").value||"その他",memo:$("activityMemo").value.trim(),startedAt:n,segmentStartedAt:n,accumulatedMs:0,running:true,pauses:[],laps:[],lastLapTotalMs:0});renderActivity()};
+$("activityPause").onclick=()=>{const s=getActivityTimer();if(!s)return;const n=Date.now();if(s.running){s.accumulatedMs=activityActive(s,n);s.running=false;s.pauses.push({startedAt:n,endedAt:0})}else{s.running=true;s.segmentStartedAt=n;const p=s.pauses.at(-1);if(p&&!p.endedAt)p.endedAt=n}putActivityTimer(s);renderActivity()};
+$("activityLap").onclick=()=>{const s=getActivityTimer();if(!s||!s.running)return;const n=Date.now(),total=activityActive(s,n),prev=Number(s.lastLapTotalMs||0);s.laps.push({at:n,totalMs:total,lapMs:Math.max(0,total-prev)});s.lastLapTotalMs=total;putActivityTimer(s);renderActivity()};
+$("activityStop").onclick=()=>{const s=getActivityTimer();if(!s)return;const n=Date.now(),logs=loadActivityLogs();logs.push({id:"qa_"+n+"_"+Math.random().toString(36).slice(2,7),name:s.name,category:s.category,memo:s.memo,startedAt:s.startedAt,endedAt:n,activeMs:activityActive(s,n),pauses:s.pauses||[],laps:s.laps||[],createdAt:n,source:"Life Archive QUICK"});saveActivityLogs(logs);putActivityTimer(null);$("activityName").value="";$("activityMemo").value="";renderActivity()};
 
 const TODAY_KEY="life_archive_quick_today_v1";
 function loadToday(){
@@ -167,5 +204,5 @@ $("export").onclick=async()=>{
   showTransferFallback(text);
  }
 };
-render();renderTodayTasks();
+render();renderTodayTasks();renderActivity();setInterval(renderActivity,500);
 </script></body></html>
