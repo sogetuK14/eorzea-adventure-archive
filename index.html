@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Life Archive v0.9746</title>
+<title>Life Archive v0.9747</title>
 <style>
 :root{--bg:#0b1118;--panel:#172331;--panel2:#223247;--text:#f5f7fa;--muted:#aeb9c8;--gold:#d7b55b;--line:#3a4d64;--green:#8fd0a2;--red:#ed9191;--blue:#8fc5ff;--purple:#c8adff}
 *{box-sizing:border-box}body{margin:0;font-family:"Segoe UI","Yu Gothic UI",sans-serif;color:var(--text);background:radial-gradient(circle at 85% 0,rgba(215,181,91,.13),transparent 30%),linear-gradient(#101925,var(--bg));min-height:100vh}
@@ -381,7 +381,7 @@ button{font-size:.86rem!important}
 <aside class="sidebar" id="sidebar">
   <div class="brand">
     <h1>Life Archive</h1>
-    <div class="sub">v0.9746 “SAKU+MERU 表示連結”<br>ヒカセン、PL、そして日常。すべてを一つの記録庫へ。</div>
+    <div class="sub">v0.9747 “SAKU+MERU 表示連結”<br>ヒカセン、PL、そして日常。すべてを一つの記録庫へ。</div>
   </div>
   <nav class="sidebar-nav">
     <button class="tab active" data-view="home">⌂ ホーム</button>
@@ -470,7 +470,7 @@ button{font-size:.86rem!important}
     <div class="sakumeru-link-bar">
       <strong>📖 SAKU+MERU</strong>
       <span class="small">LAを閉じずに卓管理を操作</span>
-      <button type="button" class="secondary" id="sakumeruReload">再読み込み</button>
+      <button type="button" class="secondary" id="sakumeruReload" title="キャッシュを使わずSAKU+MERUだけ読み込み直します">最新版を確認</button>
       <button type="button" class="secondary" id="sakumeruOpenExternal">別タブで開く</button>
     </div>
     <iframe id="sakumeruFrame" class="sakumeru-link-frame" title="SAKU+MERU" loading="lazy" data-src="https://pp-hibithx.github.io/39-2/"></iframe>
@@ -7810,7 +7810,7 @@ document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{if(b.dataset.view===
  if(b.dataset.view==="records"&&$("adventureRecordNotice"))$("adventureRecordNotice").style.display="none";
 });
 
-if($("sakumeruReload"))$("sakumeruReload").onclick=()=>{const f=$("sakumeruFrame");if(!f)return;const url=f.src||f.dataset.src;f.src="about:blank";setTimeout(()=>{f.src=url||"https://pp-hibithx.github.io/39-2/"},30)};
+if($("sakumeruReload"))$("sakumeruReload").onclick=()=>{const f=$("sakumeruFrame");if(!f)return;const base=(f.dataset.src||"https://pp-hibithx.github.io/39-2/").split("?")[0];f.src=base+"?la_refresh="+Date.now()};
 if($("sakumeruOpenExternal"))$("sakumeruOpenExternal").onclick=()=>window.open("https://pp-hibithx.github.io/39-2/","_blank","noopener");
 
 document.querySelectorAll(".trpgToolJump").forEach(b=>b.onclick=()=>switchView(b.dataset.viewTarget));
