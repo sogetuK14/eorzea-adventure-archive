@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Life Archive v0.9747</title>
+<title>Life Archive v0.9748</title>
 <style>
 :root{--bg:#0b1118;--panel:#172331;--panel2:#223247;--text:#f5f7fa;--muted:#aeb9c8;--gold:#d7b55b;--line:#3a4d64;--green:#8fd0a2;--red:#ed9191;--blue:#8fc5ff;--purple:#c8adff}
 *{box-sizing:border-box}body{margin:0;font-family:"Segoe UI","Yu Gothic UI",sans-serif;color:var(--text);background:radial-gradient(circle at 85% 0,rgba(215,181,91,.13),transparent 30%),linear-gradient(#101925,var(--bg));min-height:100vh}
@@ -374,14 +374,18 @@ button{font-size:.86rem!important}
 #pomodoroMini.collapsed .pomo-title:after{content:"⏱ " attr(data-mini);font-size:.72rem;font-weight:800;letter-spacing:.04em}
 #pomodoroMini.collapsed .pomo-collapse{flex:0 0 auto;padding:2px 4px!important}
 </style>
-</head>
+<style id="laNavCleanupV09748">
+.nav-group[data-group="trpg"]{display:none!important}
+.nav-standalone{display:block;margin:4px 0}
+.nav-standalone>button,.nav-standalone>a{width:100%;box-sizing:border-box}
+</style></head>
 <body>
 <div class="sidebar-overlay" id="sidebarOverlay"></div>
 <div class="app-shell">
 <aside class="sidebar" id="sidebar">
   <div class="brand">
     <h1>Life Archive</h1>
-    <div class="sub">v0.9747 “SAKU+MERU 表示連結”<br>ヒカセン、PL、そして日常。すべてを一つの記録庫へ。</div>
+    <div class="sub">v0.9748 “SAKU+MERU 表示連結”<br>ヒカセン、PL、そして日常。すべてを一つの記録庫へ。</div>
   </div>
   <nav class="sidebar-nav">
     <button class="tab active" data-view="home">⌂ ホーム</button>
@@ -439,11 +443,14 @@ button{font-size:.86rem!important}
     </details>
 
     <button class="tab" data-view="checklistTool">☑ 自由チェックメモ</button>
-    <button class="tab" data-view="sakumeru">📖 SAKU+MERU</button>
+    
 
-    <button class="tab" data-view="settings">⚙ 設定</button>
+    
+<div class="nav-standalone"><button class="tab" data-view="sakumeru">📖 SAKU+MERU</button></div>
+<div class="nav-standalone"><button class="tab" data-view="householdBudget">💰 家計簿</button></div>
+<button class="tab" data-view="settings">⚙ 設定</button>
     <button class="tab" data-view="backup">⤓ バックアップ</button>
-  <button class="tab" data-view="householdBudget">💰 家計簿</button></nav>
+  </nav>
 </aside>
 <div class="content-wrap">
   <header class="content-header">
