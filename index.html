@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Life Archive v0.9745</title>
+<title>Life Archive v0.9746</title>
 <style>
 :root{--bg:#0b1118;--panel:#172331;--panel2:#223247;--text:#f5f7fa;--muted:#aeb9c8;--gold:#d7b55b;--line:#3a4d64;--green:#8fd0a2;--red:#ed9191;--blue:#8fc5ff;--purple:#c8adff}
 *{box-sizing:border-box}body{margin:0;font-family:"Segoe UI","Yu Gothic UI",sans-serif;color:var(--text);background:radial-gradient(circle at 85% 0,rgba(215,181,91,.13),transparent 30%),linear-gradient(#101925,var(--bg));min-height:100vh}
@@ -365,6 +365,15 @@ button{font-size:.86rem!important}
 .sakumeru-link-frame{width:100%;flex:1;border:0;background:#fff}
 @media(max-width:650px){.sakumeru-link-shell{height:calc(100vh - 52px);min-height:520px;border-radius:0}.sakumeru-link-bar .small{display:none}.sakumeru-link-bar{padding:7px}.sakumeru-link-bar button{padding:7px 9px!important}}
 </style>
+<style id="laCompactTimerV09746">
+#pomodoroMini.collapsed{width:132px!important;min-width:132px!important;right:8px!important;bottom:8px!important}
+#pomodoroMini.collapsed .eorzea-clock,#pomodoroMini.collapsed .pomo-body,#pomodoroMini.collapsed .et-alarm-details,#pomodoroMini.collapsed .activity-mini{display:none!important}
+#pomodoroMini.collapsed .pomo-head{border-bottom:0!important;padding:5px 7px!important;min-height:30px}
+#pomodoroMini.collapsed .pomo-dot{display:none}
+#pomodoroMini.collapsed .pomo-title{font-size:0!important;white-space:nowrap;overflow:hidden}
+#pomodoroMini.collapsed .pomo-title:after{content:"⏱ " attr(data-mini);font-size:.72rem;font-weight:800;letter-spacing:.04em}
+#pomodoroMini.collapsed .pomo-collapse{flex:0 0 auto;padding:2px 4px!important}
+</style>
 </head>
 <body>
 <div class="sidebar-overlay" id="sidebarOverlay"></div>
@@ -372,7 +381,7 @@ button{font-size:.86rem!important}
 <aside class="sidebar" id="sidebar">
   <div class="brand">
     <h1>Life Archive</h1>
-    <div class="sub">v0.9745 “SAKU+MERU 表示連結”<br>ヒカセン、PL、そして日常。すべてを一つの記録庫へ。</div>
+    <div class="sub">v0.9746 “SAKU+MERU 表示連結”<br>ヒカセン、PL、そして日常。すべてを一つの記録庫へ。</div>
   </div>
   <nav class="sidebar-nav">
     <button class="tab active" data-view="home">⌂ ホーム</button>
@@ -416,19 +425,8 @@ button{font-size:.86rem!important}
         <button class="tab" data-view="peopleCodex">人物・PC図鑑</button>
         <button class="tab" data-view="scenarioLibrary">所持シナリオ</button>
     <button class="tab" data-view="trpgAssets">🎨 TRPG素材庫</button>
-    <details class="nav-group" open>
-      <summary>🎲 TRPGツール</summary>
-      <div class="nav-children">
-        <button class="nav-anchor" data-view="diceTool">ダイスログ抽出</button>
-        <button class="nav-anchor" data-view="kpTools">KP補助</button>
-      </div>
-    </details>
-        <button class="nav-anchor" data-view="records" data-record-type="TRPG">卓の記録</button>
-        <button class="nav-anchor" data-view="history" data-history-category="TRPG">セッション履歴</button>
-      </div>
-    </details>
-
-    <details class="nav-group" data-group="life">
+    <!-- legacy TRPG nav hidden; data retained -->
+<details class="nav-group" data-group="life">
       <summary>生活</summary>
       <div class="nav-children">
         <button class="tab" data-view="history">前回・最終日</button>
