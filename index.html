@@ -1830,12 +1830,12 @@ button{font-size:.86rem!important}
 </section>
 <section id="householdBudget" class="view"><div class="pagehead"><div><h2>💰 家計簿</h2><div class="small">収支・固定費・予算をLife Archiveでまとめて管理。</div></div></div>
 <div class="grid3"><div class="card"><div class="small">今月の収入</div><div class="big" id="budgetIncome">¥0</div></div><div class="card"><div class="small">今月の支出記録</div><div class="big" id="budgetExpense">¥0</div></div><div class="card"><div class="small">今月の収支</div><div class="big" id="budgetBalance">¥0</div></div></div>
-<div class="card" style="margin-top:12px"><h3>今月の予算</h3><div class="grid3"><div><label>月予算</label><input id="budgetMonthlyLimit" type="text" inputmode="decimal" class="budgetNumericInput"></div><div><label>固定費・予算枠差引後</label><div class="big" id="budgetAfterFixed">—</div></div><div><label>残り予算</label><div class="big" id="budgetRemaining">—</div></div><div><label>今日から1日あたり</label><div class="big" id="budgetPerDay">—</div></div></div></div>
+<div class="card" style="margin-top:12px"><h3>今月の予算</h3><div class="grid3"><div><label>月予算</label><input id="budgetMonthlyLimit" type="text" class="budgetNumericInput" lang="ja"></div><div><label>固定費・予算枠差引後</label><div class="big" id="budgetAfterFixed">—</div></div><div><label>残り予算</label><div class="big" id="budgetRemaining">—</div></div><div><label>今日から1日あたり</label><div class="big" id="budgetPerDay">—</div></div></div></div>
 <div class="grid2" style="margin-top:12px"><div class="card"><h3>収支を追加</h3><div class="grid2"><div><label>日付</label><input id="budgetDate" type="date"></div><div style="grid-column:1/-1"><label>記録の種類</label><div class="wrap" id="budgetModeButtons">
 <button type="button" class="secondary budgetMode active" data-type="expense">💸 支出</button>
 <button type="button" class="secondary budgetMode" data-type="income">💰 収入</button>
 <button type="button" class="secondary budgetMode" data-type="transfer">↔ 振替</button>
-</div><select id="budgetType" style="display:none"><option value="expense">支出</option><option value="income">収入</option><option value="transfer">振替</option></select></div><div><label>金額</label><input id="budgetAmount" type="text" inputmode="decimal" class="budgetNumericInput"></div><div><label>カテゴリ</label><select id="budgetCategory"><option>食費</option><option>日用品</option><option>固定費</option><option>趣味</option><option>ゲーム</option><option>交通</option><option>医療</option><option>猫</option><option>衣類</option><option>収入</option><option>その他</option></select></div><div id="budgetPaymentWrap"><label>支払い方法</label><select id="budgetPayment"><option>現金</option><option>PayPay</option><option>ワンバンク</option><option>バンドル</option><option>銀行</option><option>その他</option></select></div>
+</div><select id="budgetType" style="display:none"><option value="expense">支出</option><option value="income">収入</option><option value="transfer">振替</option></select></div><div><label>金額</label><input id="budgetAmount" type="text" class="budgetNumericInput" lang="ja"></div><div><label>カテゴリ</label><select id="budgetCategory"><option>食費</option><option>日用品</option><option>固定費</option><option>趣味</option><option>ゲーム</option><option>交通</option><option>医療</option><option>猫</option><option>衣類</option><option>収入</option><option>その他</option></select></div><div id="budgetPaymentWrap"><label>支払い方法</label><select id="budgetPayment"><option>現金</option><option>PayPay</option><option>ワンバンク</option><option>バンドル</option><option>銀行</option><option>その他</option></select></div>
 <div id="budgetIncomeDestWrap" style="display:none"><label>入金先</label><select id="budgetIncomeDest"><option>銀行</option><option>現金</option><option>PayPay</option><option>ワンバンク</option><option>その他</option></select></div>
 <div id="budgetTransferFromWrap" style="display:none"><label>移動元</label><select id="budgetTransferFrom"><option>現金</option><option>銀行</option><option>PayPay</option><option>ワンバンク</option><option>バンドル</option><option>その他</option></select></div>
 <div id="budgetTransferToWrap" style="display:none"><label>移動先</label><select id="budgetTransferTo"><option>PayPay</option><option>ワンバンク</option><option>現金</option><option>銀行</option><option>バンドル</option><option>その他</option></select></div>
@@ -2667,6 +2667,7 @@ let damageRows=[];
 function normalizeNumericText(v){return String(v??"").replace(/[０-９]/g,c=>String.fromCharCode(c.charCodeAt(0)-0xFEE0)).replace(/[．。]/g,".").replace(/[，、]/g,",").replace(/[－ー−]/g,"-").replace(/[＋]/g,"+").replace(/[,\s￥¥]/g,"")}
 function numericValue(v,def=0){const n=Number(normalizeNumericText(v));return Number.isFinite(n)?n:def}
 function nval(id,def=0){const el=$(id);return numericValue(el?.value,def)}
+// IME保持用: 家計簿の数値欄は通常のtext入力にし、全角数字はblur時に正規化する。
 function setupBudgetNumericInput(root=document){root.querySelectorAll?.(".budgetNumericInput").forEach(el=>{if(el.dataset.jpnumReady)return;el.dataset.jpnumReady="1";el.addEventListener("blur",()=>{const raw=el.value.trim();if(!raw)return;const normalized=normalizeNumericText(raw);if(normalized!==raw)el.value=normalized})})}
 function damageExpectedMultiplier(cdh=false){
  const cr=Math.max(0,Math.min(1,nval("dmgCritRate")/100)),cm=Math.max(1,nval("dmgCritMult",1.4));
@@ -2772,11 +2773,11 @@ function renderBudgetDraftItems(){
  if(!$("budgetItems"))return;
  $("budgetItems").innerHTML=budgetDraftItems.length?budgetDraftItems.map((x,i)=>`<div class="listitem"><div class="grid3">
  <div><label>品名</label><input class="budgetItemName" data-i="${i}" value="${esc(x.name)}" placeholder="卵"></div>
- <div><label>単価</label><input class="budgetItemPrice budgetNumericInput" data-i="${i}" type="text" inputmode="decimal" value="${x.unitPrice||""}"></div>
- <div><label>購入数</label><input class="budgetItemBuyQty budgetNumericInput" data-i="${i}" type="text" inputmode="decimal" value="${x.buyQty||1}"></div>
+ <div><label>単価</label><input class="budgetItemPrice budgetNumericInput" data-i="${i}" type="text" lang="ja" value="${x.unitPrice||""}"></div>
+ <div><label>購入数</label><input class="budgetItemBuyQty budgetNumericInput" data-i="${i}" type="text" lang="ja" value="${x.buyQty||1}"></div>
  <div><label><input class="budgetItemInv" data-i="${i}" type="checkbox" ${x.toInventory?"checked":""}> 在庫登録</label><button class="danger budgetItemRemove" data-i="${i}">内訳削除</button></div>
  </div><div class="small">小計：<b>${yen((Number(x.unitPrice||0))*(Number(x.buyQty||0)))}</b></div>${x.toInventory?`<div class="grid3" style="margin-top:6px">
- <div><label>1つあたり内容量</label><input class="budgetItemContentQty budgetNumericInput" data-i="${i}" type="text" inputmode="decimal" value="${x.contentQty||1}"></div>
+ <div><label>1つあたり内容量</label><input class="budgetItemContentQty budgetNumericInput" data-i="${i}" type="text" lang="ja" value="${x.contentQty||1}"></div>
  <div><label>単位</label><input class="budgetItemUnit" data-i="${i}" value="${esc(x.unit)}" placeholder="個 / g / ml"></div>
  <div><label>保管場所</label><input class="budgetItemPlace" data-i="${i}" value="${esc(x.place)}" placeholder="冷蔵庫 / 冷凍庫 / 棚"></div>
  <div><label>タグ</label><input class="budgetItemTags" data-i="${i}" value="${esc(x.tags)}" placeholder="肉, 朝食, 開封済み"></div>
