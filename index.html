@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Life Archive v0.9750</title>
+<title>Life Archive v0.9751</title>
 <style>
 :root{--bg:#0b1118;--panel:#172331;--panel2:#223247;--text:#f5f7fa;--muted:#aeb9c8;--gold:#d7b55b;--line:#3a4d64;--green:#8fd0a2;--red:#ed9191;--blue:#8fc5ff;--purple:#c8adff}
 *{box-sizing:border-box}body{margin:0;font-family:"Segoe UI","Yu Gothic UI",sans-serif;color:var(--text);background:radial-gradient(circle at 85% 0,rgba(215,181,91,.13),transparent 30%),linear-gradient(#101925,var(--bg));min-height:100vh}
@@ -1874,6 +1874,11 @@ button{font-size:.86rem!important}
 </div>
 <div class="card"><div class="row"><h3>固定費</h3><div><span class="small">合計</span> <b id="fixedTotal">¥0</b></div></div><div class="grid2"><div><label>項目</label><input id="fixedName"></div><div><label>金額</label><input id="fixedAmount" type="number" min="0"></div></div><button id="fixedAdd" class="secondary" style="width:100%;margin-top:8px">固定費を登録</button><div id="fixedList" style="margin-top:8px"></div></div></div>
 <div class="card" style="margin-top:12px">
+ <div class="row"><div><h3>💳 支払い方法・資金置き場</h3><div class="small">家計簿の支払い方法・入金先・振替元/先で共通利用します。既存の記録は、ここから項目を削除しても残ります。</div></div></div>
+ <div class="grid2"><div><label>名称</label><input id="budgetPaymentMethodName" placeholder="例：Suica / 楽天Pay / ○○銀行"></div><div style="display:flex;align-items:end"><button id="budgetPaymentMethodAdd" class="secondary" style="width:100%">＋ 登録</button></div></div>
+ <div id="budgetPaymentMethodList" style="margin-top:8px"></div>
+</div>
+<div class="card" style="margin-top:12px">
 <div class="row"><div><h3>🥚 食材・日用品在庫</h3><div class="small">家計簿の内訳から追加した購入品を確認。保管場所・タグはあとから自由に付け替えできます。</div></div><select id="inventoryFilter" style="max-width:150px"><option value="">すべて</option><option>冷蔵</option><option>冷凍</option><option>常温</option><option>日用品</option><option>その他</option></select></div>
 <div id="inventorySummary" class="small" style="margin:8px 0"></div><div id="inventoryList"></div></div>
 <div class="card" style="margin-top:12px"><div class="row"><h3>月の記録</h3><input id="budgetMonth" type="month" style="max-width:180px"></div><div id="budgetCategorySummary" class="small" style="margin:8px 0"></div><div id="budgetPaymentSummary" class="small" style="margin:8px 0"></div><div id="budgetList"></div></div></section></main>
@@ -2736,10 +2741,26 @@ function applyPotionPreset(){
  }
  calcDamage();
 }
-function budgetRoot(d=load()){d.householdBudget=d.householdBudget||{entries:[],fixed:[],variableBudgets:[],monthlyLimit:0,inventory:[],postpayPlans:[]};d.householdBudget.inventory=d.householdBudget.inventory||[];d.householdBudget.variableBudgets=d.householdBudget.variableBudgets||[];d.householdBudget.postpayPlans=d.householdBudget.postpayPlans||[];return d}
+function budgetRoot(d=load()){
+ d.householdBudget=d.householdBudget||{entries:[],fixed:[],variableBudgets:[],monthlyLimit:0,inventory:[],postpayPlans:[]};
+ d.householdBudget.inventory=d.householdBudget.inventory||[];d.householdBudget.variableBudgets=d.householdBudget.variableBudgets||[];d.householdBudget.postpayPlans=d.householdBudget.postpayPlans||[];
+ if(!Array.isArray(d.householdBudget.paymentMethods)||!d.householdBudget.paymentMethods.length)d.householdBudget.paymentMethods=["現金","PayPay","ワンバンク","バンドル","銀行","その他"];
+ return d
+}
+function budgetPaymentMethods(d=budgetRoot(load())){return [...new Set((d.householdBudget.paymentMethods||[]).map(x=>String(x||"").trim()).filter(Boolean))]}
+function refreshBudgetPaymentSelects(){
+ const d=budgetRoot(load()),methods=budgetPaymentMethods(d),defs={budgetPayment:"現金",budgetIncomeDest:"銀行",budgetTransferFrom:"現金",budgetTransferTo:"PayPay",postpayReservePlace:"PayPay"};
+ Object.entries(defs).forEach(([id,fallback])=>{const el=$(id);if(!el)return;const current=el.value||fallback;el.innerHTML=methods.map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join("");if(methods.includes(current))el.value=current;else if(methods.includes(fallback))el.value=fallback});
+}
+function renderBudgetPaymentMethods(){
+ const el=$("budgetPaymentMethodList");if(!el)return;const d=budgetRoot(load()),methods=budgetPaymentMethods(d);
+ el.innerHTML=methods.length?methods.map(x=>`<div class="listitem"><div class="row"><b>${esc(x)}</b><button class="danger budgetPaymentMethodDelete" data-name="${esc(x)}">削除</button></div></div>`).join(""):'<div class="empty">支払い方法は未登録です。</div>';
+ document.querySelectorAll(".budgetPaymentMethodDelete").forEach(b=>b.onclick=()=>{const name=b.dataset.name;if(!confirm(`「${name}」を支払い方法一覧から削除しますか？\n過去の家計簿記録は削除されません。`))return;const d=budgetRoot(load());d.householdBudget.paymentMethods=budgetPaymentMethods(d).filter(x=>x!==name);save(d);refreshBudgetPaymentSelects();renderBudgetPaymentMethods()});
+}
+function addBudgetPaymentMethod(){const name=$("budgetPaymentMethodName")?.value.trim();if(!name)return;const d=budgetRoot(load());const methods=budgetPaymentMethods(d);if(!methods.includes(name))methods.push(name);d.householdBudget.paymentMethods=methods;save(d);$("budgetPaymentMethodName").value="";refreshBudgetPaymentSelects();renderBudgetPaymentMethods()}
 function yen(n){return "¥"+Math.round(Number(n||0)).toLocaleString("ja-JP")}
 function renderBudget(){if(!$("budgetList"))return;const d=budgetRoot(load()),now=new Date(),mk=$("budgetMonth").value||`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,"0")}`;$("budgetMonth").value=mk;$("budgetMonthlyLimit").value=d.householdBudget.monthlyLimit||"";const rows=d.householdBudget.entries.filter(x=>String(x.date||"").slice(0,7)===mk).sort((a,b)=>String(b.date).localeCompare(String(a.date)));const inc=rows.filter(x=>x.type==="income").reduce((s,x)=>s+Number(x.amount||0),0),exp=rows.filter(x=>x.type==="expense").reduce((s,x)=>s+Number(x.amount||0),0);$("budgetIncome").textContent=yen(inc);$("budgetExpense").textContent=yen(exp);$("budgetBalance").textContent=yen(inc-exp);const lim=Number(d.householdBudget.monthlyLimit||0),fixedTotal=d.householdBudget.fixed.reduce((s,x)=>s+Number(x.amount||0),0),variableBudgetTotal=d.householdBudget.variableBudgets.reduce((s,x)=>s+Number(x.amount||0),0),reservedNames=new Set(d.householdBudget.variableBudgets.map(x=>String(x.name||"").trim()).filter(Boolean)),variableExp=rows.filter(x=>x.type==="expense"&&x.category!=="固定費"&&!reservedNames.has(String(x.title||"").trim())).reduce((s,x)=>s+Number(x.amount||0),0),afterFixed=lim-fixedTotal-variableBudgetTotal,rem=afterFixed-variableExp;if($("budgetAfterFixed"))$("budgetAfterFixed").textContent=lim?yen(afterFixed):"未設定";$("budgetRemaining").textContent=lim?yen(rem):"未設定";const [yy,mm]=mk.split("-").map(Number),last=new Date(yy,mm,0).getDate(),today=(now.getFullYear()===yy&&now.getMonth()+1===mm)?now.getDate():1;$("budgetPerDay").textContent=lim?yen(Math.max(0,rem)/Math.max(1,last-today+1)):"未設定";const cats={};rows.filter(x=>x.type==="expense").forEach(x=>cats[x.category]=(cats[x.category]||0)+Number(x.amount||0));$("budgetCategorySummary").innerHTML=Object.keys(cats).length?"<b>カテゴリ別：</b> "+Object.entries(cats).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`${esc(k)} ${yen(v)}`).join(" ／ "):"支出記録はまだありません。";const pays={};rows.filter(x=>x.type==="expense").forEach(x=>{const k=x.payment||"未設定";pays[k]=(pays[k]||0)+Number(x.amount||0)});if($("budgetPaymentSummary"))$("budgetPaymentSummary").innerHTML=Object.keys(pays).length?"<b>支払い方法別：</b> "+Object.entries(pays).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`${esc(k)} ${yen(v)}`).join(" ／ "):"";$("budgetList").innerHTML=rows.length?rows.map(x=>`<div class="listitem"><div class="row"><div><b>${x.type==="income"?"＋":x.type==="transfer"?"↔":"－"} ${yen(x.amount)}　${esc(x.title||x.category)}</b><div class="small">${esc(x.date)} ／ ${esc(x.category)}${x.type==="expense"&&x.payment?` ／ ${esc(x.payment)}`:""}${x.type==="income"&&x.incomeDest?` ／ 入金先 ${esc(x.incomeDest)}`:""}${x.type==="transfer"?` ／ ${esc(x.transferFrom||"-")} → ${esc(x.transferTo||"-")}`:""}${x.memo?` ／ ${esc(x.memo)}`:""}</div></div><div class="wrap"><button class="secondary budgetEdit" data-id="${x.id}">編集</button><button class="danger budgetDelete" data-id="${x.id}">削除</button></div></div></div>`).join(""):'<div class="empty">この月の記録はありません。</div>';document.querySelectorAll(".budgetEdit").forEach(b=>b.onclick=()=>editBudgetEntry(b.dataset.id));
-document.querySelectorAll(".budgetDelete").forEach(b=>b.onclick=()=>{const d=budgetRoot(load());d.householdBudget.entries=d.householdBudget.entries.filter(x=>x.id!==b.dataset.id);d.householdBudget.inventory=d.householdBudget.inventory.filter(v=>v.entryId!==b.dataset.id);save(d);renderBudget();renderInventory()});renderFixedCosts();renderVariableBudgets();renderPostpay();renderInventory()}
+document.querySelectorAll(".budgetDelete").forEach(b=>b.onclick=()=>{if(!confirm("この家計簿記録を削除しますか？\n家計簿から追加済みの在庫はそのまま残します。"))return;const d=budgetRoot(load());d.householdBudget.entries=d.householdBudget.entries.filter(x=>x.id!==b.dataset.id);save(d);renderBudget();renderInventory()});renderFixedCosts();renderVariableBudgets();renderPostpay();renderInventory();refreshBudgetPaymentSelects();renderBudgetPaymentMethods()}
 let budgetDraftItems=[];let budgetEditingEntryId="";
 function addBudgetDraftItem(seed={}){
  budgetDraftItems.push({id:uid(),name:seed.name||"",unitPrice:Number(seed.unitPrice??seed.amount??0),buyQty:Number(seed.buyQty||1),toInventory:!!seed.toInventory,contentQty:Number(seed.contentQty??seed.qty??1),unit:seed.unit||"",place:seed.place||"冷蔵",tags:seed.tags||"",expiry:seed.expiry||""});renderBudgetDraftItems();
@@ -2793,8 +2814,9 @@ function renderInventory(){
  if(!$("inventoryList"))return;const d=budgetRoot(load()),filter=$("inventoryFilter")?.value||"";
  const rows=d.householdBudget.inventory.filter(x=>Number(x.qty||0)>0).filter(x=>!filter||x.place===filter||((x.tags||[]).includes(filter))).sort((a,b)=>(a.expiry||"9999").localeCompare(b.expiry||"9999"));
  $("inventorySummary").textContent=`在庫 ${rows.length}品 ／ 購入額 ${yen(rows.reduce((s,x)=>s+Number(x.price||0),0))}`;
- $("inventoryList").innerHTML=rows.length?rows.map(x=>`<div class="listitem"><div class="row"><div><b>${esc(x.name)}</b> <span class="badge">${esc(x.place||"場所未設定")}</span>${(x.tags||[]).map(v=>` <span class="badge">${esc(v)}</span>`).join("")}<div class="small">${x.qty}${esc(x.unit||"")} ／ 購入 ${esc(x.purchased||"-")} ／ ${yen(x.price)}${x.expiry?` ／ 期限 ${esc(x.expiry)}`:""}</div></div><div class="wrap"><button class="secondary invUse" data-id="${x.id}">使う</button><button class="secondary invEdit" data-id="${x.id}">場所・タグ編集</button><button class="danger invDelete" data-id="${x.id}">削除</button></div></div></div>`).join(""):'<div class="empty">在庫はまだありません。</div>';
+ $("inventoryList").innerHTML=rows.length?rows.map(x=>`<div class="listitem"><div class="row"><div><b>${esc(x.name)}</b> <span class="badge">${esc(x.place||"場所未設定")}</span>${(x.tags||[]).map(v=>` <span class="badge">${esc(v)}</span>`).join("")}<div class="small">${x.qty}${esc(x.unit||"")} ／ 購入 ${esc(x.purchased||"-")} ／ ${yen(x.price)}${x.expiry?` ／ 期限 ${esc(x.expiry)}`:""}</div></div><div class="wrap"><button class="secondary invUse" data-id="${x.id}">使う</button><button class="secondary invToShopping" data-id="${x.id}">買い物リストへ</button><button class="secondary invEdit" data-id="${x.id}">場所・タグ編集</button><button class="danger invDelete" data-id="${x.id}">削除</button></div></div></div>`).join(""):'<div class="empty">在庫はまだありません。</div>';
  document.querySelectorAll(".invUse").forEach(b=>b.onclick=()=>{const d=budgetRoot(load()),x=d.householdBudget.inventory.find(v=>v.id===b.dataset.id);if(!x)return;const q=Number(prompt(`「${x.name}」をいくつ使いましたか？`,1));if(!q||q<0)return;x.qty=Math.max(0,Number(x.qty||0)-q);save(d);renderInventory()});
+ document.querySelectorAll(".invToShopping").forEach(b=>b.onclick=()=>{const d=budgetRoot(load()),x=d.householdBudget.inventory.find(v=>v.id===b.dataset.id);if(!x)return;d.shopping=d.shopping||[];const exists=d.shopping.some(v=>!v.done&&String(v.name||"").trim()===String(x.name||"").trim());if(!exists)d.shopping.push({id:uid(),name:x.name,category:(x.place==="日用品"?"日用品":"食材"),memo:"在庫から追加",done:false,time:Date.now()});save(d);renderShopping();b.textContent=exists?"追加済み":"追加しました";setTimeout(()=>b.textContent="買い物リストへ",900)});
  document.querySelectorAll(".invEdit").forEach(b=>b.onclick=()=>{const d=budgetRoot(load()),x=d.householdBudget.inventory.find(v=>v.id===b.dataset.id);if(!x)return;const place=prompt("保管場所を変更",x.place||"");if(place===null)return;const tags=prompt("タグ（カンマ区切り）",(x.tags||[]).join(", "));if(tags===null)return;x.place=place.trim();x.tags=tags.split(",").map(v=>v.trim()).filter(Boolean);save(d);renderInventory()});
  document.querySelectorAll(".invDelete").forEach(b=>b.onclick=()=>{if(!confirm("この在庫を削除しますか？"))return;const d=budgetRoot(load());d.householdBudget.inventory=d.householdBudget.inventory.filter(x=>x.id!==b.dataset.id);save(d);renderInventory()});
 }
@@ -7946,6 +7968,9 @@ $("saveSettings").onclick=()=>{const d=load();d.settings.guideUrl=$("guideUrl").
 if($("dmgGearSearchSlot"))$("dmgGearSearchSlot").onchange=()=>{const s=$("dmgGearSearchSlot").value;$("dmgGearSlot").value=s==="指輪"?"指輪1":s};
 if($("budgetDate"))$("budgetDate").value=new Date().toISOString().slice(0,10);
 if($("inventoryFilter"))$("inventoryFilter").onchange=renderInventory;
+if($("budgetPaymentMethodAdd"))$("budgetPaymentMethodAdd").onclick=addBudgetPaymentMethod;
+if($("budgetPaymentMethodName"))$("budgetPaymentMethodName").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();addBudgetPaymentMethod()}};
+refreshBudgetPaymentSelects();renderBudgetPaymentMethods();
 if($("budgetItemAdd"))$("budgetItemAdd").onclick=()=>addBudgetDraftItem();
 if($("budgetAmount"))$("budgetAmount").oninput=renderBudgetDraftTotal;
 if($("budgetEditCancel"))$("budgetEditCancel").onclick=()=>{budgetEditingEntryId="";budgetDraftItems=[];$("budgetAdd").textContent="記録する";$("budgetAdd").classList.remove("success");$("budgetEditCancel").style.display="none";["budgetAmount","budgetTitle","budgetMemo"].forEach(id=>$(id).value="");renderBudgetDraftItems()};
