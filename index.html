@@ -7839,7 +7839,14 @@ document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{if(b.dataset.view===
 
 const LA_LAST_KP_KEY="life_archive_last_sakumeru_kp_v1";
 function loadLaLastKp(){
- try{return JSON.parse(localStorage.getItem(LA_LAST_KP_KEY)||"null")}catch{return null}
+ try{
+   const x=JSON.parse(localStorage.getItem(LA_LAST_KP_KEY)||"null");
+   if(x?.url&&x.url.includes("https://pp-hibithx.github.io/39-2/")){
+     x.url=x.url.replace("https://pp-hibithx.github.io/39-2/","https://pp-hibithx.github.io/sakumeru/");
+     localStorage.setItem(LA_LAST_KP_KEY,JSON.stringify(x));
+   }
+   return x;
+ }catch{return null}
 }
 function saveLaLastKp(x){
  if(!x||!x.scenarioId||!x.url)return;
