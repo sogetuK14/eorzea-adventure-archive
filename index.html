@@ -474,7 +474,7 @@ button{font-size:.86rem!important}
       <button type="button" class="secondary" id="sakumeruReload" title="キャッシュを使わずSAKU+MERUだけ読み込み直します">最新版を確認</button>
       <button type="button" class="secondary" id="sakumeruOpenExternal">別タブで開く</button>
     </div>
-    <iframe id="sakumeruFrame" class="sakumeru-link-frame" title="SAKU+MERU" loading="lazy" data-src="https://pp-hibithx.github.io/39-2/"></iframe>
+    <iframe id="sakumeruFrame" class="sakumeru-link-frame" title="SAKU+MERU" loading="lazy" data-src="https://pp-hibithx.github.io/sakumeru/"></iframe>
   </div>
 </section>
 
@@ -2878,7 +2878,7 @@ function loadUI(){try{return JSON.parse(localStorage.getItem(UI_KEY)||"{}")}catc
 function saveUI(patch){const ui={...loadUI(),...patch};localStorage.setItem(UI_KEY,JSON.stringify(ui));return ui}
 function closeSidebar(){document.getElementById("sidebar")?.classList.remove("open");document.getElementById("sidebarOverlay")?.classList.remove("open")}
 function switchView(id,options={}){
- if(id==="sakumeru"){const f=document.getElementById("sakumeruFrame");if(f&&!f.src)f.src=f.dataset.src||"https://pp-hibithx.github.io/39-2/";}
+ if(id==="sakumeru"){const f=document.getElementById("sakumeruFrame");if(f&&!f.src)f.src=f.dataset.src||"https://pp-hibithx.github.io/sakumeru/";}
  const pomo=document.getElementById("pomodoroMini");if(pomo)pomo.classList.toggle("budget-compact",id==="householdBudget");
  document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("active",b.dataset.view===id));
  document.querySelectorAll(".view").forEach(v=>v.classList.toggle("active",v.id===id));
@@ -7872,10 +7872,10 @@ if($("sakumeruLastKp"))$("sakumeruLastKp").onclick=()=>{
 };
 if($("sakumeruReload"))$("sakumeruReload").onclick=()=>{
  const f=$("sakumeruFrame");if(!f)return;
- const base=(f.dataset.src||"https://pp-hibithx.github.io/39-2/").split("?")[0];
+ const base=(f.dataset.src||"https://pp-hibithx.github.io/sakumeru/").split("?")[0];
  f.src=base+"?la_refresh="+Date.now();
 };
-if($("sakumeruOpenExternal"))$("sakumeruOpenExternal").onclick=()=>window.open("https://pp-hibithx.github.io/39-2/","_blank","noopener");
+if($("sakumeruOpenExternal"))$("sakumeruOpenExternal").onclick=()=>window.open("https://pp-hibithx.github.io/sakumeru/","_blank","noopener");
 renderLaLastKp();
 
 document.querySelectorAll(".trpgToolJump").forEach(b=>b.onclick=()=>switchView(b.dataset.viewTarget));
