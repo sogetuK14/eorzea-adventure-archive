@@ -470,6 +470,7 @@ button{font-size:.86rem!important}
     <div class="sakumeru-link-bar">
       <strong>📖 SAKU+MERU</strong>
       <span class="small">LAを閉じずに卓管理を操作</span>
+      <button type="button" class="primary" id="sakumeruLastKp" hidden title="最後に開いたKPバインダーへ移動">KPバインダーへ</button>
       <button type="button" class="secondary" id="sakumeruReload" title="キャッシュを使わずSAKU+MERUだけ読み込み直します">最新版を確認</button>
       <button type="button" class="secondary" id="sakumeruOpenExternal">別タブで開く</button>
     </div>
@@ -7836,8 +7837,46 @@ document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{if(b.dataset.view===
  if(b.dataset.view==="records"&&$("adventureRecordNotice"))$("adventureRecordNotice").style.display="none";
 });
 
-if($("sakumeruReload"))$("sakumeruReload").onclick=()=>{const f=$("sakumeruFrame");if(!f)return;const base=(f.dataset.src||"https://pp-hibithx.github.io/39-2/").split("?")[0];f.src=base+"?la_refresh="+Date.now()};
+const LA_LAST_KP_KEY="life_archive_last_sakumeru_kp_v1";
+function loadLaLastKp(){
+ try{return JSON.parse(localStorage.getItem(LA_LAST_KP_KEY)||"null")}catch{return null}
+}
+function saveLaLastKp(x){
+ if(!x||!x.scenarioId||!x.url)return;
+ try{localStorage.setItem(LA_LAST_KP_KEY,JSON.stringify(x))}catch{}
+ renderLaLastKp();
+}
+function renderLaLastKp(){
+ const btn=$("sakumeruLastKp"),x=loadLaLastKp();
+ if(!btn)return;
+ if(!x?.url){btn.hidden=true;return}
+ btn.hidden=false;
+ btn.textContent=x.scenarioTitle?`KP：${x.scenarioTitle}`:"KPバインダーへ";
+ btn.title=x.scenarioTitle?`最後に開いた「${x.scenarioTitle}」へ移動`:"最後に開いたKPバインダーへ移動";
+}
+window.addEventListener("message",e=>{
+ if(e.origin!=="https://pp-hibithx.github.io")return;
+ const d=e.data;
+ if(!d||d.type!=="sakumeru:last-kp-binder")return;
+ saveLaLastKp({
+   scenarioId:String(d.scenarioId||""),
+   scenarioTitle:String(d.scenarioTitle||"シナリオ"),
+   openedAt:String(d.openedAt||new Date().toISOString()),
+   url:String(d.url||"")
+ });
+});
+if($("sakumeruLastKp"))$("sakumeruLastKp").onclick=()=>{
+ const f=$("sakumeruFrame"),x=loadLaLastKp();
+ if(!f||!x?.url)return;
+ f.src=x.url+(x.url.includes("?")?"&":"?")+"la_open="+Date.now();
+};
+if($("sakumeruReload"))$("sakumeruReload").onclick=()=>{
+ const f=$("sakumeruFrame");if(!f)return;
+ const base=(f.dataset.src||"https://pp-hibithx.github.io/39-2/").split("?")[0];
+ f.src=base+"?la_refresh="+Date.now();
+};
 if($("sakumeruOpenExternal"))$("sakumeruOpenExternal").onclick=()=>window.open("https://pp-hibithx.github.io/39-2/","_blank","noopener");
+renderLaLastKp();
 
 document.querySelectorAll(".trpgToolJump").forEach(b=>b.onclick=()=>switchView(b.dataset.viewTarget));
 document.querySelectorAll(".nav-anchor").forEach(b=>b.onclick=()=>{if(b.dataset.view==="records")currentRecordCategoryFilter=b.dataset.recordType||"";
