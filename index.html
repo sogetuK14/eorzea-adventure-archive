@@ -389,7 +389,7 @@ button{font-size:.86rem!important}
 <aside class="sidebar" id="sidebar">
   <div class="brand">
     <h1>Life Archive</h1>
-    <div class="sub">v0.9760 “FF14分離版”<br>日常・記録・家計・在庫を、ひとつの生活アーカイブへ。</div>
+    <div class="sub">v0.9761 “SAKU+MERU URL修正版”<br>日常・記録・家計・在庫を、ひとつの生活アーカイブへ。</div>
   </div>
   <nav class="sidebar-nav">
     <button class="tab active" data-view="home">⌂ ホーム</button>
@@ -7809,9 +7809,23 @@ document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{if(b.dataset.view===
 
 const LA_LAST_KP_KEY="life_archive_last_sakumeru_kp_v1";
 const LA_SAKUMERU_URL_KEY="life_archive_sakumeru_url_v1";
+const LA_SAKUMERU_DEFAULT_URL="https://pp-hibithx.github.io/sakumeru/";
+function normalizeLaSakumeruUrl(value){
+ const raw=String(value||"").trim();
+ if(!raw)return LA_SAKUMERU_DEFAULT_URL;
+ try{
+   const u=new URL(raw);
+   if(u.protocol!=="https:")return LA_SAKUMERU_DEFAULT_URL;
+   return u.href;
+ }catch{return LA_SAKUMERU_DEFAULT_URL}
+}
 function laSakumeruUrl(){
- const saved=String(localStorage.getItem(LA_SAKUMERU_URL_KEY)||"").trim();
- return (saved||"https://pp-hibithx.github.io/sakumeru/").replace(/\/+$/,"")+"/";
+ return normalizeLaSakumeruUrl(localStorage.getItem(LA_SAKUMERU_URL_KEY)||LA_SAKUMERU_DEFAULT_URL);
+}
+function laAddQuery(url,key,value){
+ const u=new URL(url);
+ u.searchParams.set(key,String(value));
+ return u.href;
 }
 function applyLaSakumeruUrl(){
  const f=$("sakumeruFrame"); if(!f)return;
@@ -7857,22 +7871,29 @@ window.addEventListener("message",e=>{
 if($("sakumeruLastKp"))$("sakumeruLastKp").onclick=()=>{
  const f=$("sakumeruFrame"),x=loadLaLastKp();
  if(!f||!x?.url)return;
- f.src=x.url+(x.url.includes("?")?"&":"?")+"la_open="+Date.now();
+ f.src=laAddQuery(x.url,"la_open",Date.now());
 };
 if($("sakumeruReload"))$("sakumeruReload").onclick=()=>{
  const f=$("sakumeruFrame");if(!f)return;
- const base=laSakumeruUrl().split("?")[0];
- f.src=base+"?la_refresh="+Date.now();
+ f.src=laAddQuery(laSakumeruUrl(),"la_refresh",Date.now());
 };
 if($("sakumeruOpenExternal"))$("sakumeruOpenExternal").onclick=()=>window.open(laSakumeruUrl(),"_blank","noopener");
 if($("sakumeruConnection"))$("sakumeruConnection").onclick=()=>{
  const now=laSakumeruUrl();
- const v=prompt("SAKU+MERUの公開URL",now);
+ const v=prompt("SAKU+MERUのURL\nトップでも、KPバインダーなどのページURLでもそのまま貼れます。",now);
  if(v===null)return;
  const clean=String(v||"").trim();
- if(!/^https:\/\//i.test(clean)){alert("https:// から始まるURLを入力してください");return}
- localStorage.setItem(LA_SAKUMERU_URL_KEY,clean);
- const f=$("sakumeruFrame");if(f){f.dataset.src=laSakumeruUrl();f.src=laSakumeruUrl()+"?la_connect="+Date.now()}
+ let u;
+ try{u=new URL(clean)}catch{alert("URLの形式を確認してください");return}
+ if(u.protocol!=="https:"){alert("https:// から始まるURLを入力してください");return}
+ if(u.origin!=="https://pp-hibithx.github.io"||!u.pathname.startsWith("/sakumeru/")){
+   alert("SAKU+MERUのURLを入力してください");return;
+ }
+ localStorage.setItem(LA_SAKUMERU_URL_KEY,u.href);
+ const f=$("sakumeruFrame");if(f){
+   f.dataset.src=u.href;
+   f.src=laAddQuery(u.href,"la_connect",Date.now());
+ }
 };
 applyLaSakumeruUrl();
 renderLaLastKp();
