@@ -362,31 +362,64 @@ button{font-size:.86rem!important}
 <style id="activityTimerStyleV09640">
 .activity-mini{padding:8px 10px;border-top:1px solid rgba(77,220,255,.18)}.activity-head{display:flex;justify-content:space-between;gap:8px;align-items:center}.activity-clock{font:800 1.2rem Consolas,"Segoe UI",sans-serif;color:#9eeeff}.activity-name{font-size:.7rem;max-width:145px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.activity-controls{display:flex;gap:5px;margin-top:6px}.activity-controls button{flex:1;padding:6px!important;font-size:.68rem!important}.activity-form{display:grid;gap:5px;margin-top:7px}.activity-form input,.activity-form select,.activity-form textarea{font-size:.72rem!important;padding:5px 6px!important}.activity-form textarea{min-height:42px!important}.activity-history{max-height:190px;overflow:auto;margin-top:7px}.activity-history-item{border-top:1px solid rgba(77,220,255,.12);padding:6px 0;font-size:.7rem}.activity-history-time{font-family:Consolas,"Segoe UI",sans-serif;color:#9eeeff}.activity-lap-row{display:flex;justify-content:space-between;gap:8px;padding:3px 0;border-top:1px dashed rgba(77,220,255,.12)}#pomodoroMini.collapsed .activity-mini .activity-form,#pomodoroMini.collapsed .activity-mini .activity-controls,#pomodoroMini.collapsed .activity-mini details{display:none}
 </style>
-<style id="sakumeruPortalBridgeV2Style">
-#sakumeru.view{max-width:1180px}
-.sakumeru-portal{display:grid;gap:14px}
-.sakumeru-portal-head{display:flex;gap:12px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap}
-.sakumeru-portal-head h2{margin:0 0 4px}
-.sakumeru-role-note{padding:9px 11px;border:1px solid var(--line);border-radius:9px;background:rgba(255,255,255,.025);font-size:.78rem;color:var(--muted)}
-.sakumeru-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px}
-.sakumeru-panel{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:14px;min-width:0}
-.sakumeru-panel h3{margin:0 0 9px}
-.sakumeru-url-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:7px}
-.sakumeru-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:8px}
-.sakumeru-sync-card{margin-top:12px;padding:10px;border:1px solid var(--line);border-radius:9px;background:rgba(255,255,255,.02)}
-.sakumeru-scene-list{display:grid;gap:5px;margin-top:8px;max-height:220px;overflow:auto}
-.sakumeru-scene-row{display:flex;justify-content:space-between;gap:8px;padding:6px 8px;border:1px solid rgba(255,255,255,.08);border-radius:7px;font-size:.76rem}
-.sakumeru-share-editor{min-height:220px;padding:12px;border:1px solid var(--line);border-radius:9px;background:var(--input,#111);line-height:1.75;overflow:auto}
-.sakumeru-share-editor:empty:before{content:attr(data-placeholder);color:var(--muted)}
-.sakumeru-toolbar{display:flex;gap:5px;flex-wrap:wrap;margin:8px 0}
-.sakumeru-toolbar button{padding:6px 9px!important}
-.sakumeru-image-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin-top:8px}
-.sakumeru-image-grid input{min-width:0}
-.sakumeru-status{margin-top:8px;min-height:1.2em}
-.sakumeru-direction{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;text-align:center;margin-top:8px}
-.sakumeru-direction .box{border:1px solid var(--line);border-radius:8px;padding:8px}
-@media(max-width:850px){.sakumeru-grid{grid-template-columns:1fr}}
-@media(max-width:650px){.sakumeru-url-row{grid-template-columns:1fr}.sakumeru-image-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+<style id="sakumeruCentralWorkspaceV3Style">
+/* LA is the shell/entrance; SAKU+MERU occupies the entire central work area. */
+#sakumeru.sakumeru-workspace-view{
+  padding:0!important;
+  margin:0!important;
+  max-width:none!important;
+  width:100%;
+  height:calc(100dvh - var(--la-content-header-h, 52px));
+  overflow:hidden;
+}
+#sakumeru .sakumeru-workspace{
+  position:relative;
+  width:100%;
+  height:100%;
+  min-height:640px;
+  background:var(--panel);
+  overflow:hidden;
+}
+#sakumeru .sakumeru-workspace-mini{
+  position:absolute;
+  z-index:5;
+  top:8px;
+  right:14px;
+  display:flex;
+  align-items:center;
+  gap:7px;
+  padding:6px 7px 6px 10px;
+  border:1px solid var(--line);
+  border-radius:999px;
+  background:color-mix(in srgb,var(--panel) 92%,transparent);
+  box-shadow:0 6px 22px rgba(0,0,0,.18);
+  backdrop-filter:blur(10px);
+}
+#sakumeru .sakumeru-workspace-mini button{
+  min-height:30px;
+  padding:5px 9px!important;
+  font-size:.72rem;
+}
+#sakumeru .sakumeru-workspace-frame{
+  display:block;
+  width:100%;
+  height:100%;
+  min-height:640px;
+  border:0!important;
+  margin:0;
+  padding:0;
+  background:#fff;
+}
+@media(max-width:760px){
+  #sakumeru.sakumeru-workspace-view{height:calc(100dvh - 48px)}
+  #sakumeru .sakumeru-workspace-mini{
+    left:8px;right:8px;top:6px;
+    border-radius:10px;
+    overflow-x:auto;
+    justify-content:flex-start;
+  }
+  #sakumeru .sakumeru-workspace-mini .small{display:none}
+}
 </style>
 <style id="laCompactTimerV09746">
 #pomodoroMini.collapsed{width:132px!important;min-width:132px!important;right:8px!important;bottom:8px!important}
@@ -407,7 +440,7 @@ button{font-size:.86rem!important}
 <aside class="sidebar" id="sidebar">
   <div class="brand">
     <h1>Life Archive</h1>
-    <div class="sub">v0.9762 “SAKU+MERU ポータル連携”<br>日常・記録・家計・在庫を、ひとつの生活アーカイブへ。</div>
+    <div class="sub">v0.9763 “中央ワークスペース”<br>日常・記録・家計・在庫を、ひとつの生活アーカイブへ。</div>
   </div>
   <nav class="sidebar-nav">
     <button class="tab active" data-view="home">⌂ ホーム</button>
@@ -456,73 +489,18 @@ button{font-size:.86rem!important}
 </div>
 </section>
 
-<section id="sakumeru" class="view">
-  <div class="sakumeru-portal">
-    <div class="sakumeru-portal-head">
-      <div>
-        <h2>📖 SAKU+MERU</h2>
-        <div class="small">Life Archive は入口。卓データの原本は SAKU+MERU、LAで作る共有シーンだけ必要なときにSAKU+MERUへ送ります。</div>
-      </div>
-      <button type="button" class="secondary" id="sakumeruOpenHome">SAKU+MERUを開く ↗</button>
+<section id="sakumeru" class="view sakumeru-workspace-view">
+  <div class="sakumeru-workspace">
+    <div class="sakumeru-workspace-mini">
+      <strong>📖 SAKU+MERU</strong>
+      <span class="small">中央ワークスペース</span>
+      <button type="button" class="primary" id="sakumeruLastKp" hidden>最後のKP</button>
+      <button type="button" class="secondary" id="sakumeruReload">再読込</button>
+      <button type="button" class="secondary" id="sakumeruOpenExternal">原本を別タブで開く ↗</button>
     </div>
-    <div class="sakumeru-role-note">
-      <b>データの向き：</b>
-      <div class="sakumeru-direction">
-        <div class="box"><b>SAKU+MERU</b><br><span class="small">卓・シナリオ・KP BINDER</span></div>
-        <b>⇄</b>
-        <div class="box"><b>Life Archive</b><br><span class="small">入口・共有シーン編集</span></div>
-      </div>
-    </div>
-
-    <div class="sakumeru-grid">
-      <section class="sakumeru-panel">
-        <h3>卓情報をSAKU+MERUから読む</h3>
-        <div class="small">KP BINDERは別タブで通常のSAKU+MERUとして開き、正しい保存領域から情報を受け取ります。LA側から原本を上書きしません。</div>
-        <label style="margin-top:10px">KP BINDER URL
-          <div class="sakumeru-url-row">
-            <input id="sakumeruKpUrl" type="url" placeholder="https://pp-hibithx.github.io/sakumeru/scenario/kp-binder.html?id=...">
-            <button type="button" class="primary" id="sakumeruSyncKp">SAKU+MERUから更新</button>
-          </div>
-        </label>
-        <div class="sakumeru-actions">
-          <button type="button" class="secondary" id="sakumeruOpenKp">このKP BINDERを開く ↗</button>
-          <button type="button" class="secondary" id="sakumeruUseLastKp">最後に使ったKP URL</button>
-        </div>
-        <div id="sakumeruSyncStatus" class="small sakumeru-status"></div>
-        <div id="sakumeruSyncSummary" class="sakumeru-sync-card">
-          <div class="small">まだSAKU+MERUから卓情報を受け取っていません。</div>
-        </div>
-      </section>
-
-      <section class="sakumeru-panel">
-        <h3>共有シーンをSAKU+MERUへ送る</h3>
-        <div class="small">LAで書いた内容を、上のKP BINDERへ<strong>新しい開示シーンとして追加</strong>します。既存シーンは上書きしません。</div>
-        <label style="margin-top:10px">シーン名
-          <input id="sakumeruShareTitle" placeholder="例：探索1日目・書斎">
-        </label>
-        <div class="sakumeru-toolbar" id="sakumeruShareToolbar">
-          <button type="button" class="secondary" data-cmd="bold"><b>B</b></button>
-          <button type="button" class="secondary" data-cmd="italic"><i>I</i></button>
-          <button type="button" class="secondary" data-cmd="insertUnorderedList">・リスト</button>
-          <button type="button" class="secondary" data-cmd="formatBlock" data-value="h3">小見出し</button>
-          <button type="button" class="secondary" data-cmd="formatBlock" data-value="p">本文</button>
-          <button type="button" class="secondary" id="sakumeruShareLink">リンク</button>
-        </div>
-        <div id="sakumeruShareBody" class="sakumeru-share-editor" contenteditable="true" data-placeholder="ブログのように共有したい内容を書きます。"></div>
-        <div class="small" style="margin-top:8px">画像URL（最大4枚・同じ列で送信）</div>
-        <div class="sakumeru-image-grid">
-          <input class="sakumeruShareImage" placeholder="画像URL 1">
-          <input class="sakumeruShareImage" placeholder="画像URL 2">
-          <input class="sakumeruShareImage" placeholder="画像URL 3">
-          <input class="sakumeruShareImage" placeholder="画像URL 4">
-        </div>
-        <div class="sakumeru-actions">
-          <button type="button" class="primary" id="sakumeruPushScene">SAKU+MERUへ追加</button>
-          <button type="button" class="secondary" id="sakumeruClearScene">入力をクリア</button>
-        </div>
-        <div id="sakumeruPushStatus" class="small sakumeru-status"></div>
-      </section>
-    </div>
+    <iframe id="sakumeruFrame" class="sakumeru-workspace-frame" title="SAKU+MERU"
+      loading="lazy" data-src="https://pp-hibithx.github.io/sakumeru/"
+      allow="clipboard-read; clipboard-write"></iframe>
   </div>
 </section>
 
@@ -2926,7 +2904,7 @@ function loadUI(){try{return JSON.parse(localStorage.getItem(UI_KEY)||"{}")}catc
 function saveUI(patch){const ui={...loadUI(),...patch};localStorage.setItem(UI_KEY,JSON.stringify(ui));return ui}
 function closeSidebar(){document.getElementById("sidebar")?.classList.remove("open");document.getElementById("sidebarOverlay")?.classList.remove("open")}
 function switchView(id,options={}){
-
+ if(id==="sakumeru"){applyLaSakumeruUrl();}
  const pomo=document.getElementById("pomodoroMini");if(pomo)pomo.classList.toggle("budget-compact",id==="householdBudget");
  document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("active",b.dataset.view===id));
  document.querySelectorAll(".view").forEach(v=>v.classList.toggle("active",v.id===id));
@@ -7882,167 +7860,83 @@ document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{if(b.dataset.view===
 });
 
 const LA_LAST_KP_KEY="life_archive_last_sakumeru_kp_v1";
-const LA_SAKUMERU_KP_URL_KEY="life_archive_sakumeru_kp_url_v2";
-const LA_SAKUMERU_SNAPSHOT_KEY="life_archive_sakumeru_snapshot_v1";
-const LA_SAKUMERU_HOME="https://pp-hibithx.github.io/sakumeru/";
-let laBridgePending=null;
-
-function laValidKpUrl(value){
+const LA_SAKUMERU_URL_KEY="life_archive_sakumeru_url_v1";
+const LA_SAKUMERU_DEFAULT_URL="https://pp-hibithx.github.io/sakumeru/";
+function normalizeLaSakumeruUrl(value){
  const raw=String(value||"").trim();
+ if(!raw)return LA_SAKUMERU_DEFAULT_URL;
  try{
    const u=new URL(raw);
-   return u.protocol==="https:" &&
-     u.origin==="https://pp-hibithx.github.io" &&
-     u.pathname==="/sakumeru/scenario/kp-binder.html" &&
-     !!u.searchParams.get("id") ? u : null;
+   if(u.protocol!=="https:")return LA_SAKUMERU_DEFAULT_URL;
+   return u.href;
+ }catch{return LA_SAKUMERU_DEFAULT_URL}
+}
+function laSakumeruUrl(){
+ return LA_SAKUMERU_DEFAULT_URL;
+}
+function laAddQuery(url,key,value){
+ const u=new URL(url);
+ u.searchParams.set(key,String(value));
+ return u.href;
+}
+function applyLaSakumeruUrl(){
+ const f=$("sakumeruFrame"); if(!f)return;
+ const url=laSakumeruUrl();
+ f.dataset.src=url;
+ if(!f.src||f.src==="about:blank")f.src=url;
+}
+
+function loadLaLastKp(){
+ try{
+   const x=JSON.parse(localStorage.getItem(LA_LAST_KP_KEY)||"null");
+   if(x?.url&&x.url.includes("https://pp-hibithx.github.io/sakumeru/")){
+     x.url=x.url.replace("https://pp-hibithx.github.io/sakumeru/","https://pp-hibithx.github.io/sakumeru/");
+     localStorage.setItem(LA_LAST_KP_KEY,JSON.stringify(x));
+   }
+   return x;
  }catch{return null}
 }
-function laBridgeNonce(){
- return (crypto.randomUUID?.()||("la-"+Date.now()+"-"+Math.random().toString(36).slice(2)));
-}
-function loadLaLastKp(){try{return JSON.parse(localStorage.getItem(LA_LAST_KP_KEY)||"null")}catch{return null}}
-function loadLaSnapshot(){try{return JSON.parse(localStorage.getItem(LA_SAKUMERU_SNAPSHOT_KEY)||"null")}catch{return null}}
 function saveLaLastKp(x){
- if(!x?.scenarioId||!x?.url)return;
+ if(!x||!x.scenarioId||!x.url)return;
  try{localStorage.setItem(LA_LAST_KP_KEY,JSON.stringify(x))}catch{}
+ renderLaLastKp();
 }
-function saveLaSnapshot(x){
- try{localStorage.setItem(LA_SAKUMERU_SNAPSHOT_KEY,JSON.stringify(x))}catch{}
- renderLaSnapshot();
-}
-function currentLaKpUrl(){
- return String($("sakumeruKpUrl")?.value||localStorage.getItem(LA_SAKUMERU_KP_URL_KEY)||"").trim();
-}
-function setLaKpUrl(url){
- const u=laValidKpUrl(url);if(!u)return false;
- const clean=u.href;
- localStorage.setItem(LA_SAKUMERU_KP_URL_KEY,clean);
- if($("sakumeruKpUrl"))$("sakumeruKpUrl").value=clean;
- return true;
-}
-function renderLaSnapshot(){
- const host=$("sakumeruSyncSummary"),x=loadLaSnapshot();if(!host)return;
- if(!x?.scenarioId){host.innerHTML='<div class="small">まだSAKU+MERUから卓情報を受け取っていません。</div>';return}
- const scenes=Array.isArray(x.scenes)?x.scenes:[];
- host.innerHTML=`<div><b>${esc(x.scenarioTitle||"シナリオ")}</b></div>
-   <div class="small">シーン ${scenes.length}件 ／ 更新 ${esc(x.receivedAt?new Date(x.receivedAt).toLocaleString("ja-JP"):"")}</div>
-   <div class="sakumeru-scene-list">${scenes.length?scenes.map(s=>`<div class="sakumeru-scene-row"><span>${esc(s.title||"無題")}</span><span class="small">${Number(s.characters||0).toLocaleString()}字</span></div>`).join(""):'<div class="small">シーンはまだありません。</div>'}</div>`;
-}
-function openLaBridge(action,payload=null){
- const u=laValidKpUrl(currentLaKpUrl());
- if(!u){alert("SAKU+MERUのKP BINDER URLを入力してください。");return null}
- setLaKpUrl(u.href);
- const nonce=laBridgeNonce();
- u.searchParams.set("la_bridge",nonce);
- u.searchParams.set("la_action",action);
- laBridgePending={nonce,action,payload,openedAt:Date.now()};
- const w=window.open(u.href,"_blank");
- if(!w){
-   laBridgePending=null;
-   alert("別タブを開けませんでした。ブラウザのポップアップ設定を確認してください。");
-   return null;
- }
- return w;
-}
-function laCleanShareHtml(raw){
- const tpl=document.createElement("template");tpl.innerHTML=String(raw||"");
- tpl.content.querySelectorAll("script,style,iframe,object,embed,form,input,button,textarea,select").forEach(n=>n.remove());
- tpl.content.querySelectorAll("*").forEach(el=>{
-   [...el.attributes].forEach(a=>{
-     const n=a.name.toLowerCase(),v=String(a.value||"");
-     if(n.startsWith("on")||n==="contenteditable"||n==="id")el.removeAttribute(a.name);
-     if((n==="href"||n==="src")&&/^\s*javascript:/i.test(v))el.removeAttribute(a.name);
-   });
- });
- return tpl.innerHTML;
-}
-function laSharePayload(){
- const title=String($("sakumeruShareTitle")?.value||"").trim()||"LA共有シーン";
- const body=laCleanShareHtml($("sakumeruShareBody")?.innerHTML||"").trim();
- const images=[...document.querySelectorAll(".sakumeruShareImage")].map(x=>String(x.value||"").trim()).filter(v=>{
-   try{const u=new URL(v);return u.protocol==="https:"||u.protocol==="http:"}catch{return false}
- }).slice(0,4);
- if(!body&&!images.length){alert("共有する本文か画像を入力してください。");return null}
- return {title,body,images,createdAt:new Date().toISOString(),source:"life-archive"};
+function renderLaLastKp(){
+ const btn=$("sakumeruLastKp"),x=loadLaLastKp();
+ if(!btn)return;
+ if(!x?.url){btn.hidden=true;return}
+ btn.hidden=false;
+ btn.textContent=x.scenarioTitle?`KP：${x.scenarioTitle}`:"KPバインダーへ";
+ btn.title=x.scenarioTitle?`最後に開いた「${x.scenarioTitle}」へ移動`:"最後に開いたKPバインダーへ移動";
 }
 window.addEventListener("message",e=>{
  if(e.origin!=="https://pp-hibithx.github.io")return;
  const d=e.data;
- if(!d||typeof d!=="object")return;
-
- if(d.type==="sakumeru:last-kp-binder"){
-   const clean=laValidKpUrl(d.url);
-   if(clean){
-     saveLaLastKp({scenarioId:String(d.scenarioId||""),scenarioTitle:String(d.scenarioTitle||"シナリオ"),openedAt:String(d.openedAt||new Date().toISOString()),url:clean.href});
-   }
-   return;
- }
- if(!laBridgePending||d.nonce!==laBridgePending.nonce)return;
-
- if(d.type==="sakumeru:bridge-error"){
-   const msg=String(d.message||"SAKU+MERUとの連携に失敗しました。");
-   if($("sakumeruSyncStatus"))$("sakumeruSyncStatus").textContent=msg;
-   if($("sakumeruPushStatus"))$("sakumeruPushStatus").textContent=msg;
-   laBridgePending=null;return;
- }
- if(d.type==="sakumeru:bridge-ready"){
-   if(d.snapshot){
-     saveLaSnapshot({...d.snapshot,receivedAt:new Date().toISOString()});
-     if(d.snapshot.url)setLaKpUrl(d.snapshot.url);
-   }
-   if(laBridgePending.action==="sync"){
-     if($("sakumeruSyncStatus"))$("sakumeruSyncStatus").textContent="SAKU+MERUの原本から卓情報を受け取りました。";
-     laBridgePending=null;
-   }else if(laBridgePending.action==="push"){
-     e.source?.postMessage({type:"la:push-shared-scene",nonce:d.nonce,payload:laBridgePending.payload},"https://pp-hibithx.github.io");
-     if($("sakumeruPushStatus"))$("sakumeruPushStatus").textContent="SAKU+MERUへ送信中…";
-   }
-   return;
- }
- if(d.type==="sakumeru:scene-imported"){
-   saveLaSnapshot({...d.snapshot,receivedAt:new Date().toISOString()});
-   if($("sakumeruPushStatus"))$("sakumeruPushStatus").textContent=`「${d.sceneTitle||"共有シーン"}」をSAKU+MERUへ追加しました。既存シーンは変更していません。`;
-   laBridgePending=null;
- }
+ if(!d||d.type!=="sakumeru:last-kp-binder")return;
+ saveLaLastKp({
+   scenarioId:String(d.scenarioId||""),
+   scenarioTitle:String(d.scenarioTitle||"シナリオ"),
+   openedAt:String(d.openedAt||new Date().toISOString()),
+   url:String(d.url||"")
+ });
 });
+if($("sakumeruLastKp"))$("sakumeruLastKp").onclick=()=>{
+ const f=$("sakumeruFrame"),x=loadLaLastKp();
+ if(!f||!x?.url)return;
+ f.src=laAddQuery(x.url,"la_open",Date.now());
+};
+if($("sakumeruReload"))$("sakumeruReload").onclick=()=>{
+ const f=$("sakumeruFrame");if(!f)return;
+ try{
+   const u=new URL(f.src||laSakumeruUrl());
+   u.searchParams.set("la_refresh",String(Date.now()));
+   f.src=u.href;
+ }catch{f.src=laAddQuery(laSakumeruUrl(),"la_refresh",Date.now())}
+};
+if($("sakumeruOpenExternal"))$("sakumeruOpenExternal").onclick=()=>window.open(LA_SAKUMERU_DEFAULT_URL,"_blank","noopener");
 
-if($("sakumeruOpenHome"))$("sakumeruOpenHome").onclick=()=>window.open(LA_SAKUMERU_HOME,"_blank","noopener");
-if($("sakumeruOpenKp"))$("sakumeruOpenKp").onclick=()=>{
- const u=laValidKpUrl(currentLaKpUrl());if(!u)return alert("KP BINDER URLを入力してください。");
- setLaKpUrl(u.href);window.open(u.href,"_blank","noopener");
-};
-if($("sakumeruUseLastKp"))$("sakumeruUseLastKp").onclick=()=>{
- const x=loadLaLastKp();if(!x?.url)return alert("最後に使ったKP BINDER情報がまだありません。");
- if(setLaKpUrl(x.url))$("sakumeruSyncStatus").textContent=`${x.scenarioTitle||"KP BINDER"} のURLをセットしました。`;
-};
-if($("sakumeruSyncKp"))$("sakumeruSyncKp").onclick=()=>{
- if($("sakumeruSyncStatus"))$("sakumeruSyncStatus").textContent="SAKU+MERUを別タブで開いて原本を確認します…";
- openLaBridge("sync");
-};
-if($("sakumeruPushScene"))$("sakumeruPushScene").onclick=()=>{
- const payload=laSharePayload();if(!payload)return;
- if($("sakumeruPushStatus"))$("sakumeruPushStatus").textContent="SAKU+MERUを別タブで開いて共有シーンを追加します…";
- openLaBridge("push",payload);
-};
-if($("sakumeruClearScene"))$("sakumeruClearScene").onclick=()=>{
- if(!confirm("共有シーンの入力内容をクリアしますか？"))return;
- $("sakumeruShareTitle").value="";$("sakumeruShareBody").innerHTML="";
- document.querySelectorAll(".sakumeruShareImage").forEach(x=>x.value="");
- $("sakumeruPushStatus").textContent="";
-};
-document.querySelectorAll("#sakumeruShareToolbar [data-cmd]").forEach(btn=>btn.onclick=()=>{
- $("sakumeruShareBody")?.focus();
- document.execCommand(btn.dataset.cmd,false,btn.dataset.value||null);
-});
-if($("sakumeruShareLink"))$("sakumeruShareLink").onclick=()=>{
- const url=prompt("リンク先URL","https://");if(!url)return;
- try{const u=new URL(url);if(!/^https?:$/.test(u.protocol))throw 0;document.execCommand("createLink",false,u.href)}catch{alert("http:// または https:// のURLを入力してください。")}
-};
-if($("sakumeruKpUrl")){
- $("sakumeruKpUrl").value=localStorage.getItem(LA_SAKUMERU_KP_URL_KEY)||loadLaLastKp()?.url||"";
- $("sakumeruKpUrl").addEventListener("change",()=>{const u=laValidKpUrl($("sakumeruKpUrl").value);if(u)setLaKpUrl(u.href)});
-}
-renderLaSnapshot();
+applyLaSakumeruUrl();
+renderLaLastKp();
 
 document.querySelectorAll(".trpgToolJump").forEach(b=>b.onclick=()=>switchView(b.dataset.viewTarget));
 document.querySelectorAll(".nav-anchor").forEach(b=>b.onclick=()=>{if(b.dataset.view==="records")currentRecordCategoryFilter=b.dataset.recordType||"";
