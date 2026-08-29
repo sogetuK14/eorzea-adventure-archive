@@ -362,64 +362,13 @@ button{font-size:.86rem!important}
 <style id="activityTimerStyleV09640">
 .activity-mini{padding:8px 10px;border-top:1px solid rgba(77,220,255,.18)}.activity-head{display:flex;justify-content:space-between;gap:8px;align-items:center}.activity-clock{font:800 1.2rem Consolas,"Segoe UI",sans-serif;color:#9eeeff}.activity-name{font-size:.7rem;max-width:145px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.activity-controls{display:flex;gap:5px;margin-top:6px}.activity-controls button{flex:1;padding:6px!important;font-size:.68rem!important}.activity-form{display:grid;gap:5px;margin-top:7px}.activity-form input,.activity-form select,.activity-form textarea{font-size:.72rem!important;padding:5px 6px!important}.activity-form textarea{min-height:42px!important}.activity-history{max-height:190px;overflow:auto;margin-top:7px}.activity-history-item{border-top:1px solid rgba(77,220,255,.12);padding:6px 0;font-size:.7rem}.activity-history-time{font-family:Consolas,"Segoe UI",sans-serif;color:#9eeeff}.activity-lap-row{display:flex;justify-content:space-between;gap:8px;padding:3px 0;border-top:1px dashed rgba(77,220,255,.12)}#pomodoroMini.collapsed .activity-mini .activity-form,#pomodoroMini.collapsed .activity-mini .activity-controls,#pomodoroMini.collapsed .activity-mini details{display:none}
 </style>
-<style id="sakumeruCentralWorkspaceV3Style">
-/* LA is the shell/entrance; SAKU+MERU occupies the entire central work area. */
-#sakumeru.sakumeru-workspace-view{
-  padding:0!important;
-  margin:0!important;
-  max-width:none!important;
-  width:100%;
-  height:calc(100dvh - var(--la-content-header-h, 52px));
-  overflow:hidden;
-}
-#sakumeru .sakumeru-workspace{
-  position:relative;
-  width:100%;
-  height:100%;
-  min-height:640px;
-  background:var(--panel);
-  overflow:hidden;
-}
-#sakumeru .sakumeru-workspace-mini{
-  position:absolute;
-  z-index:5;
-  top:8px;
-  right:14px;
-  display:flex;
-  align-items:center;
-  gap:7px;
-  padding:6px 7px 6px 10px;
-  border:1px solid var(--line);
-  border-radius:999px;
-  background:color-mix(in srgb,var(--panel) 92%,transparent);
-  box-shadow:0 6px 22px rgba(0,0,0,.18);
-  backdrop-filter:blur(10px);
-}
-#sakumeru .sakumeru-workspace-mini button{
-  min-height:30px;
-  padding:5px 9px!important;
-  font-size:.72rem;
-}
-#sakumeru .sakumeru-workspace-frame{
-  display:block;
-  width:100%;
-  height:100%;
-  min-height:640px;
-  border:0!important;
-  margin:0;
-  padding:0;
-  background:#fff;
-}
-@media(max-width:760px){
-  #sakumeru.sakumeru-workspace-view{height:calc(100dvh - 48px)}
-  #sakumeru .sakumeru-workspace-mini{
-    left:8px;right:8px;top:6px;
-    border-radius:10px;
-    overflow-x:auto;
-    justify-content:flex-start;
-  }
-  #sakumeru .sakumeru-workspace-mini .small{display:none}
-}
+<style id="sakumeruDisplayLinkV1Style">
+#sakumeru.view{padding:0;max-width:none}
+.sakumeru-link-shell{display:flex;flex-direction:column;height:calc(100vh - 58px);min-height:620px;background:var(--panel);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.sakumeru-link-bar{display:flex;align-items:center;gap:8px;padding:9px 11px;border-bottom:1px solid var(--line);background:rgba(255,255,255,.025)}
+.sakumeru-link-bar strong{margin-right:auto}.sakumeru-link-bar .small{margin-right:6px}
+.sakumeru-link-frame{width:100%;flex:1;border:0;background:#fff}
+@media(max-width:650px){.sakumeru-link-shell{height:calc(100vh - 52px);min-height:520px;border-radius:0}.sakumeru-link-bar .small{display:none}.sakumeru-link-bar{padding:7px}.sakumeru-link-bar button{padding:7px 9px!important}}
 </style>
 <style id="laCompactTimerV09746">
 #pomodoroMini.collapsed{width:132px!important;min-width:132px!important;right:8px!important;bottom:8px!important}
@@ -440,7 +389,7 @@ button{font-size:.86rem!important}
 <aside class="sidebar" id="sidebar">
   <div class="brand">
     <h1>Life Archive</h1>
-    <div class="sub">v0.9763 “中央ワークスペース”<br>日常・記録・家計・在庫を、ひとつの生活アーカイブへ。</div>
+    <div class="sub">v0.9764 “FF14分離・整理版”<br>日常・記録・家計・在庫を、ひとつの生活アーカイブへ。</div>
   </div>
   <nav class="sidebar-nav">
     <button class="tab active" data-view="home">⌂ ホーム</button>
@@ -489,18 +438,17 @@ button{font-size:.86rem!important}
 </div>
 </section>
 
-<section id="sakumeru" class="view sakumeru-workspace-view">
-  <div class="sakumeru-workspace">
-    <div class="sakumeru-workspace-mini">
+<section id="sakumeru" class="view">
+  <div class="sakumeru-link-shell">
+    <div class="sakumeru-link-bar">
       <strong>📖 SAKU+MERU</strong>
-      <span class="small">中央ワークスペース</span>
-      <button type="button" class="primary" id="sakumeruLastKp" hidden>最後のKP</button>
-      <button type="button" class="secondary" id="sakumeruReload">再読込</button>
-      <button type="button" class="secondary" id="sakumeruOpenExternal">原本を別タブで開く ↗</button>
+      <span class="small">LAを閉じずに卓管理を操作</span>
+      <button type="button" class="primary" id="sakumeruLastKp" hidden title="最後に開いたKPバインダーへ移動">KPバインダーへ</button>
+      <button type="button" class="secondary" id="sakumeruReload" title="キャッシュを使わずSAKU+MERUだけ読み込み直します">最新版を確認</button>
+      <button type="button" class="secondary" id="sakumeruOpenExternal">別タブで開く</button>
+      
     </div>
-    <iframe id="sakumeruFrame" class="sakumeru-workspace-frame" title="SAKU+MERU"
-      loading="lazy" data-src="https://pp-hibithx.github.io/sakumeru/"
-      allow="clipboard-read; clipboard-write"></iframe>
+    <iframe id="sakumeruFrame" class="sakumeru-link-frame" title="SAKU+MERU" loading="lazy" data-src="https://pp-hibithx.github.io/sakumeru/"></iframe>
   </div>
 </section>
 
@@ -688,30 +636,7 @@ button{font-size:.86rem!important}
 </section>
 </section>
 
-<section id="ff14" class="view">
-<section class="panel" id="ffLodestonePanel">
-<div class="section-kicker">OFFICIAL PROFILE SYNC</div>
-<div class="row">
- <div><h2>🪪 Lodestoneプロフィール</h2><div class="small">Lodestone IDまたはキャラクターページURLを1度登録して、公開プロフィールをLife Archiveへ保存します。</div></div>
- <div class="wrap"><button id="ffProfileSync" class="primary">公開プロフィールを同期</button><button id="ffProfileOpen" class="secondary">Lodestoneを開く</button></div>
-</div>
-<div class="inline2" style="margin-top:10px">
- <div><label>Lodestone ID / キャラクターURL</label><input id="ffLodestoneId" placeholder="例：12345678 または https://jp.finalfantasyxiv.com/lodestone/character/12345678/"></div>
- <div><label>同期状態</label><div id="ffProfileSyncStatus" class="card" style="margin:0">未登録</div></div>
-</div>
-<div class="card" style="border-color:var(--gold);margin-top:10px">
- <b>📄 GitHub Pages用：Lodestone HTMLを読み込む</b>
- <div class="small" style="margin-top:5px">完全自動同期がCORSで止まる場合はこちらを使えます。Lodestoneの「プロフィール」ページと、必要なら「クラス・ジョブ」ページをHTMLで保存し、ここへ読み込ませてください。公開情報を手入力し直す必要はありません。</div>
- <input id="ffProfileHtmlFiles" type="file" accept=".html,.htm,text/html" multiple style="margin-top:8px">
- <button id="ffProfileHtmlImport" class="secondary" style="margin-top:8px">HTMLからプロフィールを取り込む</button>
- <div id="ffProfileHtmlStatus" class="small" style="margin-top:6px"></div>
-</div>
-<div id="ffProfileCard" style="margin-top:12px"></div>
-<details class="card" style="margin-top:10px">
- <summary><b>取得について</b></summary>
- <div class="small" style="margin-top:8px">公開プロフィールだけを対象にします。GitHub Pagesは静的サイトのため、ブラウザからLodestoneへの直接取得はCORSで失敗する場合があります。その場合はHTML読込を使えます。将来バックエンドを用意すれば、この画面のIDから完全自動同期へ切り替えられます。取得に失敗しても前回保存したプロフィールは削除しません。</div>
-</details>
-</section>
+
 
 
 <div class="grid3">
@@ -724,325 +649,16 @@ button{font-size:.86rem!important}
 
 </section>
 
-<section id="ffxivDamage" class="view">
-<section class="panel">
-<div class="section-kicker">FFXIV DAMAGE LAB</div>
-<div class="row"><div><h2>⚔ 戦士 火力計算機</h2><div class="small">Patch 7.5公式ジョブガイドのアクション威力を基準に、スキル回しの理論火力を威力ベースで比較します。</div></div><span class="badge gold">WAR</span></div>
-<div class="card" style="border-color:var(--gold);margin-top:12px"><b>この計算機について</b><div class="small">FFXIV公式ではアクション威力は公開されていますが、実ダメージの完全な内部計算式は公開されていません。そのため現段階では「威力/秒」と、入力したクリティカル・DH率を使った期待威力を算出します。ACT等の外部ログは不要です。</div></div>
-<div class="card" style="margin-top:14px;border-color:var(--purple)">
- <div class="row"><div><h3>🛡 装備一式から作る</h3><div class="small">ILは管理・比較用。火力計算には各装備の武器性能・STR・サブステを合算して使います。装備検索はXIVAPI v2、確認先は公式Lodestoneです。</div></div><button id="dmgGearClear" class="secondary">装備をクリア</button></div>
- <div class="card" style="margin-top:10px">
-  <div class="row"><div><b>🔎 FF14装備DB検索</b><div class="small">XIVAPI v2から日本語名で装備を検索し、武器・防具・アクセすべてのIL・物理基本性能・STR・VIT・サブステを入力欄へ反映します。</div></div><button id="dmgGearOfficialSearch" class="ghost">公式DBで確認</button></div>
-  <div class="grid3" style="margin-top:8px">
-   <div><label>検索する部位</label><select id="dmgGearSearchSlot"><option>武器</option><option>頭</option><option>胴</option><option>手</option><option>脚</option><option>足</option><option>耳</option><option>首</option><option>腕</option><option>指輪</option></select></div>
-   <div><label>装備名</label><input id="dmgGearSearch" placeholder="例：ネオキングダム、ヘヴィアクス"></div>
-   <div style="display:flex;align-items:end"><button id="dmgGearSearchBtn" class="primary" style="width:100%">装備を検索</button></div>
-  </div>
-  <div id="dmgGearSearchStatus" class="small" style="margin-top:7px"></div>
-  <div id="dmgGearSearchResults"></div>
- </div>
- <div class="grid3" style="margin-top:8px">
-  <div><label>部位</label><select id="dmgGearSlot"><option>武器</option><option>頭</option><option>胴</option><option>手</option><option>脚</option><option>足</option><option>耳</option><option>首</option><option>腕</option><option>指輪1</option><option>指輪2</option></select></div>
-  <div><label>装備名</label><input id="dmgGearName" placeholder="例：ファントムウェポン"></div>
-  <div><label>IL</label><input id="dmgGearIlvl" type="number" min="0"></div>
-  <div><label>物理基本性能</label><input id="dmgGearWd" type="number" min="0" value="0"></div>
-  <div><label>STR</label><input id="dmgGearStr" type="number" min="0" value="0"></div>
-  <div><label>VIT</label><input id="dmgGearVit" type="number" min="0" value="0"></div>
-  <div><label>クリ</label><input id="dmgGearCrit" type="number" min="0" value="0"></div>
-  <div><label>意思</label><input id="dmgGearDet" type="number" min="0" value="0"></div>
-  <div><label>DH</label><input id="dmgGearDh" type="number" min="0" value="0"></div>
-  <div><label>スキス</label><input id="dmgGearSks" type="number" min="0" value="0"></div>
-  <div><label>不屈</label><input id="dmgGearTen" type="number" min="0" value="0"></div>
- </div>
- <div class="card" style="margin-top:8px">
-  <b>💎 この装備のマテリア</b>
-  <div class="grid2" style="margin-top:6px">
-   <div><label>マテリア1</label><select id="dmgGearMateria1"><option value="">なし</option><option value="crit">武略のハイアルテマテリジャ</option><option value="det">雄略のハイアルテマテリジャ</option><option value="dh">天眼のハイアルテマテリジャ</option><option value="sks">剛柔のハイアルテマテリジャ</option></select></div>
-   <div><label>マテリア2</label><select id="dmgGearMateria2"><option value="">なし</option><option value="crit">武略のハイアルテマテリジャ</option><option value="det">雄略のハイアルテマテリジャ</option><option value="dh">天眼のハイアルテマテリジャ</option><option value="sks">剛柔のハイアルテマテリジャ</option></select></div>
-  </div>
-  <div class="small">ハイアルテマテリジャの加算値は設定欄で変更可能。装備ごとに記録してセット全体へ合算します。</div>
- </div>
- <button id="dmgGearAdd" class="primary" style="width:100%;margin-top:8px">この装備を追加 / 更新</button>
- <div id="dmgGearList" style="margin-top:10px"></div>
- <div id="dmgGearTotals" class="small" style="margin-top:8px"></div>
- <div class="grid2" style="margin-top:10px">
-  <div><label>ハイアルテマテリジャ 1個の加算値</label><input id="dmgMateriaValue" type="number" min="0" value="54"></div>
-  <div><label>目標GCD</label><input id="dmgTargetGcd" type="number" min="1.5" max="3" step="0.01" value="2.50"></div>
- </div>
- <div class="wrap" style="margin-top:8px"><button id="dmgSaveSetA" class="secondary">セットA保存</button><button id="dmgSaveSetB" class="secondary">セットB保存</button><button id="dmgCompareSets" class="primary">A / B比較</button></div>
- <div id="dmgSetCompare" class="small" style="margin-top:8px"></div>
- <div class="card" style="margin-top:12px;border-color:var(--gold)">
-  <div class="row"><div><b>💾 装備セット履歴</b><div class="small">装備・マテリア・飯・薬・スキル回しをまとめてLife Archiveへ保存します。</div></div><button id="dmgSaveHistory" class="primary">現在のセットを保存</button></div>
-  <label>保存名</label><input id="dmgHistoryName" placeholder="例：零式3層クリア時 / ファントム完成後">
-  <div class="grid2" style="margin-top:8px">
-   <div><label>前回</label><select id="dmgHistoryBefore"><option value="">選択</option></select></div>
-   <div><label>今回</label><select id="dmgHistoryAfter"><option value="">選択</option></select></div>
-  </div>
-  <button id="dmgHistoryCompare" class="secondary" style="width:100%;margin-top:8px">前回 / 今回を比較</button>
-  <div id="dmgHistoryCompareResult" class="small" style="margin-top:8px"></div>
-  <details style="margin-top:10px"><summary><b>保存済みセット</b></summary><div id="dmgHistoryList"></div></details>
- </div>
-</div>
 
-<div class="card" style="margin-top:14px">
- <h3>⚔ 最終装備ステータス</h3><div class="small">上の装備一式を登録すると自動合算されます。直接入力して比較することもできます。</div>
- <div class="grid3">
-  <div><label>物理基本性能</label><input id="dmgWeaponDamage" type="number" min="0" value="0"></div>
-  <div><label>STR</label><input id="dmgStr" type="number" min="0" value="0"></div>
-  <div><label>VIT</label><input id="dmgVit" type="number" min="0" value="0"></div>
-  <div><label>クリティカル</label><input id="dmgCritStat" type="number" min="0" value="0"></div>
-  <div><label>意思力</label><input id="dmgDetStat" type="number" min="0" value="0"></div>
-  <div><label>ダイレクトヒット</label><input id="dmgDhStat" type="number" min="0" value="0"></div>
-  <div><label>スキルスピード</label><input id="dmgSksStat" type="number" min="0" value="0"></div>
-  <div><label>不屈</label><input id="dmgTenStat" type="number" min="0" value="0"></div>
- </div>
- <details style="margin-top:10px">
-  <summary><b>💎 マテリア加算</b></summary>
-  <div class="grid3" style="margin-top:8px">
-   <div><label>クリ +</label><input id="dmgMatCrit" type="number" min="0" value="0"></div>
-   <div><label>意思 +</label><input id="dmgMatDet" type="number" min="0" value="0"></div>
-   <div><label>DH +</label><input id="dmgMatDh" type="number" min="0" value="0"></div>
-   <div><label>スキス +</label><input id="dmgMatSks" type="number" min="0" value="0"></div>
-   <div><label>不屈 +</label><input id="dmgMatTen" type="number" min="0" value="0"></div>
-  </div>
- </details>
- <div id="dmgEffectiveStats" class="small" style="margin-top:10px"></div>
-</div>
-
-<div class="grid2" style="margin-top:14px">
- <div class="card">
-  <h3>🍽 食事</h3>
-  <div class="grid2"><div><label>プリセット</label>
-  <select id="dmgFoodPreset">
-   <option value="">手動設定</option>
-   <option value="caramel" selected>キャラメルポップコーン</option>
-  </select></div><div><label>品質</label><select id="dmgFoodQuality"><option value="hq" selected>HQ</option><option value="nq">NQ</option></select></div></div>
-  <div class="grid2">
-   <div><label>効果1</label><select id="dmgFoodStat1"><option value="crit">クリティカル</option><option value="det">意思力</option><option value="dh">DH</option><option value="sks">スキス</option><option value="ten">不屈</option></select></div>
-   <div><label>％</label><input id="dmgFoodPct1" type="number" min="0" value="8"></div>
-   <div><label>上限</label><input id="dmgFoodCap1" type="number" min="0" value="72"></div>
-   <div><label>効果2</label><select id="dmgFoodStat2"><option value="det">意思力</option><option value="crit">クリティカル</option><option value="dh">DH</option><option value="sks">スキス</option><option value="ten">不屈</option></select></div>
-   <div><label>％</label><input id="dmgFoodPct2" type="number" min="0" value="8"></div>
-   <div><label>上限</label><input id="dmgFoodCap2" type="number" min="0" value="120"></div>
-  </div>
-  <div id="dmgFoodSummary" class="small" style="margin-top:8px"></div>
- </div>
-
- <div class="card">
-  <h3>🧪 薬</h3>
-  <div class="grid2"><div><label>プリセット</label>
-  <select id="dmgPotionPreset">
-   <option value="">手動設定</option>
-   <option value="grade4str" selected>剛力の宝薬G4</option>
-  </select></div><div><label>品質</label><select id="dmgPotionQuality"><option value="hq" selected>HQ</option><option value="nq">NQ</option></select></div></div>
-  <div class="grid2">
-   <div><label>STR上昇率（%）</label><input id="dmgPotionPct" type="number" min="0" value="8"></div>
-   <div><label>上限</label><input id="dmgPotionCap" type="number" min="0" value="432"></div>
-   <div><label>効果時間（秒）</label><input id="dmgPotionDuration" type="number" min="0" value="30"></div>
-   <div><label>使用回数</label><input id="dmgPotionUses" type="number" min="0" value="1"></div>
-  </div>
-  <div id="dmgPotionSummary" class="small" style="margin-top:8px"></div>
- </div>
-</div>
-
-<div class="grid2" style="margin-top:12px">
- <div><label>計算時間（秒）</label><input id="dmgDuration" type="number" min="1" value="120"></div>
- <div><label>シュトルムブレハ効果</label><select id="dmgTempest"><option value="1.1">常時あり（+10%）</option><option value="1">なし</option></select></div>
- <div><label>クリティカル率（%）</label><input id="dmgCritRate" type="number" min="0" max="100" step="0.1" value="20"></div>
- <div><label>クリティカル倍率</label><input id="dmgCritMult" type="number" min="1" step="0.01" value="1.40"></div>
- <div><label>ダイレクトヒット率（%）</label><input id="dmgDhRate" type="number" min="0" max="100" step="0.1" value="0"></div>
- <div><label>DH倍率</label><input id="dmgDhMult" type="number" min="1" step="0.01" value="1.25"></div>
-</div>
-<div class="card" style="margin-top:14px">
- <div class="row"><div><h3>スキル回し</h3><div class="small">使った回数を入力してください。確定クリDH技は自動で期待値へ反映します。</div></div><button id="dmgReset" class="secondary">リセット</button></div>
- <div class="card" style="margin:8px 0">
-  <div class="row"><div><b>📋 スキル回しプリセット</b><div class="small">The Balance WAR「All-Around Opener」Patch 7.4（2025-12-27更新）を登録できます。</div></div><button id="dmgLoadBalanceOpener" class="primary">The Balance 開幕を読み込む</button></div>
-  <div class="small" style="margin-top:6px">Tomahawk開始。Infuriate / Inner Release / Potion / Upheaval / Onslaught / Primal WrathなどのoGCDも回し情報として保持します。火力集計は攻撃アクションのみ加算します。</div>
- </div>
- <div id="dmgOpenerTimeline"></div>
- <div id="dmgRows"></div>
- <div class="grid3" style="margin-top:10px"><div><label>アクション</label><select id="dmgActionSelect"><option value="240" data-cdh="false">ヘヴィスウィング（240）</option>
-<option value="340" data-cdh="false">メイム（コンボ）（340）</option>
-<option value="500" data-cdh="false">シュトルムヴィント（コンボ）（500）</option>
-<option value="500" data-cdh="false">シュトルムブレハ（コンボ）（500）</option>
-<option value="580" data-cdh="false">フェルクリーヴ（580）</option>
-<option value="700" data-cdh="true">インナーカオス（700）</option>
-<option value="150" data-cdh="false">オンスロート（150）</option>
-<option value="420" data-cdh="false">アップヒーバル（420）</option>
-<option value="720" data-cdh="true">プライマルレンド（720）</option>
-<option value="700" data-cdh="false">プライマルラス（700）</option>
-<option value="800" data-cdh="true">プライマルルイネーション（800）</option>
-<option value="150" data-cdh="false">トマホーク（150）</option></select></div><div><label>回数</label><input id="dmgActionCount" type="number" min="1" value="1"></div><div style="display:flex;align-items:end"><button id="dmgAddAction" class="primary" style="width:100%">追加</button></div></div>
- <details style="margin-top:10px"><summary><b>＋ 任意アクションを追加</b></summary><div class="grid3" style="margin-top:8px"><div><label>名前</label><input id="dmgCustomName"></div><div><label>威力</label><input id="dmgCustomPotency" type="number" min="0"></div><div><label>回数</label><input id="dmgCustomCount" type="number" min="1" value="1"></div></div><label class="checkline"><input id="dmgCustomCDH" type="checkbox"> 確定クリティカル＋ダイレクトヒット</label><button id="dmgAddCustom" class="secondary">任意アクションを追加</button></details>
-</div>
-<div class="stats" style="margin-top:14px"><div class="stat">総威力<b id="dmgTotalPotency">0</b></div><div class="stat">威力/秒<b id="dmgPps">0</b></div><div class="stat">期待総威力<b id="dmgExpected">0</b></div><div class="stat">期待威力/秒<b id="dmgExpectedPps">0</b></div></div>
-<div id="dmgBreakdown" class="card" style="margin-top:12px"></div>
-<div class="small" style="margin-top:8px">※ レイド利用を想定し、飯・薬はHQを初期値にしています。NQへ切替・手動上書きも可能です。実戦DPSではなく、スキル回し・装備変更前後を比較するための理論値です。</div>
-</section>
 </section>
 
-<section id="achievements" class="view">
-<section class="panel" id="achievementArchive">
-<div class="row"><div><h2>🏆 アチーブメント記録庫</h2><div class="small">日本語アチーブメント実データを内蔵。データ本体と取得状況を分離して保存します。</div></div><button id="achOfficialTop" class="secondary">公式一覧</button></div>
-<div class="card" id="achDataPackInfo" style="border-color:var(--blue)">
-<b>📦 アチーブメント・データパック</b>
-<div class="small" id="achDataPackMeta">内蔵データを確認中…</div>
-</div>
-<div class="stats" style="margin-top:14px">
-<div class="stat">収録<b id="achTotal">0</b></div>
-<div class="stat">取得済み<b id="achDone">0</b></div>
-<div class="stat">獲得ポイント<b id="achPoints">0</b></div>
-<div class="stat">表示中<b id="achShown">0</b></div>
-<div class="stat">達成率<b id="achRate">0%</b></div>
-</div>
-<div class="inline2" style="margin-top:14px">
-<div><label>名前・条件を検索</label><input id="achSearch" placeholder="例：漁師、FATE、ファントムウェポン"></div>
-<div><label>大分類</label><select id="achKind"><option value="">すべて</option><option value="PvP">PvP</option><option value="その他">その他</option><option value="アイテム">アイテム</option><option value="キャラクター">キャラクター</option><option value="クエスト">クエスト</option><option value="グランドカンパニー">グランドカンパニー</option><option value="バトル">バトル</option><option value="探検">探検</option><option value="製作・採集">製作・採集</option></select></div>
-</div>
-<div class="inline2">
-<div><label>小分類</label><select id="achCategory"><option value="">すべて</option></select></div>
-<div><label>取得状態</label><select id="achStatus"><option value="">すべて</option><option value="todo">未取得</option><option value="done">取得済み</option></select></div>
-</div>
-<div class="inline2">
-<div><label>タグ検索</label><input id="achTagSearch" placeholder="例：事件屋、黄金、優先"></div>
-<div><label>入力状況</label><select id="achInputStatus"><option value="">すべて</option><option value="noDate">達成日なし</option><option value="noNote">メモなし</option><option value="hasChecklist">チェックリストあり</option><option value="checklistIncomplete">チェックリスト未完了</option><option value="hasTag">タグあり</option></select></div>
-</div>
-<div class="inline2">
-<div><label>報酬</label><select id="achReward"><option value="">すべて</option><option value="title">称号あり</option><option value="item">アイテムあり</option></select></div>
-<div><label>並び順</label><select id="achSort"><option value="id">ゲーム内順</option><option value="name">名前順</option><option value="dateDesc">達成日が新しい順</option><option value="dateAsc">達成日が古い順</option></select></div>
-</div>
-<div class="wrap" style="margin:10px 0">
-<label style="margin:0"><input id="achIncludeHidden" type="checkbox" style="width:auto"> 非表示・過去データも表示</label>
-<select id="achPageSize" style="width:auto"><option value="50">50件ずつ</option><option value="100">100件ずつ</option><option value="200">200件ずつ</option></select>
-<button id="achPrevMissing" class="secondary">前の未入力</button>
-<button id="achNextMissing" class="secondary">次の未入力</button>
-<button id="achRandomTodo" class="ghost">未取得をランダム表示</button>
-</div>
-<div id="achList"></div>
-<div class="row" style="margin-top:12px"><button id="achPrev" class="secondary">前へ</button><span id="achPageInfo" class="small"></span><button id="achNext" class="secondary">次へ</button></div>
-</section>
+
 </section>
 
-<section id="crafting" class="view">
-<section class="panel">
-<h2>⚒ 制作手帳</h2>
-<p class="small">制作レシピ・素材・制作計画をここで管理します。レリック系の武器制作は専用ページへ分離しました。</p>
-<div class="card" style="border-color:var(--blue)">
-<b>📦 制作レシピ・データパック v0.9421</b>
-<div class="small">日本語ゲームデータから8クラフターのレシピを収録。各レシピの「素材を見る」から必要素材を確認でき、複数完成品の素材集計に加えて、登録した素材在庫から「今すぐ作れる／加工すれば作れる／あと少し」の未制作レシピも逆引きできます。レシピ本体を更新しても制作済みチェックは別保存のため維持されます。</div>
-</div>
-<div class="stats">
-<div class="stat">収録レシピ<b id="craftRecipeTotal">0</b></div>
-<div class="stat">制作済み<b id="craftRecipeDone">0</b></div>
-<div class="stat">未制作<b id="craftRecipeTodo">0</b></div>
-<div class="stat">表示中<b id="craftRecipeShown">0</b></div>
-</div>
 
-<div class="inline2" style="margin-top:14px">
-<div><label>レシピ名を検索</label><input id="craftSearch" placeholder="例：ブロンズインゴット、タコス"></div>
-<div><label>クラフター</label><select id="craftJob">
-<option value="">8職すべて</option>
-<option>木工</option><option>鍛冶</option><option>甲冑</option><option>彫金</option>
-<option>革細工</option><option>裁縫</option><option>錬金</option><option>調理</option>
-</select></div>
-</div>
-<div class="inline2">
-<div><label>レベル帯</label><select id="craftLevelBand">
-<option value="">すべて</option>
-<option value="1-50">1～50</option><option value="51-60">51～60</option>
-<option value="61-70">61～70</option><option value="71-80">71～80</option>
-<option value="81-90">81～90</option><option value="91-100">91～100</option>
-</select></div>
-<div><label>制作状態</label><select id="craftStatus">
-<option value="">すべて</option><option value="todo">未制作</option><option value="done">制作済み</option>
-</select></div>
-</div>
-<div class="inline2">
-<div><label>特殊条件</label><select id="craftSpecial">
-<option value="">すべて</option><option value="star">★付き</option><option value="secret">秘伝書</option>
-<option value="specialist">マイスター専用</option><option value="expert">高難易度</option>
-<option value="noquick">簡易制作不可</option>
-</select></div>
-<div><label>表示件数</label><select id="craftPageSize">
-<option value="100">100件</option><option value="200">200件</option><option value="500">500件</option>
-</select></div>
-</div>
-
-<div id="craftingSummary"></div>
-
-<div class="card" id="craftInventoryPanel" style="border-color:var(--blue);margin:14px 0">
-<div class="row">
- <div><b>📦 素材在庫から逆引き</b><div class="small">持っている素材を登録すると、未制作レシピから「今すぐ作れる／加工すれば作れる／あと少し」を抽出します。</div></div>
- <div class="wrap"><button type="button" id="craftIndexBuild" class="secondary">必要素材データを再取得</button><span id="craftIndexStatus" class="small">未準備</span></div>
-</div>
-<div class="inline2" style="margin-top:10px">
- <div><label>素材</label><input id="craftInventoryName" list="craftIngredientCatalog" placeholder="例：鉄鉱"><datalist id="craftIngredientCatalog"></datalist><div class="small">候補から選択／直接入力のどちらでも登録できます。直接入力した素材も、同じ名前のレシピ素材として照合します。</div></div>
- <div><label>所持数</label><input id="craftInventoryQty" type="number" min="0" step="1" value="1"></div>
-</div>
-<button type="button" id="craftInventoryAdd" class="primary">在庫へ追加・更新</button>
-<div id="craftInventoryList" style="margin-top:10px"></div>
-<div class="row" style="margin-top:12px">
- <div class="wrap">
-  <button type="button" class="secondary craftReverseMode" data-mode="uses">この素材を使う</button>
-  <button type="button" class="secondary craftReverseMode" data-mode="now">今すぐ作れる</button>
-  <button type="button" class="secondary craftReverseMode" data-mode="process">加工すれば作れる</button>
-  <button type="button" class="secondary craftReverseMode" data-mode="near">あと少し</button>
- </div>
- <div class="wrap"><label style="margin:0">不足数 <input id="craftNearLimit" type="number" min="1" max="20" value="3" style="width:70px"></label><button type="button" id="craftReverseRun" class="primary">判定する</button></div>
-</div>
-<div class="small" style="margin-top:8px">「この素材を使う」は所持素材を1つでも使うレシピを表示。「今すぐ作れる」は必要素材がすべて揃っているレシピだけを表示します。</div>
-<div id="craftReverseStatus" class="small" style="margin-top:8px"></div>
-<div id="craftReverseResults" style="margin-top:8px"></div>
-</div>
-
-<div class="card" id="craftPlannerPanel" style="border-color:var(--gold);margin:14px 0">
-<div class="row">
- <div><b>🧰 制作計画</b><div class="small">作りたい完成品を複数選び、必要素材をまとめて計算します。</div></div>
- <div class="wrap"><button type="button" id="craftPlanBuild" class="primary">必要素材を集計</button><button type="button" id="craftPlanClear" class="danger">計画をクリア</button></div>
-</div>
-<div id="craftPlanProducts" style="margin-top:10px"></div>
-<div id="craftPlanStatus" class="small" style="margin-top:8px"></div>
-<div id="craftPlanResults" style="margin-top:10px"></div>
-</div>
-
-<div id="craftRecipeList"></div>
-<div class="row" style="margin-top:12px">
-<button type="button" id="craftPrev" class="secondary">前へ</button>
-<span id="craftPageInfo" class="small"></span>
-<button type="button" id="craftNext" class="secondary">次へ</button>
-</div>
-</section>
 </section>
 
-<section id="guildleves" class="view">
-<section class="panel">
-<h2>📜 ギルドリーヴ</h2><p class="small">正式な日本語タイトルが取得できるリーヴのみ表示します。受注場所と納品NPCも、ゲームデータから取得できる範囲で表示します。クラスはLeveAssignmentTypeの正式データから、クラフター／ギャザラー職ごとに分けます。番号だけの仮タイトルは表示しません。</p>
-<p class="small">ギルドリーヴの一覧と達成状況を管理します。データ本体と自分のチェックは分離保存です。</p>
-<div class="card" style="border-color:var(--blue)">
-<b>📦 ギルドリーヴ・データパック v0.9480</b>
-<div class="small">日本語ゲームデータを必要時に読み込みます。戦闘・制作・採集、レベル帯、名称で絞り込める構造です。</div>
-</div>
-<div class="stats">
-<div class="stat">収録<b id="leveTotal">0</b></div>
-<div class="stat">達成済み<b id="leveDone">0</b></div>
-<div class="stat">未達成<b id="leveTodo">0</b></div>
-<div class="stat">表示中<b id="leveShown">0</b></div>
-</div>
-<div class="inline2" style="margin-top:14px">
-<div><label>リーヴ名を検索</label><input id="leveSearch" placeholder="リーヴ名・依頼内容"></div>
-<div><label>達成状態</label><select id="leveStatus"><option value="">すべて</option><option value="todo">未達成</option><option value="done">達成済み</option></select></div>
-</div>
-<div class="inline2">
-<div><label>クラス</label><select id="leveCategory"><option value="">すべて</option></select></div>
-<div><label>レベル帯</label><select id="leveLevel"><option value="">すべて</option></select></div>
-</div>
-<div class="inline2">
-<div><label>表示件数</label><select id="levePageSize"><option value="100">100件</option><option value="200">200件</option><option value="500">500件</option></select></div>
-<div class="row" style="align-items:end"><button type="button" id="leveReload" class="secondary">正式タイトルを再取得</button><span id="leveLoadStatus" class="small">未読込</span></div>
-</div>
-<div id="leveList"></div>
-<div class="row" style="margin-top:12px"><button type="button" id="levePrev" class="secondary">前へ</button><span id="levePageInfo" class="small"></span><button type="button" id="leveNext" class="secondary">次へ</button></div>
-</section>
+
 </section>
 
 <section id="eventsHome" class="view">
@@ -1060,41 +676,7 @@ button{font-size:.86rem!important}
 </section>
 </section>
 
-<section id="yokai" class="view">
-<section class="panel">
-<h2>⌚ 妖怪ウォッチ エオルゼア大集合だニャン！</h2>
-<p class="small">ミニオン・妖怪レジェンドメダル・武器・マウント条件をイベント専用でまとめて管理します。</p>
 
-<div class="card" style="border-color:var(--blue)">
-<b>📦 妖怪ウォッチ・イベントデータ v0.9490</b>
-<div class="small">17妖怪と17武器を対応づけて管理。2026年再演で追加された3種の室内調度品もボーナス報酬として追跡できます。</div>
-</div>
-
-<div class="stats">
-<div class="stat">ミニオン<b id="yokaiMinionProgress">0 / 17</b></div>
-<div class="stat">武器<b id="yokaiWeaponProgress">0 / 17</b></div>
-<div class="stat">メダル入力済み<b id="yokaiMedalProgress">0 / 17</b></div>
-<div class="stat">総達成率<b id="yokaiRate">0%</b></div>
-</div>
-
-<div class="card" style="border-color:var(--gold);margin-top:14px">
-<b>🏆 自動判定される報酬</b>
-<div id="yokaiMilestones" style="margin-top:8px"></div>
-</div>
-
-<div class="row" style="margin-top:14px">
-<div><label>検索</label><input id="yokaiSearch" placeholder="妖怪名・ジョブ・武器名"></div>
-<div><label>表示</label><select id="yokaiStatus"><option value="">すべて</option><option value="todo">未完了を含む</option><option value="done">ミニオン＋武器完了</option></select></div>
-</div>
-
-<div id="yokaiList"></div>
-
-<div class="card" style="border-color:var(--blue);margin-top:16px">
-<b>🎁 追加・ボーナス報酬</b>
-<div class="small">ポートレート教材と、2026年再演で追加された室内調度品3種を個別チェックできます。</div>
-<div id="yokaiBonusRewards" style="margin-top:8px"></div>
-</div>
-</section>
 </section>
 
 <section id="weapons" class="view">
@@ -1143,32 +725,7 @@ button{font-size:.86rem!important}
 </section>
 </section>
 
-<section id="fishing" class="view">
-<section class="panel">
-<div class="row"><div><h2>🎣 釣り手帳</h2><div class="small">釣り条件データパックと取得進捗を分離して管理します。</div></div></div>
-<div class="card" style="border-color:var(--blue)">
-<b>📦 釣りデータパック v0.9410</b>
-<div class="small">条件・餌・釣り場・座標などを持つ追跡魚 1,110件を収録。オオヌシは新生〜黄金の各拡張6匹、計36匹を専用判定。新生6匹は「爆釣エオルゼア」対象としても区別します。以前の全魚チェックリストは1,517件なので、通常魚を含む残りは今後のデータパックで追加します。</div>
-</div>
-<div class="stats">
-<div class="stat">条件データ<b id="fishTotal">0</b></div>
-<div class="stat">取得済み<b id="fishDone">0</b></div>
-<div class="stat">未取得<b id="fishTodo">0</b></div>
-<div class="stat">ヌシ<b id="fishBig">0</b></div>
-<div class="stat">オオヌシ<b id="fishLegendary">0</b></div>
-<div class="stat">表示中<b id="fishShown">0</b></div>
-</div>
-<div class="inline2" style="margin-top:14px">
-<div><label>魚名・釣り場・餌を検索</label><input id="fishSearch" placeholder="例：雷皇子、根渡り沼、ハニーワーム"></div>
-<div><label>拡張</label><select id="fishExpansion"><option value="">すべて</option><option>新生</option><option>蒼天</option><option>紅蓮</option><option>漆黒</option><option>暁月</option><option>黄金</option></select></div>
-</div>
-<div class="inline2">
-<div><label>取得状態</label><select id="fishStatus"><option value="">すべて</option><option value="todo">未取得</option><option value="done">取得済み</option></select></div>
-<div><label>種類</label><select id="fishKind"><option value="">すべて</option><option value="big">ヌシのみ</option><option value="legendary">オオヌシのみ</option><option value="feast">爆釣エオルゼア対象</option><option value="timed">時間限定</option><option value="weather">天候条件あり</option><option value="folklore">伝承録あり</option></select></div>
-</div>
-<div id="fishingSummary"></div>
-<div id="fishList"></div>
-</section>
+
 </section>
 
 <section id="bicolor" class="view"><section class="panel">
@@ -1180,66 +737,7 @@ button{font-size:.86rem!important}
 <div id="bicolorSummary" class="small" style="margin-top:10px"></div><div id="bicolorList" style="margin-top:10px"></div>
 </section></section>
 
-<section id="ffcollect" class="view">
-<section class="panel" id="ffxivCollectHub">
- <div class="section-kicker">FFXIV COLLECT DATA HUB</div>
- <div class="row">
-  <div><h2>🌐 FF14 収集図鑑</h2><div class="small">FF14の収集品と入手方法をまとめて確認できます。</div></div>
-  <div class="wrap">
-   <button type="button" id="ffxivCollectCatalogSync" class="primary">図鑑を更新</button>
-   <button type="button" id="ffxivCollectJapaneseSync" class="secondary">日本語説明を同期</button>
-   <button type="button" class="secondary" id="ffxivCollectOwnershipSync">所持状況を同期</button>
-  </div>
- <div class="small">公開プロフィールから同期できる分だけ反映します。</div>
- <div id="ffxivCollectJapaneseStatus" class="small" style="margin-top:6px">ミニオン・マウントの日本語説明：未同期</div>
- <div id="ffxivCollectOwnershipStatus" class="small" style="margin-top:6px"></div>
- </div>
- <div class="grid3" style="margin-top:10px">
-  <div class="listitem"><b>🐾 ミニオン</b><div id="fcHubMinions" class="small">未取得</div></div>
-  <div class="listitem"><b>🐎 マウント</b><div id="fcHubMounts" class="small">未取得</div></div>
-  <div class="listitem"><div class="row"><b>🏆 アチーブメント</b><button type="button" class="secondary fcHomeLink" data-view-target="achievements">専用ページへ</button></div><div id="fcHubAchievements" class="small">未取得</div><div class="small">達成日・タグ・進捗管理はアチーブメントページに集約します。</div></div>
-  <div class="listitem"><b>💇 ヘアカタログ</b><div id="fcHubHairstyles" class="small">未取得</div></div>
-  <div class="listitem"><b>🙌 エモート</b><div id="fcHubEmotes" class="small">未取得</div></div>
-  <div class="listitem"><b>🎵 オーケストリオン</b><div id="fcHubOrchestrions" class="small">未取得</div></div>
-  <div class="listitem"><b>🖼 ポートレート</b><div id="fcHubFrames" class="small">未取得</div></div>
-  <div class="listitem"><b>🪄 青魔法</b><div id="fcHubSpells" class="small">未取得</div></div>
-  <div class="listitem"><div class="row"><b>🃏 トリプルトライアド</b><button type="button" class="secondary fcTriadJump">カード・NPCを開く</button></div><div id="fcHubCards" class="small">未取得</div><div class="small">カード所持と対戦NPCは収集図鑑を本籍地として管理します。</div></div>
- </div>
- <div class="wrap" style="margin-top:10px"><button type="button" class="secondary fcTriadJump">🃏 トリプルトライアド（カード・NPC）へ</button></div>
- <div id="ffxivCollectHubStatus" class="small" style="margin-top:8px">ミニオン・マウント・アチーブメントに加え、ヘアカタログ・エモート・譜面・ポートレート・青魔・カードを共通基盤へ接続します。🇯🇵 日本語表示レイヤー有効です。</div>
- <details class="card" style="margin-top:10px">
-  <summary><b>データの役割</b></summary>
-  <div class="small" style="margin-top:7px">収集品の本籍地はこの「収集図鑑」です。アチーブメントだけは達成日・タグ・進捗管理があるため専用ページを本籍地とし、ここでは同じデータの概要を表示します。</div>
- </details>
-<div class="card" style="margin-top:12px">
- <div class="row"><div><b>🔎 外部図鑑を見る</b><div class="small">未取得品も入手方法から探せます。説明は日本語データを優先します。</div></div></div>
- <div class="grid3" style="margin-top:8px">
-  <div><label>カテゴリ</label><select id="fcExplorerKind">
-   <option value="minions">ミニオン</option>
-   <option value="mounts">マウント</option>
-   <option value="achievements">アチーブメント</option>
-   <option value="hairstyles">ヘアカタログ</option>
-   <option value="emotes">エモート</option>
-   <option value="orchestrions">オーケストリオン</option>
-   <option value="frames">ポートレート</option>
-   <option value="spells">青魔法</option>
-   <option value="cards">カード</option>
-  </select></div>
-  <div><label>検索</label><input id="fcExplorerSearch" placeholder="名前・入手方法"></div>
-  <div><label>取得状況</label><select id="fcExplorerStatus"><option value="all">すべて</option><option value="owned">取得済み</option><option value="missing">未取得</option></select></div>
- </div>
- <div class="inline2" style="margin-top:8px">
-  <div><label id="fcExplorerSourceLabel">入手方法</label><select id="fcExplorerSource"><option value="">すべて</option><option>ダンジョン</option><option>討伐・討滅戦</option><option>レイド</option><option>クエスト</option><option>製作</option><option>採集</option><option>交換</option><option>ショップ</option><option>ゴールドソーサー</option><option>シーズナルイベント</option><option>オンラインストア</option><option>宝の地図</option><option>F.A.T.E.</option><option>PvP</option></select></div>
-  <div><label>並び順</label><select id="fcExplorerSort"><option value="default">図鑑順</option><option value="name">名前順</option><option value="acquiredDesc">入手日が新しい順</option><option value="acquiredAsc">入手日が古い順</option></select></div>
- </div>
- <div id="fcExplorerTagRow" class="inline2" style="margin-top:8px;display:none">
-  <div><label>タグで絞り込み</label><select id="fcExplorerTag"><option value="">すべて</option></select></div>
-  <div><label>タグ検索</label><input id="fcExplorerTagSearch" placeholder="例：黄金巡り、優先"></div>
- </div>
- <div id="fcExplorerSummary" class="small"></div>
- <div id="fcExplorerList"></div>
-</div>
-</section>
+
 <details class="panel" style="margin-top:12px">
 <summary><b>🐾 ミニオン・マウントの所持同期・詳細</b></summary>
 <div style="margin-top:10px">
@@ -1366,21 +864,7 @@ button{font-size:.86rem!important}
 </section>
 
 
-<section id="ffxivAcquisition" class="view"><section class="panel">
-<div class="section-kicker">EORZEA ACQUISITION CODEX</div>
-<div class="row"><div><h2>🎁 入手・交換品図鑑</h2><div class="small">同じ報酬は1件にまとめ、交換所・通貨など複数の入手経路をぶら下げて管理します。マテリア系も重複表示しません。</div></div><span class="badge gold" id="ffAcqCount">0件</span></div>
-<div class="stats"><div class="stat">登録<b id="ffAcqTotal">0</b></div><div class="stat">入手済<b id="ffAcqOwned">0</b></div><div class="stat">未入手<b id="ffAcqMissing">0</b></div><div class="stat">お気に入り<b id="ffAcqWanted">0</b></div></div>
-<div class="card" style="border-color:var(--gold)"><div class="row"><div><h3>📥 モブハント交換品データ</h3><div class="small">同盟記章・セントリオ記章・モブハントの戦利品の交換品をまとめて追加します。同じ報酬は1件に統合し、別の交換先は入手経路として追加します。</div></div><button id="ffAcqImportHunt" class="primary">モブハント交換品を更新</button></div><div id="ffAcqImportStatus" class="small"></div></div>
-<div class="card"><h3>＋ 手動で追加</h3><div class="grid2">
-<div><label>アイテム・報酬名</label><input id="ffAcqName"></div>
-<div><label>報酬種類</label><select id="ffAcqItemType"><option>マウント</option><option>ミニオン</option><option>オーケストリオン譜</option><option>カード</option><option>装備</option><option>武器</option><option>エモート</option><option>フェイスアクセ</option><option>ヘアカタログ</option><option>マウント速度</option><option>チョコボ装甲</option><option>庭具</option><option>素材</option><option>その他</option></select></div>
-<div><label>入手カテゴリ</label><select id="ffAcqMethod"><option>バイカラージェム</option><option>モブハント記章</option><option>詩学・トームストーン</option><option>友好部族通貨</option><option>ID</option><option>討滅戦</option><option>レイド</option><option>サブクエスト</option><option>FATE</option><option>特殊コンテンツ</option><option>NPC交換</option><option>その他</option></select></div>
-<div><label>コンテンツ／NPC／入手先</label><input id="ffAcqSource"></div>
-<div><label>必要通貨・アイテム</label><input id="ffAcqCurrency"></div><div><label>必要数</label><input id="ffAcqCost"></div>
-<div><label>エリア</label><input id="ffAcqArea"></div><div><label>公式DB / 参考URL</label><input id="ffAcqUrl" type="url"></div>
-</div><label>メモ</label><textarea id="ffAcqMemo"></textarea><button id="ffAcqAdd" class="primary" style="width:100%;margin-top:8px">図鑑へ登録</button></div>
-<div class="inline3"><div><label>検索</label><input id="ffAcqSearch"></div><div><label>入手方法</label><select id="ffAcqFilterMethod"><option value="">すべて</option><option>バイカラージェム</option><option>モブハント記章</option><option>詩学・トームストーン</option><option>友好部族通貨</option><option>ID</option><option>討滅戦</option><option>レイド</option><option>サブクエスト</option><option>FATE</option><option>特殊コンテンツ</option><option>NPC交換</option><option>その他</option></select></div><div><label>状態</label><select id="ffAcqFilterState"><option value="">すべて</option><option value="missing">未入手</option><option value="owned">入手済</option><option value="wanted">お気に入り</option></select></div></div>
-<div id="ffAcqList"></div></section></section>
+</section>
 
 <section id="trpg" class="view"><section class="panel">
 <div class="card" style="border-color:var(--purple);margin-bottom:12px">
@@ -7861,23 +7345,9 @@ document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{if(b.dataset.view===
 
 const LA_LAST_KP_KEY="life_archive_last_sakumeru_kp_v1";
 const LA_SAKUMERU_URL_KEY="life_archive_sakumeru_url_v1";
-const LA_SAKUMERU_DEFAULT_URL="https://pp-hibithx.github.io/sakumeru/";
-function normalizeLaSakumeruUrl(value){
- const raw=String(value||"").trim();
- if(!raw)return LA_SAKUMERU_DEFAULT_URL;
- try{
-   const u=new URL(raw);
-   if(u.protocol!=="https:")return LA_SAKUMERU_DEFAULT_URL;
-   return u.href;
- }catch{return LA_SAKUMERU_DEFAULT_URL}
-}
 function laSakumeruUrl(){
- return LA_SAKUMERU_DEFAULT_URL;
-}
-function laAddQuery(url,key,value){
- const u=new URL(url);
- u.searchParams.set(key,String(value));
- return u.href;
+ const saved=String(localStorage.getItem(LA_SAKUMERU_URL_KEY)||"").trim();
+ return (saved||"https://pp-hibithx.github.io/sakumeru/").replace(/\/+$/,"")+"/";
 }
 function applyLaSakumeruUrl(){
  const f=$("sakumeruFrame"); if(!f)return;
@@ -7923,17 +7393,14 @@ window.addEventListener("message",e=>{
 if($("sakumeruLastKp"))$("sakumeruLastKp").onclick=()=>{
  const f=$("sakumeruFrame"),x=loadLaLastKp();
  if(!f||!x?.url)return;
- f.src=laAddQuery(x.url,"la_open",Date.now());
+ f.src=x.url+(x.url.includes("?")?"&":"?")+"la_open="+Date.now();
 };
 if($("sakumeruReload"))$("sakumeruReload").onclick=()=>{
  const f=$("sakumeruFrame");if(!f)return;
- try{
-   const u=new URL(f.src||laSakumeruUrl());
-   u.searchParams.set("la_refresh",String(Date.now()));
-   f.src=u.href;
- }catch{f.src=laAddQuery(laSakumeruUrl(),"la_refresh",Date.now())}
+ const base=laSakumeruUrl().split("?")[0];
+ f.src=base+"?la_refresh="+Date.now();
 };
-if($("sakumeruOpenExternal"))$("sakumeruOpenExternal").onclick=()=>window.open(LA_SAKUMERU_DEFAULT_URL,"_blank","noopener");
+if($("sakumeruOpenExternal"))$("sakumeruOpenExternal").onclick=()=>window.open(laSakumeruUrl(),"_blank","noopener");
 
 applyLaSakumeruUrl();
 renderLaLastKp();
