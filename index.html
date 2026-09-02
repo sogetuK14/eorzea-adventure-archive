@@ -382,6 +382,10 @@ button{font-size:.86rem!important}
 <style id="laNavCleanupV09748">
 .nav-standalone{display:block;margin:4px 0}
 .nav-standalone>button,.nav-standalone>a{width:100%;box-sizing:border-box}
+</style>
+<style id="achievementTaskStyle">
+.achievement-task-form{display:grid;grid-template-columns:minmax(0,2fr) repeat(2,minmax(120px,1fr));gap:10px}.achievement-task-form .wide{grid-column:1/-1}.achievement-task-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:12px;margin-top:14px}.achievement-task-card{position:relative;overflow:hidden}.achievement-task-card.final{border-color:var(--gold);box-shadow:0 0 18px rgba(215,181,91,.12)}.achievement-task-progress{height:10px;border-radius:999px;background:#111b28;overflow:hidden;margin:10px 0}.achievement-task-progress>span{display:block;height:100%;background:linear-gradient(90deg,var(--sn-cyan,#4ddcff),var(--gold));transition:width .2s}.achievement-task-count{font-size:1.35rem;font-weight:800;color:#fff}.achievement-task-check{display:flex;align-items:center;gap:10px;min-height:44px;padding:9px 11px;border:1px solid rgba(77,220,255,.28);background:rgba(77,220,255,.07);border-radius:6px;cursor:pointer;color:#f4fbff}.achievement-task-check input{width:22px!important;height:22px;flex:0 0 auto}.achievement-task-reward{margin-top:9px;padding:8px 10px;border-left:3px solid var(--gold);background:rgba(215,181,91,.07)}.achievement-task-toast{position:fixed;z-index:300;left:50%;bottom:24px;transform:translateX(-50%);width:min(92vw,520px);padding:14px 18px;border:1px solid var(--gold);background:#111b28;color:#fff;border-radius:8px;box-shadow:0 12px 36px rgba(0,0,0,.48);text-align:center}.achievement-task-toast[hidden]{display:none}.achievement-task-celebration{text-align:center}.achievement-task-celebration .trophy{font-size:4rem;line-height:1}.achievement-task-celebration h2{color:var(--gold)}
+@media(max-width:650px){.achievement-task-form{grid-template-columns:1fr}.achievement-task-form .wide{grid-column:auto}.achievement-task-list{grid-template-columns:1fr}.achievement-task-card .row{align-items:flex-start}.achievement-task-card .wrap{width:100%}.achievement-task-card .wrap button{flex:1;min-height:42px}}
 </style></head>
 <body>
 <div class="sidebar-overlay" id="sidebarOverlay"></div>
@@ -440,6 +444,7 @@ button{font-size:.86rem!important}
     </details>
 
     <button class="tab" data-view="householdBudget">💰 家計簿</button>
+    <button class="tab" data-view="achievementTasks">✅ 実績付きタスク</button>
     <button class="tab" data-view="checklistTool">☑ 自由チェックメモ</button>
     <button class="tab" data-view="settings">⚙ 設定</button>
     <button class="tab" data-view="backup">⤓ バックアップ</button>
@@ -1887,7 +1892,24 @@ button{font-size:.86rem!important}
 <div class="card" style="margin-top:12px">
 <div class="row"><div><h3>🥚 食材・日用品在庫</h3><div class="small">家計簿の内訳から追加した購入品を確認。保管場所・タグはあとから自由に付け替えできます。</div></div><select id="inventoryFilter" style="max-width:150px"><option value="">すべて</option><option>冷蔵</option><option>冷凍</option><option>常温</option><option>日用品</option><option>その他</option></select></div>
 <div id="inventorySummary" class="small" style="margin:8px 0"></div><div id="inventoryList"></div></div>
-<div class="card" style="margin-top:12px"><div class="row"><h3>月の記録</h3><input id="budgetMonth" type="month" style="max-width:180px"></div><div id="budgetCategorySummary" class="small" style="margin:8px 0"></div><div id="budgetPaymentSummary" class="small" style="margin:8px 0"></div><div id="budgetList"></div></div></section></main>
+<div class="card" style="margin-top:12px"><div class="row"><h3>月の記録</h3><input id="budgetMonth" type="month" style="max-width:180px"></div><div id="budgetCategorySummary" class="small" style="margin:8px 0"></div><div id="budgetPaymentSummary" class="small" style="margin:8px 0"></div><div id="budgetList"></div></div></section>
+
+<section id="achievementTasks" class="view">
+ <div class="hero"><h2>✅ 実績付きタスク</h2><p>いつもの一歩を積み上げて、自分だけの実績にします。未達成の日があっても累計は減りません。</p></div>
+ <section class="panel">
+  <div class="row"><div><h2 id="achievementTaskFormTitle">タスクを登録</h2><div class="small">チェックポイント到達時だけ通知します。</div></div><button id="achievementTaskCancel" class="secondary" type="button" hidden>編集をやめる</button></div>
+  <input id="achievementTaskEditId" type="hidden">
+  <div class="achievement-task-form">
+   <div><label>タスク名</label><input id="achievementTaskName" maxlength="80" placeholder="例：ストレッチをする"></div>
+   <div><label>種類</label><select id="achievementTaskDaily"><option value="0">回数を積み上げる</option><option value="1">毎日・連続日数も記録</option></select></div>
+   <div><label>最終目標回数（任意）</label><input id="achievementTaskGoal" type="number" min="1" step="1" placeholder="100"></div>
+   <div class="wide"><label>チェックポイント（任意・カンマ区切り）</label><input id="achievementTaskMilestones" inputmode="numeric" placeholder="5, 10, 25, 50"></div>
+   <div class="wide"><label>達成報酬（任意）</label><input id="achievementTaskReward" maxlength="160" placeholder="例：100回達成 → ケーキを買ってもよい権利"></div>
+  </div>
+  <button id="achievementTaskSave" class="primary" type="button" style="width:100%;margin-top:12px">登録する</button>
+ </section>
+ <section class="panel"><div class="row"><div><h2>積み上げ中</h2><div id="achievementTaskSummary" class="small"></div></div></div><div id="achievementTaskList" class="achievement-task-list"></div></section>
+</section></main>
 </div>
 </div>
 
@@ -1901,6 +1923,31 @@ button{font-size:.86rem!important}
   <button id="stackEntryDetailDelete" class="danger">削除</button>
 </div>
 </div></dialog>
+
+<dialog id="achievementTaskCelebration"><div class="inside achievement-task-celebration"><div class="trophy">🏆</div><h2 id="achievementTaskCelebrationTitle">最終目標達成！</h2><p id="achievementTaskCelebrationText"></p><div id="achievementTaskCelebrationReward" class="achievement-task-reward" hidden></div><button id="achievementTaskCelebrationClose" class="primary" type="button" style="margin-top:16px">よくやった！</button></div></dialog>
+<div id="achievementTaskToast" class="achievement-task-toast" role="status" aria-live="polite" hidden></div>
+<script id="achievementTaskScript">
+(()=>{
+"use strict";
+const el=id=>document.getElementById(id),escapeHtml=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const dayKey=value=>{const d=value?new Date(value):new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`};
+const yesterdayKey=()=>{const d=new Date();d.setDate(d.getDate()-1);return dayKey(d)};
+const milestones=value=>[...new Set(String(value||"").split(/[,、\s]+/).map(Number).filter(n=>Number.isInteger(n)&&n>0))].sort((a,b)=>a-b);
+function root(){const d=load();if(!Array.isArray(d.achievementTasks))d.achievementTasks=[];return {d,items:d.achievementTasks}}
+function currentStreak(task){if(!task.daily)return 0;const last=String(task.lastCompletedDate||"");return last===dayKey()||last===yesterdayKey()?Number(task.streak||0):0}
+function resetForm(){el("achievementTaskEditId").value="";el("achievementTaskName").value="";el("achievementTaskDaily").value="0";el("achievementTaskGoal").value="";el("achievementTaskMilestones").value="";el("achievementTaskReward").value="";el("achievementTaskFormTitle").textContent="タスクを登録";el("achievementTaskSave").textContent="登録する";el("achievementTaskCancel").hidden=true}
+function toast(text){const box=el("achievementTaskToast");box.textContent=text;box.hidden=false;clearTimeout(toast.timer);toast.timer=setTimeout(()=>box.hidden=true,4200)}
+function celebrate(task){el("achievementTaskCelebrationTitle").textContent=`「${task.name}」最終目標達成！`;el("achievementTaskCelebrationText").textContent=`累計 ${task.count}回。見事な積み上げです。`;const reward=el("achievementTaskCelebrationReward");reward.hidden=!task.reward;reward.textContent=task.reward?`🎁 達成報酬：${task.reward}`:"";el("achievementTaskCelebration").showModal()}
+function saveForm(){const name=el("achievementTaskName").value.trim();if(!name)return alert("タスク名を入力してください。");const state=root(),id=el("achievementTaskEditId").value,old=state.items.find(x=>x.id===id),item={...(old||{}),id:old?.id||uid(),name,daily:el("achievementTaskDaily").value==="1",goal:Math.max(0,Number(el("achievementTaskGoal").value||0)),milestones:milestones(el("achievementTaskMilestones").value),reward:el("achievementTaskReward").value.trim(),count:Number(old?.count||0),streak:Number(old?.streak||0),bestStreak:Number(old?.bestStreak||0),lastCompletedAt:Number(old?.lastCompletedAt||0),lastCompletedDate:String(old?.lastCompletedDate||""),reachedMilestones:Array.isArray(old?.reachedMilestones)?old.reachedMilestones:[],createdAt:Number(old?.createdAt||Date.now()),updatedAt:Date.now()};if(old)Object.assign(old,item);else state.items.push(item);save(state.d);resetForm();renderAchievementTasks()}
+function complete(id){const state=root(),task=state.items.find(x=>x.id===id);if(!task)return;if(!Array.isArray(task.milestones))task.milestones=[];if(!Array.isArray(task.reachedMilestones))task.reachedMilestones=[];const today=dayKey();if(task.daily&&task.lastCompletedDate===today){toast("この毎日タスクは今日は達成済みです。");renderAchievementTasks();return}const before=Number(task.count||0);task.count=before+1;task.lastCompletedAt=Date.now();if(task.daily){task.streak=task.lastCompletedDate===yesterdayKey()?Number(task.streak||0)+1:1;task.bestStreak=Math.max(Number(task.bestStreak||0),task.streak);task.lastCompletedDate=today}task.updatedAt=Date.now();const reached=task.milestones.filter(n=>before<n&&task.count>=n&&!task.reachedMilestones.includes(n));task.reachedMilestones.push(...reached);save(state.d);renderAchievementTasks();if(task.goal&&before<task.goal&&task.count>=task.goal)celebrate(task);else if(reached.length)toast(`🎉 「${task.name}」${reached[reached.length-1]}回達成！`)}
+function edit(id){const task=root().items.find(x=>x.id===id);if(!task)return;el("achievementTaskEditId").value=task.id;el("achievementTaskName").value=task.name||"";el("achievementTaskDaily").value=task.daily?"1":"0";el("achievementTaskGoal").value=task.goal||"";el("achievementTaskMilestones").value=(task.milestones||[]).join(", ");el("achievementTaskReward").value=task.reward||"";el("achievementTaskFormTitle").textContent="タスクを編集";el("achievementTaskSave").textContent="変更を保存";el("achievementTaskCancel").hidden=false;el("achievementTaskName").scrollIntoView({behavior:"smooth",block:"center"})}
+function remove(id){if(!confirm("この実績付きタスクを削除しますか？\n累計回数も削除されます。"))return;const state=root();state.d.achievementTasks=state.items.filter(x=>x.id!==id);save(state.d);renderAchievementTasks()}
+function renderAchievementTasks(){const list=el("achievementTaskList");if(!list||!el("achievementTasks").classList.contains("active"))return;const items=root().items;el("achievementTaskSummary").textContent=`${items.length}件登録 ／ 累計 ${items.reduce((n,x)=>n+Number(x.count||0),0)}回`;list.innerHTML=items.length?items.map(task=>{const count=Number(task.count||0),marks=Array.isArray(task.milestones)?task.milestones:[],next=marks.find(n=>n>count)||(task.goal>count?task.goal:0),goal=Number(task.goal||0),percent=goal?Math.min(100,count/goal*100):0,todayDone=task.daily&&task.lastCompletedDate===dayKey(),streak=currentStreak(task);return `<article class="card achievement-task-card ${goal&&count>=goal?"final":""}"><div class="row"><div><h3>${escapeHtml(task.name)}</h3><div class="small">${task.daily?`毎日 ／ 連続 <b>${streak}日</b>（最高 ${Number(task.bestStreak||0)}日）`:"回数を積み上げるタスク"}</div></div><div class="achievement-task-count">${count}回</div></div>${goal?`<div class="achievement-task-progress" aria-label="目標進捗 ${Math.round(percent)}%"><span style="width:${percent}%"></span></div><div class="small">最終目標 ${goal}回 ／ ${count>=goal?"達成済み":`あと ${goal-count}回`}</div>`:""}<label class="achievement-task-check"><input type="checkbox" class="achievementTaskDone" data-id="${escapeHtml(task.id)}" ${todayDone?"checked disabled":""}><span>${todayDone?"今日は達成済み ✓":"達成したので1回加算"}</span></label><div class="small" style="margin-top:8px">${next?`次のチェックポイントまで <b>あと ${next-count}回</b>`:"設定済みチェックポイントはすべて達成"}</div>${task.reward?`<div class="achievement-task-reward">🎁 ${escapeHtml(task.reward)}</div>`:""}<div class="wrap" style="margin-top:10px"><button type="button" class="secondary achievementTaskEdit" data-id="${escapeHtml(task.id)}">編集</button><button type="button" class="danger achievementTaskDelete" data-id="${escapeHtml(task.id)}">削除</button></div></article>`}).join(""):'<div class="empty">まだタスクはありません。小さな習慣から登録してみましょう。</div>';list.querySelectorAll(".achievementTaskDone").forEach(x=>x.onchange=()=>{if(x.checked)complete(x.dataset.id)});list.querySelectorAll(".achievementTaskEdit").forEach(x=>x.onclick=()=>edit(x.dataset.id));list.querySelectorAll(".achievementTaskDelete").forEach(x=>x.onclick=()=>remove(x.dataset.id))}
+function init(){el("achievementTaskSave").onclick=saveForm;el("achievementTaskCancel").onclick=resetForm;el("achievementTaskCelebrationClose").onclick=()=>el("achievementTaskCelebration").close();const view=el("achievementTasks");new MutationObserver(()=>{if(view.classList.contains("active")){el("currentPageTitle").textContent="実績付きタスク";renderAchievementTasks()}}).observe(view,{attributes:true,attributeFilter:["class"]});document.querySelector('[data-view="achievementTasks"]')?.addEventListener("click",()=>setTimeout(()=>{el("currentPageTitle").textContent="実績付きタスク";renderAchievementTasks()},0))}
+document.readyState==="loading"?document.addEventListener("DOMContentLoaded",init,{once:true}):init();
+window.renderAchievementTasks=renderAchievementTasks;
+})();
+</script>
 
 <dialog id="stackAddDialog"><div class="inside">
 <div class="row"><h2 id="stackAddDialogTitle">子記録を追加</h2><button id="stackAddDialogClose" class="secondary">閉じる</button></div>
